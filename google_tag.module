@@ -119,7 +119,6 @@ function _google_tag_status_check() {
       // Get the HTTP response status.
       $status = drupal_get_http_header('status');
       $satisfied = strpos($statuses, $status) !== FALSE;
-      $headers = drupal_get_http_header();
     }
   }
   return $satisfied;
