@@ -43,8 +43,8 @@ function google_tag_settings_form($form, &$form_state) {
  */
 function google_tag_general_fieldset(&$form_state) {
   // Gather data.
-  $text = t('sign up for GTM');
-  $link = l($text, 'http://www.google.com/tagmanager/web/');
+  $args = array('@path' => 'https://tagmanager.google.com/');
+  $description = t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, <a href="@path">sign up for GTM</a> and create a container for your website.', $args);
 
   // Build form elements.
   $fieldset = array(
@@ -56,7 +56,7 @@ function google_tag_general_fieldset(&$form_state) {
   $fieldset['google_tag_container_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Container ID'),
-    '#description' => t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, !link and create a container for your website.', array('!link' => $link)),
+    '#description' => $description,
     '#default_value' => variable_get('google_tag_container_id', ''),
     '#attributes' => array('placeholder' => array('GTM-xxxxxx')),
     '#size' => 10,
@@ -157,9 +157,8 @@ function google_tag_role_fieldset(&$form_state) {
  */
 function google_tag_status_fieldset(&$form_state) {
   // Gather data.
-  $text = t('list of HTTP status codes');
-  $link = l($text, 'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes');
-  $list_description = t('Enter one response status per line. For more information, refer to the !link.', array('!link' => $link));
+  $args = array('@path' => 'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes');
+  $list_description = t('Enter one response status per line. For more information, refer to the <a href="@path">list of HTTP status codes</a>.', $args);
 
   // Build form elements.
   $fieldset = array(
