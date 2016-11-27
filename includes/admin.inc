@@ -118,6 +118,7 @@ function google_tag_path_fieldset(&$form_state) {
 function google_tag_role_fieldset(&$form_state) {
   // Gather data.
   $roles = array_map('check_plain', user_roles());
+  $roles = drupal_map_assoc($roles);
 
   // Build form elements.
   $fieldset = array(
