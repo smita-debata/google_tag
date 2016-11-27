@@ -88,12 +88,8 @@ function google_tag_insert_snippet() {
     // No container ID.
     return FALSE;
   }
-  if (!_google_tag_status_check() && !_google_tag_path_check()) {
-    // Omit snippet based on the response status and path conditions.
-    return FALSE;
-  }
-  if (!_google_tag_role_check($user)) {
-    // Omit snippet based on the user role condition.
+  if (!_google_tag_status_check() || !_google_tag_path_check() || !_google_tag_role_check($user)) {
+    // Omit snippet if any condition is not met.
     return FALSE;
   }
   return TRUE;
@@ -112,13 +108,14 @@ function _google_tag_status_check() {
     $toggle = variable_get('google_tag_status_toggle', 0);
     $statuses = variable_get('google_tag_status_list', GOOGLETAGMANAGER_STATUSES);
 
-    if (!$toggle) {
-      $satisfied = $toggle;
+    if (empty($statuses)) {
+      $satisfied = !$toggle;
     }
     else {
       // Get the HTTP response status.
       $status = drupal_get_http_header('status');
       $satisfied = strpos($statuses, $status) !== FALSE;
+      $satisfied = !($toggle xor $satisfied);
     }
   }
   return $satisfied;

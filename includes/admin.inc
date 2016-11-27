@@ -74,7 +74,7 @@ function google_tag_general_fieldset(&$form_state) {
  */
 function google_tag_path_fieldset(&$form_state) {
   // Gather data.
-  $description = t('On this and the following tab, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
+  $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
   $description .= t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
   $description .= t(' On this tab, specify the path condition.');
 
@@ -165,16 +165,19 @@ function google_tag_status_fieldset(&$form_state) {
   $fieldset = array(
     '#type' => 'fieldset',
     '#title' => t('Response statuses'),
-    '#description' => t('On this tab, specify the page response status condition. If enabled, this condition overrides the page path condition. In other words, if the HTTP response status is one of the listed statuses, then the page path condition is ignored.'),
+    '#description' => t('On this tab, specify the page response status condition.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#tree' => FALSE,
   );
 
   $fieldset['google_tag_status_toggle'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Override path condition for listed response statuses'),
-    '#description' => t('If checked, then the path condition will be ingored for a listed page response status.'),
+    '#type' => 'radios',
+    '#title' => t('Add snippet for specific statuses'),
+    '#options' => array(
+      t('All statuses except the listed statuses'),
+      t('Only the listed statuses'),
+    ),
     '#default_value' => variable_get('google_tag_status_toggle', 0),
   );
 
