@@ -175,6 +175,7 @@ function _google_tag_role_check($account) {
   if (!isset($satisfied)) {
     $toggle = variable_get('google_tag_role_toggle', 0);
     $roles = variable_get('google_tag_role_list', array());
+    $roles = array_filter($roles);
 
     // Meaning of $toggle
     // - 0: all roles except listed roles
