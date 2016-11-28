@@ -13,7 +13,7 @@
 /**
  * Default list of relative paths.
  */
-define('GOOGLETAGMANAGER_PATHS', "admin*\nbatch*\nnode/add*\nnode/*/*\nuser/*/*");
+define('GOOGLETAGMANAGER_PATHS', "admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*/delete\nuser/*/edit*\nuser/*/cancel*");
 
 /**
  * Default list of HTTP response statuses that override path conditions.
