@@ -17,7 +17,7 @@ Drupal.behaviors.gtmInsertionSettings = {
       return;
     }
 
-    $('fieldset#edit-paths', context).drupalSetSummary(function (context) {
+    $('fieldset#edit-path', context).drupalSetSummary(function (context) {
       var $radio = $('input[name="google_tag_path_toggle"]:checked', context);
       if ($radio.val() == 0) {
         if (!$('textarea[name="google_tag_path_list"]', context).val()) {
@@ -37,7 +37,7 @@ Drupal.behaviors.gtmInsertionSettings = {
       }
     });
 
-    $('fieldset#edit-roles', context).drupalSetSummary(function (context) {
+    $('fieldset#edit-role', context).drupalSetSummary(function (context) {
       var vals = [];
       $('input[type="checkbox"]:checked', context).each(function () {
         vals.push($.trim($(this).next('label').text()));
@@ -61,7 +61,7 @@ Drupal.behaviors.gtmInsertionSettings = {
       }
     });
 
-    $('fieldset#edit-statuses', context).drupalSetSummary(function (context) {
+    $('fieldset#edit-status', context).drupalSetSummary(function (context) {
       var $checkbox = $('input[name="google_tag_status_toggle"]:checked', context);
       if ($checkbox.is(':checked')) {
         if (!$('textarea[name="google_tag_status_list"]', context).val()) {

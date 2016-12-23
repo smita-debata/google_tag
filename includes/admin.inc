@@ -21,6 +21,18 @@ function google_tag_settings_form($form, &$form_state) {
   // @todo Set this on validation errors.
   $default_tab = !empty($form_state['default_tab']) ? $form_state['default_tab'] : '';
 
+  $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
+  $description .= t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
+  $description .= t(' On this tab, specify the path condition.');
+
+  $groups = [
+    'general' => ['title' => t('General'), 'collapse' => FALSE],
+    'path' => ['title' => t('Page paths'), 'description' => $description],
+    'role' => ['title' => t('User roles'), 'description' => t('On this tab, specify the user role condition.')],
+    'status' => ['title' => t('Response statuses'), 'description' => t('On this tab, specify the page response status condition.')],
+    'advanced' => ['title' => t('Advanced')],
+  ];
+
   // Build form elements.
   $form['tabs'] = array(
     '#type' => 'vertical_tabs',
@@ -31,11 +43,9 @@ function google_tag_settings_form($form, &$form_state) {
       'js' => array(drupal_get_path('module', 'google_tag') . '/js/google_tag.admin.js'),
     ),
   );
-  $form['tabs']['general'] = google_tag_general_fieldset($form_state);
-  $form['tabs']['paths'] = google_tag_path_fieldset($form_state);
-  $form['tabs']['roles'] = google_tag_role_fieldset($form_state);
-  $form['tabs']['statuses'] = google_tag_status_fieldset($form_state);
-  $form['tabs']['advanced'] = google_tag_advanced_fieldset($form_state);
+  foreach ($groups as $group => $items) {
+    $form['tabs'][$group] = google_tag_fieldset($group, $items);
+  }
 
   return system_settings_form($form);
 }
@@ -43,107 +53,19 @@ function google_tag_settings_form($form, &$form_state) {
 /**
  * Fieldset builder for the module settings form.
  */
-function google_tag_general_fieldset(&$form_state) {
+function google_tag_fieldset($group, $items) {
   // Gather data.
-  $variables = _google_tag_variable_info_general([]);
+  $function = "_google_tag_variable_info_$group";
+  $variables = $function([]);
+  $items += ['description' => '', 'collapse' => TRUE];
 
   // Build form elements.
   $fieldset = array(
     '#type' => 'fieldset',
-    '#title' => t('General'),
-    '#tree' => FALSE,
-  );
-  $fieldset += google_tag_form_elements($variables);
-
-  return $fieldset;
-}
-
-/**
- * Fieldset builder for the module settings form.
- *
- * Allows user to specify snippet insertion condition based on page path.
- */
-function google_tag_path_fieldset(&$form_state) {
-  // Gather data.
-  $variables = _google_tag_variable_info_path([]);
-
-  $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
-  $description .= t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
-  $description .= t(' On this tab, specify the path condition.');
-
-  // Build form elements.
-  $fieldset = array(
-    '#type' => 'fieldset',
-    '#title' => t('Page paths'),
-    '#description' => $description,
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#tree' => FALSE,
-  );
-  $fieldset += google_tag_form_elements($variables);
-
-  return $fieldset;
-}
-
-/**
- * Fieldset builder for the module settings form.
- *
- * Allows user to specify snippet insertion condition based on user role.
- */
-function google_tag_role_fieldset(&$form_state) {
-  // Gather data.
-  $variables = _google_tag_variable_info_role([]);
-
-  // Build form elements.
-  $fieldset = array(
-    '#type' => 'fieldset',
-    '#title' => t('User roles'),
-    '#description' => t('On this tab, specify the user role condition.'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#tree' => FALSE,
-  );
-  $fieldset += google_tag_form_elements($variables);
-
-  return $fieldset;
-}
-
-/**
- * Fieldset builder for the module settings form.
- *
- * Allows user to specify snippet insertion condition based on response status.
- */
-function google_tag_status_fieldset(&$form_state) {
-  // Gather data.
-  $variables = _google_tag_variable_info_status([]);
-
-  // Build form elements.
-  $fieldset = array(
-    '#type' => 'fieldset',
-    '#title' => t('Response statuses'),
-    '#description' => t('On this tab, specify the page response status condition.'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#tree' => FALSE,
-  );
-  $fieldset += google_tag_form_elements($variables);
-
-  return $fieldset;
-}
-
-/**
- * Fieldset builder for the module settings form.
- */
-function google_tag_advanced_fieldset(&$form_state) {
-  // Gather data.
-  $variables = _google_tag_variable_info_advanced([]);
-
-  // Build form elements.
-  $fieldset = array(
-    '#type' => 'fieldset',
-    '#title' => t('Advanced'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#title' => $items['title'],
+    '#description' => $items['description'],
+    '#collapsible' => $items['collapse'],
+    '#collapsed' => $items['collapse'],
     '#tree' => FALSE,
   );
   $fieldset += google_tag_form_elements($variables);
