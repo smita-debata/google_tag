@@ -15,6 +15,8 @@
  * @ingroup forms
  */
 function google_tag_settings_form($form, &$form_state) {
+  module_load_include('inc', 'google_tag', 'includes/variable');
+
   // Gather data.
   // @todo Set this on validation errors.
   $default_tab = !empty($form_state['default_tab']) ? $form_state['default_tab'] : '';
@@ -43,8 +45,7 @@ function google_tag_settings_form($form, &$form_state) {
  */
 function google_tag_general_fieldset(&$form_state) {
   // Gather data.
-  $args = array('@path' => 'https://tagmanager.google.com/');
-  $description = t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, <a href="@path">sign up for GTM</a> and create a container for your website.', $args);
+  $variables = _google_tag_variable_info_general([]);
 
   // Build form elements.
   $fieldset = array(
@@ -52,17 +53,7 @@ function google_tag_general_fieldset(&$form_state) {
     '#title' => t('General'),
     '#tree' => FALSE,
   );
-
-  $fieldset['google_tag_container_id'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Container ID'),
-    '#description' => $description,
-    '#default_value' => variable_get('google_tag_container_id', ''),
-    '#attributes' => array('placeholder' => array('GTM-xxxxxx')),
-    '#size' => 10,
-    '#maxlength' => 15,
-    '#required' => TRUE,
-  );
+  $fieldset += google_tag_form_elements($variables);
 
   return $fieldset;
 }
@@ -74,11 +65,11 @@ function google_tag_general_fieldset(&$form_state) {
  */
 function google_tag_path_fieldset(&$form_state) {
   // Gather data.
+  $variables = _google_tag_variable_info_path([]);
+
   $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
   $description .= t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
   $description .= t(' On this tab, specify the path condition.');
-
-  $list_description = t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', array('%blog' => 'blog', '%blog-wildcard' => 'blog/*', '%front' => '<front>'));
 
   // Build form elements.
   $fieldset = array(
@@ -89,23 +80,7 @@ function google_tag_path_fieldset(&$form_state) {
     '#collapsed' => TRUE,
     '#tree' => FALSE,
   );
-
-  $fieldset['google_tag_path_toggle'] = array(
-    '#type' => 'radios',
-    '#title' => t('Add snippet on specific paths'),
-    '#options' => array(
-      t('All paths except the listed paths'),
-      t('Only the listed paths'),
-    ),
-    '#default_value' => variable_get('google_tag_path_toggle', 0),
-  );
-  $fieldset['google_tag_path_list'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Listed paths'),
-    '#description' => $list_description,
-    '#default_value' => variable_get('google_tag_path_list', GOOGLETAGMANAGER_PATHS),
-    '#rows' => 10,
-  );
+  $fieldset += google_tag_form_elements($variables);
 
   return $fieldset;
 }
@@ -117,8 +92,7 @@ function google_tag_path_fieldset(&$form_state) {
  */
 function google_tag_role_fieldset(&$form_state) {
   // Gather data.
-  $roles = array_map('check_plain', user_roles());
-  $roles = drupal_map_assoc($roles);
+  $variables = _google_tag_variable_info_role([]);
 
   // Build form elements.
   $fieldset = array(
@@ -129,23 +103,7 @@ function google_tag_role_fieldset(&$form_state) {
     '#collapsed' => TRUE,
     '#tree' => FALSE,
   );
-
-  $fieldset['google_tag_role_toggle'] = array(
-    '#type' => 'radios',
-    '#title' => t('Add snippet for specific roles'),
-    '#options' => array(
-      t('All roles except the selected roles'),
-      t('Only the selected roles'),
-    ),
-    '#default_value' => variable_get('google_tag_role_toggle', 0),
-  );
-
-  $fieldset['google_tag_role_list'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Selected roles'),
-    '#default_value' => variable_get('google_tag_role_list', array()),
-    '#options' => $roles,
-  );
+  $fieldset += google_tag_form_elements($variables);
 
   return $fieldset;
 }
@@ -157,8 +115,7 @@ function google_tag_role_fieldset(&$form_state) {
  */
 function google_tag_status_fieldset(&$form_state) {
   // Gather data.
-  $args = array('@path' => 'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes');
-  $list_description = t('Enter one response status per line. For more information, refer to the <a href="@path">list of HTTP status codes</a>.', $args);
+  $variables = _google_tag_variable_info_status([]);
 
   // Build form elements.
   $fieldset = array(
@@ -169,24 +126,7 @@ function google_tag_status_fieldset(&$form_state) {
     '#collapsed' => TRUE,
     '#tree' => FALSE,
   );
-
-  $fieldset['google_tag_status_toggle'] = array(
-    '#type' => 'radios',
-    '#title' => t('Add snippet for specific statuses'),
-    '#options' => array(
-      t('All statuses except the listed statuses'),
-      t('Only the listed statuses'),
-    ),
-    '#default_value' => variable_get('google_tag_status_toggle', 0),
-  );
-
-  $fieldset['google_tag_status_list'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Listed statuses'),
-    '#description' => $list_description,
-    '#default_value' => variable_get('google_tag_status_list', GOOGLETAGMANAGER_STATUSES),
-    '#rows' => 5,
-  );
+  $fieldset += google_tag_form_elements($variables);
 
   return $fieldset;
 }
@@ -195,6 +135,9 @@ function google_tag_status_fieldset(&$form_state) {
  * Fieldset builder for the module settings form.
  */
 function google_tag_advanced_fieldset(&$form_state) {
+  // Gather data.
+  $variables = _google_tag_variable_info_advanced([]);
+
   // Build form elements.
   $fieldset = array(
     '#type' => 'fieldset',
@@ -203,15 +146,63 @@ function google_tag_advanced_fieldset(&$form_state) {
     '#collapsed' => TRUE,
     '#tree' => FALSE,
   );
-
-  $fieldset['google_tag_compact_tag'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Compact the JavaScript snippet'),
-    '#description' => t('If checked, then the JavaScript snippet will be compacted to remove unnecessary whitespace. This is <strong>recommended on production sites</strong>. Leave unchecked to output a snippet that can be examined using a JavaScript debugger in the browser.'),
-    '#default_value' => variable_get('google_tag_compact_tag', 1),
-  );
+  $fieldset += google_tag_form_elements($variables);
 
   return $fieldset;
+}
+
+/**
+ * Returns form elements from variable definitions.
+ *
+ * @param array $variables
+ *   Associative array of variable definitions.
+ *
+ * @return array
+ *   Associative array of form elements.
+ */
+function google_tag_form_elements($variables) {
+  static $keys = [
+    'type' => '#type',
+    'title' => '#title',
+    'description' => '#description',
+    'options' => '#options',
+    'default' => '#default_value',
+  ];
+  $elements = [];
+  foreach ($variables as $name => $variable) {
+    $element = [];
+    foreach ($keys as $key => $property) {
+      if (isset($variable[$key])) {
+        $element[$property] = $variable[$key];
+      }
+    }
+    $element['#type'] = google_tag_form_element_type($element['#type']);
+    $element['#default_value'] = variable_get($name, $variable['default']);
+    $element += isset($variable['element']) ? $variable['element'] : [];
+    $elements[$name] = $element;
+  }
+
+  return $elements;
+}
+
+/**
+ * Converts variable type to form element type.
+ *
+ * @param string $type
+ *   Variable type.
+ *
+ * @return string
+ *   Form element type.
+ */
+function google_tag_form_element_type($type) {
+  static $keys = [
+    'string' => 'textfield',
+    'select' => 'radios',
+    'text' => 'textarea',
+    'options' => 'checkboxes',
+    'boolean' => 'checkbox',
+  ];
+  return isset($keys[$type]) ? $keys[$type] : 'textfield';
 }
 
 /**

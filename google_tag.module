@@ -45,6 +45,30 @@ function google_tag_permission() {
 }
 
 /**
+ * Implements hook_variable_group_info().
+ */
+function google_tag_variable_group_info() {
+  module_load_include('inc', 'google_tag', 'includes/variable');
+  return _google_tag_variable_group_info();
+}
+
+/**
+ * Implements hook_variable_info().
+ */
+function google_tag_variable_info($options) {
+  module_load_include('inc', 'google_tag', 'includes/variable');
+  return _google_tag_variable_info($options);
+}
+
+/**
+ * Element validation handler for google_tag_container_id.
+ */
+function google_tag_validate_container_id($variable, $options, $element, $form, &$form_state) {
+  module_load_include('inc', 'google_tag', 'includes/variable');
+  return _google_tag_validate_container_id($variable, $options, $element, $form, $form_state);
+}
+
+/**
  * Implements hook_page_alter().
  *
  * Adds a post_render callback and loads the include file.
