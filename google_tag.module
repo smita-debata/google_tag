@@ -119,11 +119,14 @@ function google_tag_insert_snippet() {
     // No container ID.
     return FALSE;
   }
+  $satisfied = TRUE;
   if (!_google_tag_status_check() || !_google_tag_path_check() || !_google_tag_role_check($user)) {
     // Omit snippet if any condition is not met.
-    return FALSE;
+    $satisfied = FALSE;
   }
-  return TRUE;
+  // Allow other modules to alter the insertion criteria.
+  drupal_alter('google_tag_insert', $satisfied);
+  return $satisfied;
 }
 
 /**

@@ -55,5 +55,7 @@ $script
 <!-- End Google Tag Manager -->
 EOS;
 
+  // Allow other modules to alter the script.
+  drupal_alter('google_tag_snippet', $script);
   return $script;
 }
