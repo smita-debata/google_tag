@@ -19,6 +19,8 @@ function google_tag_snippet() {
   // Gather data.
   $container_id = variable_get('google_tag_container_id', '');
   $container_id = trim(drupal_json_encode($container_id), '"');
+  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
+  $data_layer = trim(drupal_json_encode($data_layer), '"');
   $compact = variable_get('google_tag_compact_tag', 1);
 
   // Build script tags.
@@ -40,7 +42,7 @@ EOS;
   j.async=true;
   f.parentNode.insertBefore(j,f);
 
-})(window,document,'script','dataLayer','$container_id');
+})(window,document,'script','$data_layer','$container_id');
 </script>
 EOS;
   if ($compact) {

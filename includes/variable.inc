@@ -95,7 +95,7 @@ function _google_tag_variable_info_path($options) {
     'title' => t('Listed paths', array(), $options),
     'description' => $list_description,
     'default' => GOOGLETAGMANAGER_PATHS,
-    'validate callback' => '_google_tag_validate_path_list',
+    'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 10,
     ),
@@ -157,7 +157,7 @@ function _google_tag_variable_info_status($options) {
     'title' => t('Listed statuses', array(), $options),
     'description' => $list_description,
     'default' => GOOGLETAGMANAGER_STATUSES,
-    'validate callback' => '_google_tag_validate_status_list',
+    'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 5,
     ),
@@ -176,6 +176,18 @@ function _google_tag_variable_info_advanced($options) {
     'title' => t('Compact the JavaScript snippet', array(), $options),
     'description' => t('If checked, then the JavaScript snippet will be compacted to remove unnecessary whitespace. This is <strong>recommended on production sites</strong>. Leave unchecked to output a snippet that can be examined using a JavaScript debugger in the browser.', array(), $options),
     'default' => 1,
+  );
+
+  $variables['google_tag_data_layer'] = array(
+    'type' => 'string',
+    'title' => t('Data layer', array(), $options),
+    'description' => t('The name of the data layer. Default value is "dataLayer". In most cases, use the default.'),
+    'default' => 'dataLayer',
+    'validate callback' => '_google_tag_validate_text',
+    'element' => array(
+      '#attributes' => array('placeholder' => array('dataLayer')),
+      '#required' => TRUE,
+    ),
   );
 
   return $variables;
@@ -207,18 +219,10 @@ function _google_tag_validate_container_id($variable, $options, $element, $form,
 }
 
 /**
- * Element validation handler for google_tag_path_list.
+ * Element validation handler for text values.
  */
-function _google_tag_validate_path_list($variable, $options, $element, $form, &$form_state) {
-  $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
-  $value = trim($value);
-  drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
-}
-
-/**
- * Element validation handler for google_tag_status_list.
- */
-function _google_tag_validate_status_list($variable, $options, $element, $form, &$form_state) {
+function _google_tag_validate_text($variable, $options, $element, $form, &$form_state) {
+sdm(__FUNCTION__);
   $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
   $value = trim($value);
   drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
