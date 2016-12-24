@@ -8,10 +8,10 @@
  */
 
 /**
- * Returns JavaScript snippet.
+ * Returns JavaScript snippets.
  *
- * @return string
- *   The JavaScript snippet.
+ * @return array
+ *   The JavaScript script and noscript snippets.
  *
  * @see google_tag_page_build()
  */
@@ -29,7 +29,6 @@ function google_tag_snippet() {
  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 EOS;
   $script = <<<EOS
-<script type="text/javascript">
 (function(w,d,s,l,i){
 
   w[l]=w[l]||[];
@@ -43,21 +42,24 @@ EOS;
   f.parentNode.insertBefore(j,f);
 
 })(window,document,'script','$data_layer','$container_id');
-</script>
 EOS;
   if ($compact) {
     $noscript = str_replace("\n", '', $noscript);
     $script = str_replace(array("\n", '  '), '', $script);
   }
-  $script = <<<EOS
-
+  $noscript = <<<EOS
 <!-- Google Tag Manager -->
 $noscript
+<!-- End Google Tag Manager -->
+EOS;
+  // @todo Remove initial blank line.
+  $script = <<<EOS
+<!-- Google Tag Manager -->
 $script
 <!-- End Google Tag Manager -->
 EOS;
 
   // Allow other modules to alter the script.
-  drupal_alter('google_tag_snippet', $script);
-  return $script;
+  drupal_alter('google_tag_snippet', $script, $noscript);
+  return [$script, $noscript];
 }

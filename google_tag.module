@@ -94,12 +94,20 @@ function google_tag_page_build(&$page) {
 
   // Load include file.
   module_load_include('inc', 'google_tag', 'includes/snippet');
+  list($script, $noscript) = google_tag_snippet();
+
+  // @see drupal_get_js()
+  // For inline JavaScript to validate as XHTML, all JavaScript containing
+  // XHTML needs to be wrapped in CDATA.
+  drupal_add_js($script, array('type' => 'inline', 'group' => JS_LIBRARY * 2));
+  $scripts = drupal_add_js();
+
   // Add snippet to page_top region.
   // Note: for any theme that follows the pattern of core html.tpl.php in the
   // system module (e.g. bootstrap theme), this does not place the snippet
   // immediately after the body tag but rather after the 'skip-link' div.
   $page['page_top']['google_tag'] = array(
-    '#markup' => google_tag_snippet(),
+    '#markup' => $noscript,
     '#weight' => -10,
   );
 }
