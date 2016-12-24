@@ -69,19 +69,20 @@ function google_tag_validate_container_id($variable, $options, $element, $form, 
 }
 
 /**
- * Implements hook_page_alter().
+ * Implements hook_page_build().
  *
- * Adds a post_render callback and loads the include file.
+ * Adds the snippet to the page array if the insertion conditions are met.
  *
  * @see drupal_render_page()
  */
-function google_tag_page_alter(&$page) {
+function google_tag_page_build(&$page) {
   if (!google_tag_insert_snippet()) {
     return;
   }
 
   // Call sequence:
   // - drupal_render_page()
+  //   - hook_page_build()
   //   - hook_page_alter()
   //   - drupal_render()
   // - drupal_render()
@@ -91,10 +92,16 @@ function google_tag_page_alter(&$page) {
   //   - callbacks in $elements['#post_render']
   //     - google_tag_page_process(): callback set here
 
-  // Add callback routine.
-  $page['#post_render'][] = 'google_tag_page_process';
   // Load include file.
   module_load_include('inc', 'google_tag', 'includes/snippet');
+  // Add snippet to page_top region.
+  // Note: for any theme that follows the pattern of core html.tpl.php in the
+  // system module (e.g. bootstrap theme), this does not place the snippet
+  // immediately after the body tag but rather after the 'skip-link' div.
+  $page['page_top']['google_tag'] = array(
+    '#markup' => google_tag_snippet(),
+    '#weight' => -10,
+  );
 }
 
 /**

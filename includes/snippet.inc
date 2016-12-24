@@ -8,14 +8,14 @@
  */
 
 /**
- * Implements callback_post_render().
+ * Returns JavaScript snippet.
  *
- * Inserts JavaScript snippet immediately following the opening body tag.
+ * @return string
+ *   The JavaScript snippet.
  *
- * @see google_tag_page_alter()
- * @see drupal_render()
+ * @see google_tag_page_build()
  */
-function google_tag_page_process(&$children, $elements) {
+function google_tag_snippet() {
   // Gather data.
   $container_id = variable_get('google_tag_container_id', '');
   $container_id = trim(drupal_json_encode($container_id), '"');
@@ -55,7 +55,5 @@ $script
 <!-- End Google Tag Manager -->
 EOS;
 
-  // Insert snippet after the opening body tag.
-  $children = preg_replace('@<body[^>]*>@', '$0' . $script, $children, 1);
-  return $children;
+  return $script;
 }
