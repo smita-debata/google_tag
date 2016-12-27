@@ -238,3 +238,20 @@ function _google_tag_role_check($account) {
   }
   return $satisfied;
 }
+
+/**
+ * Cleans a string representing a list of items.
+ *
+ * @param string $text
+ *   The string to clean.
+ * @param string $format
+ *   The final format of $text, either 'string' or 'array'.
+ */
+function google_tag_text_clean(&$text, $format = 'string') {
+  $text = explode("\n", $text);
+  $text = array_map('trim', $text);
+  $text = array_filter($text, 'trim');
+  if ($format == 'string') {
+    $text = implode("\n", $text);
+  }
+}

@@ -136,8 +136,8 @@ function google_tag_settings_form_validate($form, &$form_state) {
   // Trim the text values.
   $values['google_tag_container_id'] = trim($values['google_tag_container_id']);
   $values['google_tag_data_layer'] = trim($values['google_tag_data_layer']);
-  $values['google_tag_path_list'] = trim($values['google_tag_path_list']);
-  $values['google_tag_status_list'] = trim($values['google_tag_status_list']);
+  google_tag_text_clean($values['google_tag_path_list']);
+  google_tag_text_clean($values['google_tag_status_list']);
 
   // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
   $values['google_tag_container_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_container_id']);

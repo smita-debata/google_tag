@@ -222,8 +222,7 @@ function _google_tag_validate_container_id($variable, $options, $element, $form,
  * Element validation handler for text values.
  */
 function _google_tag_validate_text($variable, $options, $element, $form, &$form_state) {
-sdm(__FUNCTION__);
   $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
-  $value = trim($value);
+  google_tag_text_clean($value);
   drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
 }
