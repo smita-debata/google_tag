@@ -138,6 +138,8 @@ function google_tag_settings_form_validate($form, &$form_state) {
   $values['google_tag_data_layer'] = trim($values['google_tag_data_layer']);
   google_tag_text_clean($values['google_tag_path_list']);
   google_tag_text_clean($values['google_tag_status_list']);
+  google_tag_text_clean($values['google_tag_whitelist_classes']);
+  google_tag_text_clean($values['google_tag_blacklist_classes']);
 
   // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
   $values['google_tag_container_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_container_id']);
@@ -148,4 +150,5 @@ function google_tag_settings_form_validate($form, &$form_state) {
     // a container? It may be valid but not the correct one for the website.
     form_set_error('google_tag_container_id', t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
   }
+  form_set_error('google_tag_data_layer', _google_tag_verify_data_layer($values['google_tag_data_layer']));
 }

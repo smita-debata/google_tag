@@ -170,6 +170,13 @@ function _google_tag_variable_info_status($options) {
  * Implements hook_variable_info().
  */
 function _google_tag_variable_info_advanced($options) {
+  // Gather data.
+  $args = array('@path' => 'https://developers.google.com/tag-manager/devguide#security');
+  $description = t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="@path">developer documentation</a>.', $args);
+
+  $args = array('@path2' => 'https://www.drupal.org/project/datalayer');
+  $markup = t('If the default data layer name is used, then enable the <a href="@path2">data layer</a> module to manage the insertion of tags, triggers, and variables in one place. If a different module is used for this purpose, there may be some contamination and override of values from this and the other module.', $args);
+
   // Build variables.
   $variables['google_tag_compact_tag'] = array(
     'type' => 'boolean',
@@ -183,10 +190,37 @@ function _google_tag_variable_info_advanced($options) {
     'title' => t('Data layer', array(), $options),
     'description' => t('The name of the data layer. Default value is "dataLayer". In most cases, use the default.'),
     'default' => 'dataLayer',
-    'validate callback' => '_google_tag_validate_text',
+    'validate callback' => '_google_tag_validate_data_layer',
     'element' => array(
       '#attributes' => array('placeholder' => array('dataLayer')),
       '#required' => TRUE,
+    ),
+  );
+
+  $disabled = !module_exists('datalayer');
+
+  $variables['google_tag_whitelist_classes'] = array(
+    'type' => 'text',
+    'title' => t('White-listed classes', array(), $options),
+    'description' => $description,
+    'default' => GOOGLETAGMANAGER_WHITELIST_CLASSES,
+    'validate callback' => '_google_tag_validate_text',
+    'element' => array(
+      '#rows' => 5,
+      '#prefix' => $disabled ? '<span>' . $markup . '</span>' : '',
+//       '#disabled' => $disabled,
+    ),
+  );
+
+  $variables['google_tag_blacklist_classes'] = array(
+    'type' => 'text',
+    'title' => t('Black-listed classes', array(), $options),
+    'description' => t('The types of tags, triggers, and variables <strong>forbidden</strong> on a page. Enter one class per line.'),
+    'default' => GOOGLETAGMANAGER_BLACKLIST_CLASSES,
+    'validate callback' => '_google_tag_validate_text',
+    'element' => array(
+      '#rows' => 5,
+//       '#disabled' => $disabled,
     ),
   );
 
@@ -216,6 +250,16 @@ function _google_tag_validate_container_id($variable, $options, $element, $form,
     // a container? It may be valid but not the correct one for the website.
     return t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.');
   }
+}
+
+/**
+ * Element validation handler for google_tag_data_layer.
+ */
+function _google_tag_validate_data_layer($variable, $options, $element, $form, &$form_state) {
+  $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $value = trim($value);
+  drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+  return _google_tag_verify_data_layer($value);
 }
 
 /**

@@ -63,3 +63,44 @@ EOS;
   drupal_alter('google_tag_snippet', $script, $noscript);
   return [$script, $noscript];
 }
+
+/**
+ * Returns JavaScript snippet or adds items to data layer.
+ *
+ * @return string|NULL
+ *   The JavaScript data layer snippet or NULL.
+ *
+ * @see google_tag_page_build()
+ */
+function google_tag_data_layer() {
+  // Gather data.
+  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
+  $data_layer = trim(drupal_json_encode($data_layer), '"');
+  $whitelist = variable_get('google_tag_whitelist_classes', GOOGLETAGMANAGER_WHITELIST_CLASSES);
+  $blacklist = variable_get('google_tag_blacklist_classes', GOOGLETAGMANAGER_BLACKLIST_CLASSES);
+
+  $classes = [];
+  $names = ['whitelist', 'blacklist'];
+  foreach ($names as $name) {
+    google_tag_text_clean($$name, 'array');
+    if (empty($$name)) {
+      continue;
+    }
+    $classes["gtm.$name"] = $$name;
+  }
+
+  if ($classes) {
+    // Build data layer items.
+    if (module_exists('datalayer') && $data_layer == 'dataLayer') {
+      // Add classes to data layer.
+      // @todo How to or can we set the name of the data layer?
+      // This is an open issue on datalayer project; after it is implemented in
+      // datalayer then remove second condition on if block.
+      datalayer_add($classes);
+    }
+    else {
+      $script = "$data_layer = [" . drupal_json_encode($classes) . '];';
+      return $script;
+    }
+  }
+}

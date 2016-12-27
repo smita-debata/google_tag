@@ -21,6 +21,16 @@ define('GOOGLETAGMANAGER_PATHS', "admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*
 define('GOOGLETAGMANAGER_STATUSES', "403 Forbidden\n404 Not Found");
 
 /**
+ * Default list of tag classes to allow.
+ */
+define('GOOGLETAGMANAGER_WHITELIST_CLASSES', "google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes");
+
+/**
+ * Default list of tag classes to forbid.
+ */
+define('GOOGLETAGMANAGER_BLACKLIST_CLASSES', "customScripts\ncustomPixels");
+
+/**
  * Implements hook_help().
  */
 function google_tag_help($path, $arg) {
@@ -95,10 +105,14 @@ function google_tag_page_build(&$page) {
   // Load include file.
   module_load_include('inc', 'google_tag', 'includes/snippet');
   list($script, $noscript) = google_tag_snippet();
+  $classes = google_tag_data_layer();
 
   // @see drupal_get_js()
   // For inline JavaScript to validate as XHTML, all JavaScript containing
   // XHTML needs to be wrapped in CDATA.
+  if ($classes) {
+    drupal_add_js($classes, array('type' => 'inline', 'group' => JS_LIBRARY * 2));
+  }
   drupal_add_js($script, array('type' => 'inline', 'group' => JS_LIBRARY * 2));
   $scripts = drupal_add_js();
 
@@ -253,5 +267,19 @@ function google_tag_text_clean(&$text, $format = 'string') {
   $text = array_filter($text, 'trim');
   if ($format == 'string') {
     $text = implode("\n", $text);
+  }
+}
+
+/**
+ * Verifies presence of dataLayer module and compares name of data layer.
+ *
+ * @return boolean|NULL
+ *   Whether data layer name is incompatible with dataLayer module, if present.
+ */
+function _google_tag_verify_data_layer($value) {
+  if (module_exists('datalayer') && $value != 'dataLayer') {
+    // @todo Setting form error does not allow user to save a different name,
+    // i.e. to do what message text says.
+    return t('The 1.1 release of the dataLayer module does not support a data layer name other than "dataLayer." If you need a different layer name, then either disable the dataLayer module or alter the JavaScript added to the page response.');
   }
 }
