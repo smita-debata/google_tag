@@ -11,6 +11,7 @@
  * Form constructor for the module settings form.
  *
  * @see google_tag_settings_form_validate()
+ * @see google_tag_settings_form_submit()
  *
  * @ingroup forms
  */
@@ -46,6 +47,7 @@ function google_tag_settings_form($form, &$form_state) {
   foreach ($groups as $group => $items) {
     $form['tabs'][$group] = google_tag_fieldset($group, $items);
   }
+  $form['#after_build'] = array('google_tag_settings_form_after_build');
 
   return system_settings_form($form);
 }
@@ -128,6 +130,17 @@ function google_tag_form_element_type($type) {
 }
 
 /**
+ * Element after build callback for google_tag_settings_form().
+ */
+function google_tag_settings_form_after_build($element, &$form_state) {
+  // This will follow:
+  // variable_realm_variable_settings_form_submit
+  // variable_settings_form_submit
+  $element['#submit'][] = 'google_tag_settings_form_submit';
+  return $element;
+}
+
+/**
  * Form validation handler for google_tag_settings_form().
  */
 function google_tag_settings_form_validate($form, &$form_state) {
@@ -153,4 +166,10 @@ function google_tag_settings_form_validate($form, &$form_state) {
   if ($message = _google_tag_verify_data_layer($values['google_tag_data_layer'])) {
     form_set_error('google_tag_data_layer', $message);
   }
+}
+
+/**
+ * Form submission handler for google_tag_settings_form().
+ */
+function google_tag_settings_form_submit($form, &$form_state) {
 }
