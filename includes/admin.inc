@@ -150,5 +150,7 @@ function google_tag_settings_form_validate($form, &$form_state) {
     // a container? It may be valid but not the correct one for the website.
     form_set_error('google_tag_container_id', t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
   }
-  form_set_error('google_tag_data_layer', _google_tag_verify_data_layer($values['google_tag_data_layer']));
+  if ($message = _google_tag_verify_data_layer($values['google_tag_data_layer'])) {
+    form_set_error('google_tag_data_layer', $message);
+  }
 }
