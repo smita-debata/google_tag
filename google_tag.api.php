@@ -18,7 +18,7 @@
  * on custom conditions that cannot be defined by the status, path, and role
  * conditions provided by this module.
  *
- * @param string $satisfied
+ * @param boolean $satisfied
  *   The snippet insertion state.
  */
 function hook_google_tag_insert_alter(&$satisfied) {
@@ -27,17 +27,16 @@ function hook_google_tag_insert_alter(&$satisfied) {
 }
 
 /**
- * Alters the snippets to be inserted on the current page response.
+ * Alters the snippets to be inserted on a page response.
  *
  * This hook allows other modules to alter the snippets to be inserted based on
  * custom settings not defined by this module.
  *
- * @param string $script
- *   The script snippet.
- * @param string $noscript
- *   The noscript snippet.
+ * @param array $snippets
+ *   Associative array of snippets keyed by type: script, noscript and
+ *   data_layer.
  */
-function hook_google_tag_snippet_alter(&$script, &$noscript) {
+function hook_google_tag_snippets_alter(&$snippets) {
   // Do something to the script snippet.
-  $script = str_replace('insertBefore', 'insertAfter', $script);
+  $snippets['script'] = str_replace('insertBefore', 'insertAfter', $snippets['script']);
 }
