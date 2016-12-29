@@ -185,6 +185,13 @@ function _google_tag_variable_info_advanced($options) {
     'default' => 1,
   );
 
+  $variables['google_tag_include_file'] = array(
+    'type' => 'boolean',
+    'title' => t('Include the snippet as a file', array(), $options),
+    'description' => t('If checked, then each JavaScript snippet will be included as a file. This is <strong>recommended</strong>. Leave unchecked to inline each snippet into the page. This only applies to data layer and script snippets.', array(), $options),
+    'default' => 1,
+  );
+
   $variables['google_tag_data_layer'] = array(
     'type' => 'string',
     'title' => t('Data layer', array(), $options),

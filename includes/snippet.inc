@@ -132,7 +132,7 @@ function _google_tag_data_layer_snippet() {
     }
     else {
       // Build data layer snippet.
-      $script = "$data_layer = [" . drupal_json_encode($classes) . '];';
+      $script = "var $data_layer = [" . drupal_json_encode($classes) . '];';
       return $script;
     }
   }
