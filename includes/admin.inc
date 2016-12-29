@@ -197,3 +197,34 @@ function _google_tag_snippets_save() {
     drupal_set_message(t('Created three snippet files based on configuration.'));
   }
 }
+
+/**
+ * Cleans a string representing a list of items.
+ *
+ * @param string $text
+ *   The string to clean.
+ * @param string $format
+ *   The final format of $text, either 'string' or 'array'.
+ */
+function google_tag_text_clean(&$text, $format = 'string') {
+  $text = explode("\n", $text);
+  $text = array_map('trim', $text);
+  $text = array_filter($text, 'trim');
+  if ($format == 'string') {
+    $text = implode("\n", $text);
+  }
+}
+
+/**
+ * Verifies presence of dataLayer module and compares name of data layer.
+ *
+ * @return boolean|NULL
+ *   Whether data layer name is incompatible with dataLayer module, if present.
+ */
+function _google_tag_verify_data_layer($value) {
+  if (module_exists('datalayer') && $value != 'dataLayer') {
+    // @todo Setting form error does not allow user to save a different name,
+    // i.e. to do what message text says.
+    return t('The 1.1 release of the dataLayer module does not support a data layer name other than "dataLayer." If you need a different layer name, then either disable the dataLayer module or alter the JavaScript added to the page response.');
+  }
+}

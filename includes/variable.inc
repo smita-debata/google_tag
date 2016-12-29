@@ -242,6 +242,9 @@ function _google_tag_variable_info_advanced($options) {
  *   form_set_error('element[name]', $message).
  */
 function _google_tag_validate_container_id($variable, $options, $element, $form, &$form_state) {
+  // Load this for other validation routines.
+  module_load_include('inc', 'google_tag', 'includes/admin');
+
   // Use this routine as the variable realm form has nested values.
   $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
   // Trim the text value.
