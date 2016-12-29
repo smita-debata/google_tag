@@ -13,22 +13,22 @@
 /**
  * Default list of relative paths.
  */
-define('GOOGLETAGMANAGER_PATHS', "admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*/delete\nuser/*/edit*\nuser/*/cancel*");
+define('GOOGLE_TAG_PATHS', "admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*/delete\nuser/*/edit*\nuser/*/cancel*");
 
 /**
  * Default list of HTTP response statuses that override path conditions.
  */
-define('GOOGLETAGMANAGER_STATUSES', "403 Forbidden\n404 Not Found");
+define('GOOGLE_TAG_STATUSES', "403 Forbidden\n404 Not Found");
 
 /**
  * Default list of tag classes to allow.
  */
-define('GOOGLETAGMANAGER_WHITELIST_CLASSES', "google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes");
+define('GOOGLE_TAG_WHITELIST_CLASSES', "google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes");
 
 /**
  * Default list of tag classes to forbid.
  */
-define('GOOGLETAGMANAGER_BLACKLIST_CLASSES', "customScripts\ncustomPixels");
+define('GOOGLE_TAG_BLACKLIST_CLASSES', "customScripts\ncustomPixels");
 
 /**
  * Implements hook_help().
@@ -178,7 +178,7 @@ function _google_tag_status_check() {
 
   if (!isset($satisfied)) {
     $toggle = variable_get('google_tag_status_toggle', 0);
-    $statuses = variable_get('google_tag_status_list', GOOGLETAGMANAGER_STATUSES);
+    $statuses = variable_get('google_tag_status_list', GOOGLE_TAG_STATUSES);
 
     if (empty($statuses)) {
       $satisfied = !$toggle;
@@ -204,7 +204,7 @@ function _google_tag_path_check() {
 
   if (!isset($satisfied)) {
     $toggle = variable_get('google_tag_path_toggle', 0);
-    $paths = variable_get('google_tag_path_list', GOOGLETAGMANAGER_PATHS);
+    $paths = variable_get('google_tag_path_list', GOOGLE_TAG_PATHS);
 
     // Meaning of $toggle
     // - 0: all paths except listed paths

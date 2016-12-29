@@ -94,7 +94,7 @@ function _google_tag_variable_info_path($options) {
     'type' => 'text',
     'title' => t('Listed paths', array(), $options),
     'description' => $list_description,
-    'default' => GOOGLETAGMANAGER_PATHS,
+    'default' => GOOGLE_TAG_PATHS,
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 10,
@@ -156,7 +156,7 @@ function _google_tag_variable_info_status($options) {
     'type' => 'text',
     'title' => t('Listed statuses', array(), $options),
     'description' => $list_description,
-    'default' => GOOGLETAGMANAGER_STATUSES,
+    'default' => GOOGLE_TAG_STATUSES,
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 5,
@@ -210,7 +210,7 @@ function _google_tag_variable_info_advanced($options) {
     'type' => 'text',
     'title' => t('White-listed classes', array(), $options),
     'description' => $description,
-    'default' => GOOGLETAGMANAGER_WHITELIST_CLASSES,
+    'default' => GOOGLE_TAG_WHITELIST_CLASSES,
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 5,
@@ -223,7 +223,7 @@ function _google_tag_variable_info_advanced($options) {
     'type' => 'text',
     'title' => t('Black-listed classes', array(), $options),
     'description' => t('The types of tags, triggers, and variables <strong>forbidden</strong> on a page. Enter one class per line.'),
-    'default' => GOOGLETAGMANAGER_BLACKLIST_CLASSES,
+    'default' => GOOGLE_TAG_BLACKLIST_CLASSES,
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 5,

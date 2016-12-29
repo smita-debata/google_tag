@@ -108,8 +108,8 @@ function _google_tag_data_layer_snippet() {
   // Gather data.
   $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
   $data_layer = trim(drupal_json_encode($data_layer), '"');
-  $whitelist = variable_get('google_tag_whitelist_classes', GOOGLETAGMANAGER_WHITELIST_CLASSES);
-  $blacklist = variable_get('google_tag_blacklist_classes', GOOGLETAGMANAGER_BLACKLIST_CLASSES);
+  $whitelist = variable_get('google_tag_whitelist_classes', GOOGLE_TAG_WHITELIST_CLASSES);
+  $blacklist = variable_get('google_tag_blacklist_classes', GOOGLE_TAG_BLACKLIST_CLASSES);
 
   $classes = [];
   $names = ['whitelist', 'blacklist'];
