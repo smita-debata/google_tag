@@ -172,4 +172,28 @@ function google_tag_settings_form_validate($form, &$form_state) {
  * Form submission handler for google_tag_settings_form().
  */
 function google_tag_settings_form_submit($form, &$form_state) {
+  _google_tag_snippets_save();
+}
+
+/**
+ * Saves JS snippet files based on current settings.
+ *
+ * @return bool
+ *   Whether the files were saved.
+ */
+function _google_tag_snippets_save() {
+  // Save the altered snippets after hook_google_tag_snippets_alter().
+  module_load_include('inc', 'google_tag', 'includes/snippet');
+  $result = TRUE;
+  $snippets = google_tag_snippets();
+  foreach ($snippets as $type => $snippet) {
+    $path = file_unmanaged_save_data($snippet, "public://js/google_tag.$type.js", FILE_EXISTS_REPLACE);
+    $result = !$path ? FALSE : $result;
+  }
+  if (!$path) {
+    drupal_set_message(t('An error occurred saving one or more snippet files. Please try again or contact the site administrator if it persists.'));
+  }
+  else {
+    drupal_set_message(t('Created three snippet files based on configuration.'));
+  }
 }
