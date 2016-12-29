@@ -11,11 +11,27 @@
  * Returns JavaScript snippets.
  *
  * @return array
- *   The JavaScript script and noscript snippets.
- *
- * @see google_tag_page_build()
+ *   Associative array of snippets keyed by type: script, noscript and
+ *   data_layer.
  */
-function google_tag_snippet() {
+function google_tag_snippets() {
+  $snippets = [
+    'script' => _google_tag_script_snippet(),
+    'noscript' => _google_tag_noscript_snippet(),
+    'data_layer' => _google_tag_data_layer_snippet(),
+  ];
+  // Allow other modules to alter the snippets.
+  drupal_alter('google_tag_snippets', $snippets);
+  return $snippets;
+}
+
+/**
+ * Returns JavaScript script snippet.
+ *
+ * @return array
+ *   The script snippet.
+ */
+function _google_tag_script_snippet() {
   // Gather data.
   $container_id = variable_get('google_tag_container_id', '');
   $container_id = trim(drupal_json_encode($container_id), '"');
@@ -23,11 +39,7 @@ function google_tag_snippet() {
   $data_layer = trim(drupal_json_encode($data_layer), '"');
   $compact = variable_get('google_tag_compact_tag', 1);
 
-  // Build script tags.
-  $noscript = <<<EOS
-<noscript><iframe src="//www.googletagmanager.com/ns.html?id=$container_id"
- height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-EOS;
+  // Build script snippet.
   $script = <<<EOS
 (function(w,d,s,l,i){
 
@@ -44,35 +56,55 @@ EOS;
 })(window,document,'script','$data_layer','$container_id');
 EOS;
   if ($compact) {
-    $noscript = str_replace("\n", '', $noscript);
     $script = str_replace(array("\n", '  '), '', $script);
   }
-  $noscript = <<<EOS
-<!-- Google Tag Manager -->
-$noscript
-<!-- End Google Tag Manager -->
-EOS;
-  // @todo Remove initial blank line.
+/*
   $script = <<<EOS
 <!-- Google Tag Manager -->
 $script
 <!-- End Google Tag Manager -->
 EOS;
-
-  // Allow other modules to alter the script.
-  drupal_alter('google_tag_snippet', $script, $noscript);
-  return [$script, $noscript];
+*/
+  return $script;
 }
 
 /**
- * Returns JavaScript snippet or adds items to data layer.
+ * Returns JavaScript noscript snippet.
+ *
+ * @return array
+ *   The noscript snippet.
+ */
+function _google_tag_noscript_snippet() {
+  // Gather data.
+  $container_id = variable_get('google_tag_container_id', '');
+  $container_id = trim(drupal_json_encode($container_id), '"');
+  $compact = variable_get('google_tag_compact_tag', 1);
+
+  // Build noscript snippet.
+  $noscript = <<<EOS
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=$container_id"
+ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+EOS;
+  if ($compact) {
+    $noscript = str_replace("\n", '', $noscript);
+  }
+/*
+  $noscript = <<<EOS
+<!-- Google Tag Manager -->
+$noscript
+<!-- End Google Tag Manager -->
+EOS;
+*/
+  return $noscript;
+}
+
+/**
+ * Returns JavaScript data layer snippet or adds items to data layer.
  *
  * @return string|NULL
- *   The JavaScript data layer snippet or NULL.
- *
- * @see google_tag_page_build()
+ *   The data layer snippet or NULL.
  */
-function google_tag_data_layer() {
+function _google_tag_data_layer_snippet() {
   // Gather data.
   $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
   $data_layer = trim(drupal_json_encode($data_layer), '"');
@@ -99,6 +131,7 @@ function google_tag_data_layer() {
       datalayer_add($classes);
     }
     else {
+      // Build data layer snippet.
       $script = "$data_layer = [" . drupal_json_encode($classes) . '];';
       return $script;
     }
