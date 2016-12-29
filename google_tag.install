@@ -8,6 +8,13 @@
  */
 
 /**
+ * Implements hook_install().
+ */
+function google_tag_install() {
+  _google_tag_snippet_directory_prepare();
+}
+
+/**
  * Implements hook_uninstall().
  */
 function google_tag_uninstall() {
@@ -34,6 +41,16 @@ function google_tag_requirements($phase) {
         'value' => $t('Not configured'),
       );
     }
+    if (!is_dir('public://js')) {
+      // The snippet directory does not exist or is not writable.
+      $path = variable_get('file_public_path', conf_path() . '/files') . '/js';
+      $description = $t('Does not exist or is not writable at @path', array('@path' => $path));
+      $requirements['google_tag_snippet_directory'] = array(
+        'title' => $t('Google Tag Manager snippet directory'),
+        'severity' => REQUIREMENT_WARNING,
+        'value' => $description,
+      );
+    }
   }
   return $requirements;
 }
@@ -51,4 +68,28 @@ function google_tag_update_7101(&$sandbox) {
   }
   variable_set('google_tag_role_list', $new_values);
   return t('Converted @count role IDs to role names in google_tag_role_list variable', array('@count' => count($old_values)));
+}
+
+/**
+ * Create directory for snippet files, if not present.
+ */
+function google_tag_update_7102(&$sandbox) {
+  $result = _google_tag_snippet_directory_prepare();
+  return t('The directory exists (or was created) and is writable: @result', array('@result' => $result ? 1 : 0));
+}
+
+/**
+ * Creates directory for snippet files, if not present.
+ *
+ * @return boolean
+ *   Whether the directory exists (or was created) and is writable.
+ */
+function _google_tag_snippet_directory_prepare() {
+  // Create directory if not present.
+  $directory = 'public://js';
+  $result = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+  if (!$result) {
+    drupal_set_message(t('An error occurred creating a directory for snippet files. Please try again or contact the site administrator if it persists.'));
+  }
+  return $result;
 }
