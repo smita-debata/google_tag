@@ -62,17 +62,22 @@ Drupal.behaviors.gtmInsertionSettings = {
     });
 
     $('fieldset#edit-status', context).drupalSetSummary(function (context) {
-      var $checkbox = $('input[name="google_tag_status_toggle"]:checked', context);
-      if ($checkbox.is(':checked')) {
+      var $radio = $('input[name="google_tag_status_toggle"]:checked', context);
+      if ($radio.val() == 'exclude listed') {
+        if (!$('textarea[name="google_tag_status_list"]', context).val()) {
+          return Drupal.t('All statuses');
+        }
+        else {
+          return Drupal.t('All statuses except listed statuses');
+        }
+      }
+      else {
         if (!$('textarea[name="google_tag_status_list"]', context).val()) {
           return Drupal.t('No statuses');
         }
         else {
-          return Drupal.t('Listed statuses');
+          return Drupal.t('Only listed statuses');
         }
-      }
-      else {
-        return Drupal.t('No statuses');
       }
     });
   }
