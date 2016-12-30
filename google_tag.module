@@ -35,65 +35,113 @@ function google_tag_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_page_build().
- *
- * Adds the snippet to the page array if the insertion conditions are met.
- *
- * @see drupal_render_page()
+ * Implements hook_page_attachments().
  */
-function google_tag_page_build(&$page) {
+function google_tag_page_attachments(&$attachments) {
   if (!google_tag_insert_snippet()) {
     return;
   }
 
-  // Call sequence:
-  // - drupal_render_page()
-  //   - hook_page_build()
-  //   - hook_page_alter()
-  //   - drupal_render()
-  // - drupal_render()
-  //   - callbacks in $elements['#theme_wrappers']
-  //     - hook_preprocess_html(): 'html' is the wrapper for page
-  //     - templates may add tags after body tag
-  //   - callbacks in $elements['#post_render']
-  //     - google_tag_page_process(): callback set here
+  $config = \Drupal::config('google_tag.settings');
+  $include_script_as_file = $config->get('include_file');
 
-  $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
-
-  // Add data_layer and script snippets to head (by default).
-  $include_script_as_file = variable_get('google_tag_include_file', 1);
+  // Add data_layer and script snippets to head (no longer by default).
+  $weight = 9;
   if ($include_script_as_file) {
-    $base_path = variable_get('file_public_path', conf_path() . '/files');
     foreach (['data_layer', 'script'] as $type) {
-      $path = "$base_path/js/google_tag.$type.js";
       // @todo Will it matter if file is empty?
-      drupal_add_js($path, array('group' => JS_LIBRARY * 2));
+      // @todo Check config for the whitelist and blacklist classes before adding.
+      $attachments['#attached']['html_head'][] = _google_tag_file_tag($type, $weight++);
     }
   }
   else {
-    $base_path = $wrapper->realpath();
     foreach (['data_layer', 'script'] as $type) {
-      $url = "$base_path/js/google_tag.$type.js";
-      $contents = file_get_contents($url);
-      // @see drupal_get_js()
+      // @see drupal_get_js() in 7.x core.
       // For inline JavaScript to validate as XHTML, all JavaScript containing
       // XHTML needs to be wrapped in CDATA.
-      if ($contents) {
-        drupal_add_js($contents, array('type' => 'inline', 'group' => JS_LIBRARY * 2));
-      }
+      $attachments['#attached']['html_head'][] = _google_tag_inline_tag($type, $weight++);
     }
+  }
+}
+
+/**
+ * Returns tag array for the snippet type.
+ *
+ * @param string $type
+ *   The snippet type.
+ * @param integer $weight
+ *   The weight of the item.
+ *
+ * @return array
+ *   The tag array.
+ */
+function _google_tag_file_tag($type, $weight) {
+  $uri = "public://js/google_tag.$type.js";
+  $url = file_url_transform_relative(file_create_url($uri));
+  $attachment = [
+    [
+      '#type' => 'html_tag',
+      '#tag' => 'script',
+      '#attributes' => ['type' => 'text/javascript', 'src' => $url],
+      '#weight' => $weight,
+    ],
+    "google_tag_{$type}_tag",
+  ];
+  return $attachment;
+}
+
+/**
+ * Returns tag array for the snippet type.
+ *
+ * @param string $type
+ *   The snippet type.
+ * @param integer $weight
+ *   The weight of the item.
+ *
+ * @return array
+ *   The tag array.
+ */
+function _google_tag_inline_tag($type, $weight) {
+  $uri = "public://js/google_tag.$type.js";
+  $url = \Drupal::service('file_system')->realpath($uri);
+  $contents = file_get_contents($url);
+  $attachment = $contents ? [
+    [
+      '#type' => 'html_tag',
+      '#tag' => 'script',
+      '#attributes' => ['type' => 'text/javascript'],
+      '#value' => $contents,
+      '#weight' => $weight,
+    ],
+    "google_tag_{$type}_tag",
+  ] : [];
+  return $attachment;
+}
+
+/**
+ * Implements hook_page_top().
+ */
+function google_tag_page_top(&$page) {
+  if (!google_tag_insert_snippet()) {
+    return;
   }
 
   // Add noscript snippet to page_top region.
-  $base_path = $wrapper->realpath();
-  $url = "$base_path/js/google_tag.noscript.js";
-  $noscript = file_get_contents($url);
+  $uri = 'public://js/google_tag.noscript.js';
+  $url = \Drupal::service('file_system')->realpath($uri);
+  $contents = file_get_contents($url);
 
-  // Note: for any theme that follows the pattern of core html.tpl.php in the
-  // system module (e.g. bootstrap theme), this does not place the snippet
-  // immediately after the body tag but rather after the 'skip-link' div.
-  $page['page_top']['google_tag'] = array(
-    '#markup' => $noscript,
+  // Note: depending on the theme, this may not place the snippet immediately
+  // after the body tag but should be close and it can be altered.
+
+  // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!theme.api.php/group/theme_render/8.2.x
+  // The markup is passed through \Drupal\Component\Utility\Xss::filterAdmin()
+  // which strips known vectors while allowing a permissive list of HTML tags
+  // that are not XSS vectors. (e.g., <script> and <style> are not allowed.)
+  // @todo Core is removing the 'style' attribute from the noscript snippet.
+  $page['google_tag_noscript_tag'] = array(
+    '#markup' => $contents,
+    '#allowed_tags' => ['noscript', 'iframe'],
     '#weight' => -10,
   );
 }
