@@ -93,3 +93,50 @@ function _google_tag_snippet_directory_prepare() {
   }
   return $result;
 }
+
+/**
+ * Convert toggle settings from integer to string.
+ */
+function google_tag_update_7103(&$sandbox) {
+  $types = ['path', 'role', 'status'];
+  $count = 0;
+
+  if (module_exists('variable_realm') && module_exists('variable_store')) {
+    // i18n_variable module depends on variable_realm, variable_store
+    // In the course of variable_realm_set() calls will be made to:
+    // - cache_clear_all('variables', 'cache_bootstrap');
+    // - cache_clear_all('variable:' . $realm . ':' . $key, 'cache_bootstrap');
+    // which will clear all relevant cache tables except for cache_variable.
+    // Clear the latter at end.
+    $realms = variable_realm_list();
+    foreach ($realms as $realm_name => $realm_title) {
+      $keys = variable_realm_keys($realm_name);
+      foreach ($keys as $key_name => $key_title) {
+        foreach ($types as $type) {
+          $name = "google_tag_{$type}_toggle";
+          $value = variable_realm_get($realm_name, $key_name, $name);
+          is_null($value) ? sdp("value is null") : '';
+          if (!is_null($value)) {
+            $new_value = $value ? GOOGLE_TAG_INCLUDE_LISTED : GOOGLE_TAG_EXCLUDE_LISTED;
+            variable_realm_set($realm_name, $key_name, $name, $new_value, FALSE);
+            $count++;
+          }
+        }
+      }
+    }
+    variable_cache_clear();
+  }
+  else {
+    global $conf;
+    foreach ($types as $type) {
+      $name = "google_tag_{$type}_toggle";
+      if (isset($conf[$name])) {
+        $new_value = $conf[$name] ? GOOGLE_TAG_INCLUDE_LISTED : GOOGLE_TAG_EXCLUDE_LISTED;
+        variable_set($name, $new_value);
+        $count++;
+      }
+    }
+  }
+
+  return t('Converted @count toggle settings', ['@count' => $count]);
+}
