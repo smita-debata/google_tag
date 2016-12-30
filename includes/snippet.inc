@@ -21,7 +21,7 @@ function google_tag_snippets() {
     'data_layer' => _google_tag_data_layer_snippet(),
   ];
   // Allow other modules to alter the snippets.
-  drupal_alter('google_tag_snippets', $snippets);
+  \Drupal::moduleHandler()->alter('google_tag_snippets', $snippets);
   return $snippets;
 }
 
@@ -33,11 +33,12 @@ function google_tag_snippets() {
  */
 function _google_tag_script_snippet() {
   // Gather data.
-  $container_id = variable_get('google_tag_container_id', '');
-  $container_id = trim(drupal_json_encode($container_id), '"');
-  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
-  $data_layer = trim(drupal_json_encode($data_layer), '"');
-  $compact = variable_get('google_tag_compact_snippet', 1);
+  $config = \Drupal::config('google_tag.settings');
+  $container_id = $config->get('container_id');
+  $container_id = trim(json_encode($container_id), '"');
+  $data_layer = $config->get('data_layer');
+  $data_layer = trim(json_encode($data_layer), '"');
+  $compact = $config->get('compact_snippet');
 
   // Build script snippet.
   $script = <<<EOS
@@ -76,14 +77,17 @@ EOS;
  */
 function _google_tag_noscript_snippet() {
   // Gather data.
-  $container_id = variable_get('google_tag_container_id', '');
-  $container_id = trim(drupal_json_encode($container_id), '"');
-  $compact = variable_get('google_tag_compact_snippet', 1);
+  $config = \Drupal::config('google_tag.settings');
+  $container_id = $config->get('container_id');
+  $container_id = trim(json_encode($container_id), '"');
+  $compact = $config->get('compact_snippet');
 
   // Build noscript snippet.
+  // @todo Core removes the 'style' attribute from the snippet; so omit it.
+  // style="display:none;visibility:hidden"
   $noscript = <<<EOS
 <noscript><iframe src="//www.googletagmanager.com/ns.html?id=$container_id"
- height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+ height="0" width="0"></iframe></noscript>
 EOS;
   if ($compact) {
     $noscript = str_replace("\n", '', $noscript);
@@ -106,10 +110,11 @@ EOS;
  */
 function _google_tag_data_layer_snippet() {
   // Gather data.
-  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
-  $data_layer = trim(drupal_json_encode($data_layer), '"');
-  $whitelist = variable_get('google_tag_whitelist_classes', GOOGLE_TAG_WHITELIST_CLASSES);
-  $blacklist = variable_get('google_tag_blacklist_classes', GOOGLE_TAG_BLACKLIST_CLASSES);
+  $config = \Drupal::config('google_tag.settings');
+  $data_layer = $config->get('data_layer');
+  $data_layer = trim(json_encode($data_layer), '"');
+  $whitelist = $config->get('whitelist_classes');
+  $blacklist = $config->get('blacklist_classes');
 
   $classes = [];
   $names = ['whitelist', 'blacklist'];
@@ -122,18 +127,8 @@ function _google_tag_data_layer_snippet() {
   }
 
   if ($classes) {
-    // Build data layer items.
-    if (module_exists('datalayer') && $data_layer == 'dataLayer') {
-      // Add classes to data layer.
-      // @todo How to or can we set the name of the data layer?
-      // This is an open issue on datalayer project; after it is implemented in
-      // datalayer then remove second condition on if block.
-      datalayer_add($classes);
-    }
-    else {
-      // Build data layer snippet.
-      $script = "var $data_layer = [" . drupal_json_encode($classes) . '];';
-      return $script;
-    }
+    // Build data layer snippet.
+    $script = "var $data_layer = [" . json_encode($classes) . '];';
+    return $script;
   }
 }
