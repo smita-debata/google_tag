@@ -11,6 +11,16 @@
  */
 
 /**
+ * Default for matching all items except listed.
+ */
+const GOOGLE_TAG_EXCLUDE_LISTED = 'exclude listed';
+
+/**
+ * Default for matching only listed items.
+ */
+const GOOGLE_TAG_INCLUDE_LISTED = 'include listed';
+
+/**
  * Default list of relative paths.
  */
 define('GOOGLE_TAG_PATHS', "admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*/delete\nuser/*/edit*\nuser/*/cancel*");
@@ -149,8 +159,6 @@ function google_tag_page_build(&$page) {
  *   TRUE if the conditions are met; FALSE otherwise.
  */
 function google_tag_insert_snippet() {
-  global $user;
-
   $id = variable_get('google_tag_container_id', '');
 
   if (empty($id)) {
@@ -158,7 +166,7 @@ function google_tag_insert_snippet() {
     return FALSE;
   }
   $satisfied = TRUE;
-  if (!_google_tag_status_check() || !_google_tag_path_check() || !_google_tag_role_check($user)) {
+  if (!_google_tag_status_check() || !_google_tag_path_check() || !_google_tag_role_check()) {
     // Omit snippet if any condition is not met.
     $satisfied = FALSE;
   }
@@ -177,17 +185,17 @@ function _google_tag_status_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $toggle = variable_get('google_tag_status_toggle', 0);
+    $toggle = variable_get('google_tag_status_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
     $statuses = variable_get('google_tag_status_list', GOOGLE_TAG_STATUSES);
 
     if (empty($statuses)) {
-      $satisfied = !$toggle;
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
     else {
       // Get the HTTP response status.
       $status = drupal_get_http_header('status');
       $satisfied = strpos($statuses, $status) !== FALSE;
-      $satisfied = !($toggle xor $satisfied);
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
   return $satisfied;
@@ -203,15 +211,11 @@ function _google_tag_path_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $toggle = variable_get('google_tag_path_toggle', 0);
+    $toggle = variable_get('google_tag_path_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
     $paths = variable_get('google_tag_path_list', GOOGLE_TAG_PATHS);
 
-    // Meaning of $toggle
-    // - 0: all paths except listed paths
-    // - 1: only the listed paths
-
     if (empty($paths)) {
-      $satisfied = !$toggle;
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
     else {
       // @todo Are not some paths case sensitive???
@@ -223,7 +227,7 @@ function _google_tag_path_check() {
       if ($path != $_GET['q']) {
         $satisfied = $satisfied || drupal_match_path($_GET['q'], $paths);
       }
-      $satisfied = !($toggle xor $satisfied);
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
   return $satisfied;
@@ -232,38 +236,26 @@ function _google_tag_path_check() {
 /**
  * Returns state of snippet insertion based on user roles.
  *
- * @param object $account
- *   A user object containing an array of roles to check.
- *
  * @return boolean
  *   TRUE if the role conditions are met; FALSE otherwise.
  */
-function _google_tag_role_check($account) {
+function _google_tag_role_check() {
+  global $user;
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $toggle = variable_get('google_tag_role_toggle', 0);
+    $toggle = variable_get('google_tag_role_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
     $roles = variable_get('google_tag_role_list', array());
     $roles = array_filter($roles);
 
-    // Meaning of $toggle
-    // - 0: all roles except listed roles
-    // - 1: only the listed roles
-
     if (empty($roles)) {
-      $satisfied = !$toggle;
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
     else {
       $satisfied = FALSE;
       // Check user roles against listed roles.
-      foreach ($account->roles as $rid => $role_name) {
-        if (isset($roles[$role_name]) && $roles[$role_name] == $role_name) {
-          // User is a member of a listed role.
-          $satisfied = TRUE;
-          break;
-        }
-      }
-      $satisfied = !($toggle xor $satisfied);
+      $satisfied = (boolean) array_intersect($roles, $user->roles);
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
   return $satisfied;

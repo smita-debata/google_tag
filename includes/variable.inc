@@ -84,10 +84,10 @@ function _google_tag_variable_info_path($options) {
     'type' => 'select',
     'title' => t('Add snippet on specific paths', array(), $options),
     'options' => array(
-      t('All paths except the listed paths', array(), $options),
-      t('Only the listed paths', array(), $options),
+      GOOGLE_TAG_EXCLUDE_LISTED => t('All paths except the listed paths', array(), $options),
+      GOOGLE_TAG_INCLUDE_LISTED => t('Only the listed paths', array(), $options),
     ),
-    'default' => 0,
+    'default' => GOOGLE_TAG_EXCLUDE_LISTED,
   );
 
   $variables['google_tag_path_list'] = array(
@@ -117,10 +117,10 @@ function _google_tag_variable_info_role($options) {
     'type' => 'select',
     'title' => t('Add snippet for specific roles', array(), $options),
     'options' => array(
-      t('All roles except the selected roles', array(), $options),
-      t('Only the selected roles', array(), $options),
+      GOOGLE_TAG_EXCLUDE_LISTED => t('All roles except the selected roles', array(), $options),
+      GOOGLE_TAG_INCLUDE_LISTED => t('Only the selected roles', array(), $options),
     ),
-    'default' => 0,
+    'default' => GOOGLE_TAG_EXCLUDE_LISTED,
   );
 
   $variables['google_tag_role_list'] = array(
@@ -146,10 +146,10 @@ function _google_tag_variable_info_status($options) {
     'type' => 'select',
     'title' => t('Add snippet for specific statuses', array(), $options),
     'options' => array(
-      t('All statuses except the listed statuses', array(), $options),
-      t('Only the listed statuses', array(), $options),
+      GOOGLE_TAG_EXCLUDE_LISTED => t('All statuses except the listed statuses', array(), $options),
+      GOOGLE_TAG_INCLUDE_LISTED => t('Only the listed statuses', array(), $options),
     ),
-    'default' => 0,
+    'default' => GOOGLE_TAG_EXCLUDE_LISTED,
   );
 
   $variables['google_tag_status_list'] = array(

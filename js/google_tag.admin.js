@@ -19,7 +19,7 @@ Drupal.behaviors.gtmInsertionSettings = {
 
     $('fieldset#edit-path', context).drupalSetSummary(function (context) {
       var $radio = $('input[name="google_tag_path_toggle"]:checked', context);
-      if ($radio.val() == 0) {
+      if ($radio.val() == 'exclude listed') {
         if (!$('textarea[name="google_tag_path_list"]', context).val()) {
           return Drupal.t('All paths');
         }
@@ -43,7 +43,7 @@ Drupal.behaviors.gtmInsertionSettings = {
         vals.push($.trim($(this).next('label').text()));
       });
       var $radio = $('input[name="google_tag_role_toggle"]:checked', context);
-      if ($radio.val() == 0) {
+      if ($radio.val() == 'exclude listed') {
         if (!vals.length) {
           return Drupal.t('All roles');
         }
