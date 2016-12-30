@@ -34,30 +34,6 @@ function google_tag_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_variable_group_info().
- */
-function google_tag_variable_group_info() {
-  module_load_include('inc', 'google_tag', 'includes/variable');
-  return _google_tag_variable_group_info();
-}
-
-/**
- * Implements hook_variable_info().
- */
-function google_tag_variable_info($options) {
-  module_load_include('inc', 'google_tag', 'includes/variable');
-  return _google_tag_variable_info($options);
-}
-
-/**
- * Element validation handler for google_tag_container_id.
- */
-function google_tag_validate_container_id($variable, $options, $element, $form, &$form_state) {
-  module_load_include('inc', 'google_tag', 'includes/variable');
-  return _google_tag_validate_container_id($variable, $options, $element, $form, $form_state);
-}
-
-/**
  * Implements hook_page_build().
  *
  * Adds the snippet to the page array if the insertion conditions are met.

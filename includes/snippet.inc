@@ -114,7 +114,7 @@ function _google_tag_data_layer_snippet() {
   $classes = [];
   $names = ['whitelist', 'blacklist'];
   foreach ($names as $name) {
-    google_tag_text_clean($$name, 'array');
+    $$name = explode("\n", $$name);
     if (empty($$name)) {
       continue;
     }
