@@ -10,6 +10,7 @@
  * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -98,48 +99,61 @@ function google_tag_page_build(&$page) {
 }
 
 /**
- * Returns the state of snippet insertion on the current page response.
+ * Determines whether to insert the snippet on the response.
  *
  * @return boolean
  *   TRUE if the conditions are met; FALSE otherwise.
  */
 function google_tag_insert_snippet() {
-  $id = variable_get('google_tag_container_id', '');
+  static $satisfied;
 
-  if (empty($id)) {
-    // No container ID.
-    return FALSE;
+  if (!isset($satisfied)) {
+    $config = \Drupal::config('google_tag.settings');
+    $id = $config->get('container_id');
+
+    if (empty($id)) {
+      // No container ID.
+      return FALSE;
+    }
+
+    $satisfied = TRUE;
+    if (!_google_tag_status_check() || !_google_tag_path_check() || !_google_tag_role_check()) {
+      // Omit snippet if any condition is not met.
+      $satisfied = FALSE;
+    }
+
+    // Allow other modules to alter the insertion criteria.
+    \Drupal::moduleHandler()->alter('google_tag_insert', $satisfied);
   }
-  $satisfied = TRUE;
-  if (!_google_tag_status_check() || !_google_tag_path_check() || !_google_tag_role_check()) {
-    // Omit snippet if any condition is not met.
-    $satisfied = FALSE;
-  }
-  // Allow other modules to alter the insertion criteria.
-  drupal_alter('google_tag_insert', $satisfied);
   return $satisfied;
 }
 
 /**
- * Returns state of snippet insertion based on HTTP response status code.
+ * Determines whether to insert the snippet based on status code settings.
  *
  * @return boolean
  *   TRUE if the status conditions are met; FALSE otherwise.
  */
 function _google_tag_status_check() {
+  // @todo Response object does not exist at this point; the response status
+  //   code can not be had from it. Does the routing object include equivalent
+  //   property? Defer.
+  return TRUE;
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $toggle = variable_get('google_tag_status_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
-    $statuses = variable_get('google_tag_status_list', GOOGLE_TAG_STATUSES);
+    $config = \Drupal::config('google_tag.settings');
+    $toggle = $config->get('status_toggle');
+    $statuses = $config->get('status_list');
 
     if (empty($statuses)) {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
     else {
       // Get the HTTP response status.
-      $status = drupal_get_http_header('status');
-      $satisfied = strpos($statuses, $status) !== FALSE;
+      $response = \Drupal::service('response');
+      $status = $response->getStatusCode();
+      $satisfied = strpos($statuses, (string) $status) !== FALSE;
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
@@ -147,7 +161,7 @@ function _google_tag_status_check() {
 }
 
 /**
- * Returns state of snippet insertion based on HTTP request URI.
+ * Determines whether to insert the snippet based on the path settings.
  *
  * @return boolean
  *   TRUE if the path conditions are met; FALSE otherwise.
@@ -156,22 +170,23 @@ function _google_tag_path_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $toggle = variable_get('google_tag_path_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
-    $paths = variable_get('google_tag_path_list', GOOGLE_TAG_PATHS);
+    $config = \Drupal::config('google_tag.settings');
+    $toggle = $config->get('path_toggle');
+    $paths = Unicode::strtolower($config->get('path_list'));
 
     if (empty($paths)) {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
     else {
+      $request = \Drupal::request();
+      $current_path = \Drupal::service('path.current');
+      $alias_manager = \Drupal::service('path.alias_manager');
+      $path_matcher = \Drupal::service('path.matcher');
       // @todo Are not some paths case sensitive???
-      // Convert the paths to lowercase before comparison.
-      $paths = drupal_strtolower($paths);
-      $path = drupal_strtolower(drupal_get_path_alias($_GET['q']));
-      $satisfied = drupal_match_path($path, $paths);
-      // @todo Lowercase $_GET['q'] before comparison? What is purpose of this check?
-      if ($path != $_GET['q']) {
-        $satisfied = $satisfied || drupal_match_path($_GET['q'], $paths);
-      }
+      // Compare the lowercase path alias (if any) and internal path.
+      $path = rtrim($current_path->getPath($request), '/');
+      $path_alias = Unicode::strtolower($alias_manager->getAliasByPath($path));
+      $satisfied = $path_matcher->matchPath($path_alias, $paths) || (($path != $path_alias) && $path_matcher->matchPath($path, $paths));
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
@@ -179,18 +194,18 @@ function _google_tag_path_check() {
 }
 
 /**
- * Returns state of snippet insertion based on user roles.
+ * Determines whether to insert the snippet based on the user role settings.
  *
  * @return boolean
  *   TRUE if the role conditions are met; FALSE otherwise.
  */
 function _google_tag_role_check() {
-  global $user;
   static $satisfied;
 
   if (!isset($satisfied)) {
-    $toggle = variable_get('google_tag_role_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
-    $roles = variable_get('google_tag_role_list', array());
+    $config = \Drupal::config('google_tag.settings');
+    $toggle = $config->get('role_toggle');
+    $roles = $config->get('role_list');
     $roles = array_filter($roles);
 
     if (empty($roles)) {
@@ -199,7 +214,7 @@ function _google_tag_role_check() {
     else {
       $satisfied = FALSE;
       // Check user roles against listed roles.
-      $satisfied = (boolean) array_intersect($roles, $user->roles);
+      $satisfied = (boolean) array_intersect($roles, \Drupal::currentUser()->getRoles());
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
