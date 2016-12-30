@@ -10,6 +10,8 @@
  * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
+use Drupal\Core\Routing\RouteMatchInterface;
+
 /**
  * Default for matching all items except listed.
  */
@@ -21,47 +23,14 @@ const GOOGLE_TAG_EXCLUDE_LISTED = 'exclude listed';
 const GOOGLE_TAG_INCLUDE_LISTED = 'include listed';
 
 /**
- * Default list of relative paths.
- */
-define('GOOGLE_TAG_PATHS', "admin*\nbatch*\nnode/add*\nnode/*/edit\nnode/*/delete\nuser/*/edit*\nuser/*/cancel*");
-
-/**
- * Default list of HTTP response statuses that override path conditions.
- */
-define('GOOGLE_TAG_STATUSES', "403 Forbidden\n404 Not Found");
-
-/**
- * Default list of tag classes to allow.
- */
-define('GOOGLE_TAG_WHITELIST_CLASSES', "google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes");
-
-/**
- * Default list of tag classes to forbid.
- */
-define('GOOGLE_TAG_BLACKLIST_CLASSES', "customScripts\ncustomPixels");
-
-/**
  * Implements hook_help().
  */
-function google_tag_help($path, $arg) {
-  module_load_include('inc', 'google_tag', 'includes/info');
-  return _google_tag_help($path, $arg);
-}
-
-/**
- * Implements hook_menu().
- */
-function google_tag_menu() {
-  module_load_include('inc', 'google_tag', 'includes/info');
-  return _google_tag_menu();
-}
-
-/**
- * Implements hook_permission().
- */
-function google_tag_permission() {
-  module_load_include('inc', 'google_tag', 'includes/info');
-  return _google_tag_permission();
+function google_tag_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.google_tag':
+    case 'google_tag.settings_form':
+      return t('<a href=":url">Google Tag Manager</a> is a free service (registration required) to manage the insertion of tags for capturing website analytics.', array(':url' => 'https://tagmanager.google.com/'));
+  }
 }
 
 /**
