@@ -178,7 +178,7 @@ function _google_tag_variable_info_advanced($options) {
   $markup = t('If the default data layer name is used, then enable the <a href="@path2">data layer</a> module to manage the insertion of tags, triggers, and variables in one place. If a different module is used for this purpose, there may be some contamination and override of values from this and the other module.', $args);
 
   // Build variables.
-  $variables['google_tag_compact_tag'] = array(
+  $variables['google_tag_compact_snippet'] = array(
     'type' => 'boolean',
     'title' => t('Compact the JavaScript snippet', array(), $options),
     'description' => t('If checked, then the JavaScript snippet will be compacted to remove unnecessary whitespace. This is <strong>recommended on production sites</strong>. Leave unchecked to output a snippet that can be examined using a JavaScript debugger in the browser.', array(), $options),

@@ -37,7 +37,7 @@ function _google_tag_script_snippet() {
   $container_id = trim(drupal_json_encode($container_id), '"');
   $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
   $data_layer = trim(drupal_json_encode($data_layer), '"');
-  $compact = variable_get('google_tag_compact_tag', 1);
+  $compact = variable_get('google_tag_compact_snippet', 1);
 
   // Build script snippet.
   $script = <<<EOS
@@ -78,7 +78,7 @@ function _google_tag_noscript_snippet() {
   // Gather data.
   $container_id = variable_get('google_tag_container_id', '');
   $container_id = trim(drupal_json_encode($container_id), '"');
-  $compact = variable_get('google_tag_compact_tag', 1);
+  $compact = variable_get('google_tag_compact_snippet', 1);
 
   // Build noscript snippet.
   $noscript = <<<EOS
