@@ -183,10 +183,6 @@ function google_tag_insert_snippet() {
  *   TRUE if the status conditions are met; FALSE otherwise.
  */
 function _google_tag_status_check() {
-  // @todo Response object does not exist at this point; the response status
-  //   code can not be had from it. Does the routing object include equivalent
-  //   property? Defer.
-  return TRUE;
   static $satisfied;
 
   if (!isset($satisfied)) {
@@ -199,8 +195,11 @@ function _google_tag_status_check() {
     }
     else {
       // Get the HTTP response status.
-      $response = \Drupal::service('response');
-      $status = $response->getStatusCode();
+      $request = \Drupal::request();
+      $status = '200';
+      if ($exception = $request->attributes->get('exception')) {
+        $status = $exception->getStatusCode();
+      }
       $satisfied = strpos($statuses, (string) $status) !== FALSE;
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
