@@ -164,14 +164,14 @@ function google_tag_update_7104(&$sandbox) {
   $tables = ['variable'];
   if (module_exists('variable_realm') && module_exists('variable_store')) {
     $tables[] = 'variable_store';
+    $args = [
+      ':old' => 's:22:"google_tag_compact_tag"',
+      ':new' => 's:26:"google_tag_compact_snippet"',
+    ];
     $count += db_update('variable')
-      ->expression('value', 'REPLACE(value, \'s:22:\"google_tag_compact_tag\"\', \'s:26:\"google_tag_compact_snippet\"\')')
+      ->expression('value', 'REPLACE(value, :old, :new)', $args)
       ->condition('name', 'variable_realm_list_language')
       ->execute();
-    $query = db_update('variable')
-      ->expression('value', 'REPLACE(value, \'s:22:\"google_tag_compact_tag\"\', \'s:26:\"google_tag_compact_snippet\"\')')
-      ->condition('name', 'variable_realm_list_language')
-      ->__toString();
   }
 
   foreach ($tables as $table) {
@@ -179,10 +179,6 @@ function google_tag_update_7104(&$sandbox) {
       ->fields(['name' => 'google_tag_compact_snippet'])
       ->condition('name', 'google_tag_compact_tag')
       ->execute();
-    $query = db_update($table)
-      ->fields(['name' => 'google_tag_compact_snippet'])
-      ->condition('name', 'google_tag_compact_tag')
-      ->__toString();
   }
 
   cache_clear_all('variables', 'cache_bootstrap');
