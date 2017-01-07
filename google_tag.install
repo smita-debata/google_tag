@@ -113,7 +113,7 @@ function _google_tag_snippet_directory_prepare() {
  * Convert toggle settings from integer to string.
  */
 function google_tag_update_7103(&$sandbox) {
-  $types = ['path', 'role', 'status'];
+  $types = array('path', 'role', 'status');
   $count = 0;
 
   if (module_exists('variable_realm') && module_exists('variable_store')) {
@@ -161,13 +161,13 @@ function google_tag_update_7103(&$sandbox) {
  */
 function google_tag_update_7104(&$sandbox) {
   $count = 0;
-  $tables = ['variable'];
+  $tables = array('variable');
   if (module_exists('variable_realm') && module_exists('variable_store')) {
     $tables[] = 'variable_store';
-    $args = [
+    $args = array(
       ':old' => 's:22:"google_tag_compact_tag"',
       ':new' => 's:26:"google_tag_compact_snippet"',
-    ];
+    );
     $count += db_update('variable')
       ->expression('value', 'REPLACE(value, :old, :new)', $args)
       ->condition('name', 'variable_realm_list_language')

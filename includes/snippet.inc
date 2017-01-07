@@ -15,11 +15,11 @@
  *   data_layer.
  */
 function google_tag_snippets() {
-  $snippets = [
+  $snippets = array(
     'script' => _google_tag_script_snippet(),
     'noscript' => _google_tag_noscript_snippet(),
     'data_layer' => _google_tag_data_layer_snippet(),
-  ];
+  );
   // Allow other modules to alter the snippets.
   drupal_alter('google_tag_snippets', $snippets);
   return $snippets;
@@ -111,8 +111,8 @@ function _google_tag_data_layer_snippet() {
   $whitelist = variable_get('google_tag_whitelist_classes', GOOGLE_TAG_WHITELIST_CLASSES);
   $blacklist = variable_get('google_tag_blacklist_classes', GOOGLE_TAG_BLACKLIST_CLASSES);
 
-  $classes = [];
-  $names = ['whitelist', 'blacklist'];
+  $classes = array();
+  $names = array('whitelist', 'blacklist');
   foreach ($names as $name) {
     google_tag_text_clean($$name, 'array');
     if (empty($$name)) {

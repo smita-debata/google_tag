@@ -26,15 +26,15 @@ function _google_tag_variable_group_info() {
  */
 function _google_tag_variable_info($options) {
   // Gather data.
-  $groups = ['general', 'path', 'role', 'status', 'advanced'];
-  $common = [
+  $groups = array('general', 'path', 'role', 'status', 'advanced');
+  $common = array(
     'group' => 'google_tag',
     'localize' => TRUE,
     'multidomain' => TRUE,
-  ];
+  );
 
   // Build variables.
-  $variables = [];
+  $variables = array();
   foreach ($groups as $group) {
     $function = "_google_tag_variable_info_$group";
     $variables += $function($options);

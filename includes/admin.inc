@@ -26,13 +26,13 @@ function google_tag_settings_form($form, &$form_state) {
   $description .= t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
   $description .= t(' On this tab, specify the path condition.');
 
-  $groups = [
-    'general' => ['title' => t('General'), 'collapse' => FALSE],
-    'path' => ['title' => t('Page paths'), 'description' => $description],
-    'role' => ['title' => t('User roles'), 'description' => t('On this tab, specify the user role condition.')],
-    'status' => ['title' => t('Response statuses'), 'description' => t('On this tab, specify the page response status condition.')],
-    'advanced' => ['title' => t('Advanced')],
-  ];
+  $groups = array(
+    'general' => array('title' => t('General'), 'collapse' => FALSE),
+    'path' => array('title' => t('Page paths'), 'description' => $description),
+    'role' => array('title' => t('User roles'), 'description' => t('On this tab, specify the user role condition.')),
+    'status' => array('title' => t('Response statuses'), 'description' => t('On this tab, specify the page response status condition.')),
+    'advanced' => array('title' => t('Advanced')),
+  );
 
   // Build form elements.
   $form['tabs'] = array(
@@ -59,7 +59,7 @@ function google_tag_fieldset($group, $items) {
   // Gather data.
   $function = "_google_tag_variable_info_$group";
   $variables = $function([]);
-  $items += ['description' => '', 'collapse' => TRUE];
+  $items += array('description' => '', 'collapse' => TRUE);
 
   // Build form elements.
   $fieldset = array(
@@ -85,16 +85,16 @@ function google_tag_fieldset($group, $items) {
  *   Associative array of form elements.
  */
 function google_tag_form_elements($variables) {
-  static $keys = [
+  static $keys = array(
     'type' => '#type',
     'title' => '#title',
     'description' => '#description',
     'options' => '#options',
     'default' => '#default_value',
-  ];
-  $elements = [];
+  );
+  $elements = array();
   foreach ($variables as $name => $variable) {
-    $element = [];
+    $element = array();
     foreach ($keys as $key => $property) {
       if (isset($variable[$key])) {
         $element[$property] = $variable[$key];
@@ -119,13 +119,13 @@ function google_tag_form_elements($variables) {
  *   Form element type.
  */
 function google_tag_form_element_type($type) {
-  static $keys = [
+  static $keys = array(
     'string' => 'textfield',
     'select' => 'radios',
     'text' => 'textarea',
     'options' => 'checkboxes',
     'boolean' => 'checkbox',
-  ];
+  );
   return isset($keys[$type]) ? $keys[$type] : 'textfield';
 }
 
