@@ -96,7 +96,7 @@ function google_tag_update_7102(&$sandbox) {
 /**
  * Creates directory for snippet files, if not present.
  *
- * @return boolean
+ * @return bool
  *   Whether the directory exists (or was created) and is writable.
  */
 function _google_tag_snippet_directory_prepare() {

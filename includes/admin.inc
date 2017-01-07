@@ -218,7 +218,7 @@ function google_tag_text_clean(&$text, $format = 'string') {
 /**
  * Verifies presence of dataLayer module and compares name of data layer.
  *
- * @return boolean|NULL
+ * @return bool|NULL
  *   Whether data layer name is incompatible with dataLayer module, if present.
  */
 function _google_tag_verify_data_layer($value) {

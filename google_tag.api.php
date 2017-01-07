@@ -18,7 +18,7 @@
  * on custom conditions that cannot be defined by the status, path, and role
  * conditions provided by this module.
  *
- * @param boolean $satisfied
+ * @param bool $satisfied
  *   The snippet insertion state.
  */
 function hook_google_tag_insert_alter(&$satisfied) {

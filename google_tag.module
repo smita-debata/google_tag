@@ -155,7 +155,7 @@ function google_tag_page_build(&$page) {
 /**
  * Returns the state of snippet insertion on the current page response.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the conditions are met; FALSE otherwise.
  */
 function google_tag_insert_snippet() {
@@ -178,7 +178,7 @@ function google_tag_insert_snippet() {
 /**
  * Returns state of snippet insertion based on HTTP response status code.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the status conditions are met; FALSE otherwise.
  */
 function _google_tag_status_check() {
@@ -198,13 +198,14 @@ function _google_tag_status_check() {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
+sdm('status check ' . $satisfied);
   return $satisfied;
 }
 
 /**
  * Returns state of snippet insertion based on HTTP request URI.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the path conditions are met; FALSE otherwise.
  */
 function _google_tag_path_check() {
@@ -230,13 +231,14 @@ function _google_tag_path_check() {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
+sdm('path check ' . $satisfied);
   return $satisfied;
 }
 
 /**
  * Returns state of snippet insertion based on user roles.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the role conditions are met; FALSE otherwise.
  */
 function _google_tag_role_check() {
@@ -254,7 +256,7 @@ function _google_tag_role_check() {
     else {
       $satisfied = FALSE;
       // Check user roles against listed roles.
-      $satisfied = (boolean) array_intersect($roles, $user->roles);
+      $satisfied = (bool) array_intersect($roles, $user->roles);
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
