@@ -8,13 +8,6 @@
  */
 
 /**
- * Implements hook_install().
- */
-function google_tag_install() {
-  _google_tag_snippet_directory_prepare();
-}
-
-/**
  * Implements hook_uninstall().
  */
 function google_tag_uninstall() {
@@ -41,14 +34,36 @@ function google_tag_requirements($phase) {
         'value' => $t('Not configured'),
       );
     }
-    if (!is_dir('public://js')) {
+  }
+  if ($phase == 'runtime' || $phase == 'install') {
+    // Adapted from system_requirements().
+    $directory = variable_get('file_public_path', conf_path() . '/files') . '/js';
+    if (!is_dir($directory) || !is_writable($directory)) {
+      file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+    }
+    $is_writable = is_writable($directory);
+    $is_directory = is_dir($directory);
+    if (!$is_writable || !$is_directory) {
       // The snippet directory does not exist or is not writable.
-      $path = variable_get('file_public_path', conf_path() . '/files') . '/js';
-      $description = $t('Does not exist or is not writable at @path', array('@path' => $path));
+      if (!$is_directory) {
+        $error = $t('The directory %directory does not exist.', array('%directory' => $directory));
+        $description = $t('An automated attempt to create the directory failed, possibly due to a permissions problem. Create the directory and make it writable.');
+        $value = $t('Does not exist');
+      }
+      else {
+        $error = $t('The directory %directory is not writable.', array('%directory' => $directory));
+        $description = $t('An automated attempt to make the directory writable failed, possibly due to a permissions problem. Make the directory writable.');
+        $value = $t('Not writable');
+      }
+      if ($phase == 'install') {
+        $description .= $t(' For more information, see INSTALL.txt or the <a href=":handbook_url">online handbook</a>.', array(':handbook_url' => 'https://www.drupal.org/server-permissions'));
+        $value = '';
+      }
       $requirements['google_tag_snippet_directory'] = array(
         'title' => $t('Google Tag Manager snippet directory'),
-        'severity' => REQUIREMENT_WARNING,
-        'value' => $description,
+        'description' => "$error $description",
+        'severity' => REQUIREMENT_ERROR,
+        'value' => $value,
       );
     }
   }
