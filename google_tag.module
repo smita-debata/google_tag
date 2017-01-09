@@ -198,7 +198,6 @@ function _google_tag_status_check() {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
-sdm('status check ' . $satisfied);
   return $satisfied;
 }
 
@@ -231,7 +230,6 @@ function _google_tag_path_check() {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }
-sdm('path check ' . $satisfied);
   return $satisfied;
 }
 
