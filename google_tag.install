@@ -182,7 +182,9 @@ function google_tag_update_7104(&$sandbox) {
 
   cache_clear_all('variables', 'cache_bootstrap');
   cache_clear_all('variable:', 'cache_bootstrap', TRUE);
-  variable_cache_clear();
+  if (module_exists('variable')) {
+    variable_cache_clear();
+  }
 
   return t('Converted @count occurrences of setting', ['@count' => $count]);
 }
