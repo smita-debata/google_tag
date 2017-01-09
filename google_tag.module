@@ -30,7 +30,7 @@ function google_tag_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.google_tag':
     case 'google_tag.settings_form':
-      return t('<a href=":url">Google Tag Manager</a> is a free service (registration required) to manage the insertion of tags for capturing website analytics.', array(':url' => 'https://tagmanager.google.com/'));
+      return t('<a href=":url">Google Tag Manager</a> is a free service (registration required) to manage the insertion of tags for capturing website analytics.', [':url' => 'https://tagmanager.google.com/']);
   }
 }
 
@@ -139,11 +139,11 @@ function google_tag_page_top(&$page) {
   // which strips known vectors while allowing a permissive list of HTML tags
   // that are not XSS vectors. (e.g., <script> and <style> are not allowed.)
   // @todo Core is removing the 'style' attribute from the noscript snippet.
-  $page['google_tag_noscript_tag'] = array(
+  $page['google_tag_noscript_tag'] = [
     '#markup' => $contents,
     '#allowed_tags' => ['noscript', 'iframe'],
     '#weight' => -10,
-  );
+  ];
 }
 
 /**
@@ -261,7 +261,7 @@ function _google_tag_role_check() {
     else {
       $satisfied = FALSE;
       // Check user roles against listed roles.
-      $satisfied = (boolean) array_intersect($roles, \Drupal::currentUser()->getRoles());
+      $satisfied = (bool) array_intersect($roles, \Drupal::currentUser()->getRoles());
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
   }

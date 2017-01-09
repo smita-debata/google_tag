@@ -88,10 +88,16 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('path_toggle'),
     ];
 
+    $args = [
+      '%blog' => 'blog',
+      '%blog-wildcard' => 'blog/*',
+      '%front' => '<front>',
+    ];
+
     $form['path']['path_list'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Listed paths'),
-      '#description' => $this->t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', ['%blog' => 'blog', '%blog-wildcard' => 'blog/*', '%front' => '<front>']),
+      '#description' => $this->t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args),
       '#default_value' => $config->get('path_list'),
       '#rows' => 10,
     ];
