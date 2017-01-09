@@ -195,6 +195,7 @@ function _google_tag_snippets_save() {
   }
   else {
     drupal_set_message(t('Created three snippet files based on configuration.'));
+    drupal_clear_js_cache();
   }
 }
 

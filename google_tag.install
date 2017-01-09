@@ -14,6 +14,7 @@ function google_tag_uninstall() {
   db_delete('variable')
     ->condition('name', db_like('google_tag_') . '%', 'LIKE')
     ->execute();
+  drupal_clear_js_cache();
 }
 
 /**
