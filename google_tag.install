@@ -8,6 +8,15 @@
  */
 
 /**
+ * Implements hook_install().
+ */
+function google_tag_install() {
+  // Create snippet files using default setttings (to avoid PHP warnings).
+  module_load_include('inc', 'google_tag', 'includes/admin');
+  return _google_tag_snippets_save();
+}
+
+/**
  * Implements hook_uninstall().
  */
 function google_tag_uninstall() {
