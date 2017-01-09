@@ -105,7 +105,7 @@ EOS;
 /**
  * Returns JavaScript data layer snippet or adds items to data layer.
  *
- * @return string|NULL
+ * @return string|null
  *   The data layer snippet or NULL.
  */
 function _google_tag_data_layer_snippet() {

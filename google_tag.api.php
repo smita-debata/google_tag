@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Documents hooks provided by this module.
@@ -12,13 +13,13 @@
  */
 
 /**
- * Alters the state of snippet insertion on the current page response.
+ * Alter the state of snippet insertion on the current page response.
  *
  * This hook allows other modules to alter the state of snippet insertion based
  * on custom conditions that cannot be defined by the status, path, and role
  * conditions provided by this module.
  *
- * @param boolean $satisfied
+ * @param bool $satisfied
  *   The snippet insertion state.
  */
 function hook_google_tag_insert_alter(&$satisfied) {
@@ -27,7 +28,7 @@ function hook_google_tag_insert_alter(&$satisfied) {
 }
 
 /**
- * Alters the snippets to be inserted on a page response.
+ * Alter the snippets to be inserted on a page response.
  *
  * This hook allows other modules to alter the snippets to be inserted based on
  * custom settings not defined by this module.
