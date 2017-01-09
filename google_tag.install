@@ -25,6 +25,8 @@ function google_tag_requirements($phase) {
         'value' => t('Not configured'),
       );
     }
+  }
+  if ($phase == 'runtime' || $phase == 'install') {
     // Adapted from system_requirements().
     $directory = PublicStream::basePath() . '/js';
     if (!is_dir($directory) || !is_writable($directory)) {
