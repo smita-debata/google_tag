@@ -128,7 +128,7 @@ function google_tag_page_build(&$page) {
     $base_path = $wrapper->realpath();
     foreach (array('data_layer', 'script') as $type) {
       $url = "$base_path/js/google_tag.$type.js";
-      $contents = file_get_contents($url);
+      $contents = @file_get_contents($url);
       // @see drupal_get_js()
       // For inline JavaScript to validate as XHTML, all JavaScript containing
       // XHTML needs to be wrapped in CDATA.
@@ -141,15 +141,18 @@ function google_tag_page_build(&$page) {
   // Add noscript snippet to page_top region.
   $base_path = $wrapper->realpath();
   $url = "$base_path/js/google_tag.noscript.js";
-  $noscript = file_get_contents($url);
+  $noscript = @file_get_contents($url);
 
-  // Note: for any theme that follows the pattern of core html.tpl.php in the
-  // system module (e.g. bootstrap theme), this does not place the snippet
-  // immediately after the body tag but rather after the 'skip-link' div.
-  $page['page_top']['google_tag'] = array(
-    '#markup' => $noscript,
-    '#weight' => -10,
-  );
+  if ($noscript) {
+    // Note: for any theme that follows the pattern of core html.tpl.php in the
+    // system module (e.g. bootstrap theme), this does not place the snippet
+    // immediately after the body tag but rather after the 'skip-link' div.
+    $page['page_top']['google_tag'] = array(
+      '#markup' => $noscript,
+      '#weight' => -10,
+    );
+  }
+
 }
 
 /**
