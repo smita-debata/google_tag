@@ -118,7 +118,7 @@ function google_tag_page_build(&$page) {
   $include_script_as_file = variable_get('google_tag_include_file', 1);
   if ($include_script_as_file) {
     $base_path = variable_get('file_public_path', conf_path() . '/files');
-    foreach (['data_layer', 'script'] as $type) {
+    foreach (array('data_layer', 'script') as $type) {
       $path = "$base_path/js/google_tag.$type.js";
       // @todo Will it matter if file is empty?
       drupal_add_js($path, array('group' => JS_LIBRARY * 2));
@@ -126,7 +126,7 @@ function google_tag_page_build(&$page) {
   }
   else {
     $base_path = $wrapper->realpath();
-    foreach (['data_layer', 'script'] as $type) {
+    foreach (array('data_layer', 'script') as $type) {
       $url = "$base_path/js/google_tag.$type.js";
       $contents = file_get_contents($url);
       // @see drupal_get_js()

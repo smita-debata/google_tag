@@ -58,7 +58,7 @@ function google_tag_settings_form($form, &$form_state) {
 function google_tag_fieldset($group, $items) {
   // Gather data.
   $function = "_google_tag_variable_info_$group";
-  $variables = $function([]);
+  $variables = $function(array());
   $items += array('description' => '', 'collapse' => TRUE);
 
   // Build form elements.

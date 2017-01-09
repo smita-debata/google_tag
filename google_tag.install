@@ -175,7 +175,7 @@ function google_tag_update_7104(&$sandbox) {
 
   foreach ($tables as $table) {
     $count += db_update($table)
-      ->fields(['name' => 'google_tag_compact_snippet'])
+      ->fields(array('name' => 'google_tag_compact_snippet'))
       ->condition('name', 'google_tag_compact_tag')
       ->execute();
   }
