@@ -49,7 +49,6 @@ function _google_tag_script_snippet() {
   var f=d.getElementsByTagName(s)[0];
   var j=d.createElement(s);
   var dl=l!='dataLayer'?'&l='+l:'';
-  j.type='text/javascript';
   j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;
   j.async=true;
   f.parentNode.insertBefore(j,f);

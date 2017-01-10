@@ -82,7 +82,7 @@ function _google_tag_file_tag($type, $weight) {
     [
       '#type' => 'html_tag',
       '#tag' => 'script',
-      '#attributes' => ['type' => 'text/javascript', 'src' => $url],
+      '#attributes' => ['src' => $url],
       '#weight' => $weight,
     ],
     "google_tag_{$type}_tag",
@@ -109,7 +109,6 @@ function _google_tag_inline_tag($type, $weight) {
     [
       '#type' => 'html_tag',
       '#tag' => 'script',
-      '#attributes' => ['type' => 'text/javascript'],
       '#value' => $contents,
       '#weight' => $weight,
     ],
