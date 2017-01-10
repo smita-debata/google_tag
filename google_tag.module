@@ -78,11 +78,12 @@ function google_tag_page_attachments(&$attachments) {
 function _google_tag_file_tag($type, $weight) {
   $uri = "public://js/google_tag.$type.js";
   $url = file_url_transform_relative(file_create_url($uri));
+  $query_string = \Drupal::state()->get('system.css_js_query_string') ?: '0';
   $attachment = [
     [
       '#type' => 'html_tag',
       '#tag' => 'script',
-      '#attributes' => ['src' => $url],
+      '#attributes' => ['src' => $url . '?' . $query_string],
       '#weight' => $weight,
     ],
     "google_tag_{$type}_tag",

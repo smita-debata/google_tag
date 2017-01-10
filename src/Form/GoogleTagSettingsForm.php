@@ -280,6 +280,8 @@ class GoogleTagSettingsForm extends ConfigFormBase {
     }
     else {
       drupal_set_message(t('Created three snippet files based on configuration.'));
+      \Drupal::service('asset.js.collection_optimizer')->deleteAll();
+      _drupal_flush_css_js();
     }
   }
 
