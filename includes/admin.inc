@@ -102,7 +102,7 @@ function google_tag_form_elements($variables) {
     }
     $element['#type'] = google_tag_form_element_type($element['#type']);
     $element['#default_value'] = variable_get($name, $variable['default']);
-    $element += isset($variable['element']) ? $variable['element'] : [];
+    $element += isset($variable['element']) ? $variable['element'] : array();
     $elements[$name] = $element;
   }
 

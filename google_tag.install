@@ -153,7 +153,7 @@ function google_tag_update_7103(&$sandbox) {
     }
   }
 
-  return t('Converted @count toggle settings', ['@count' => $count]);
+  return t('Converted @count toggle settings', array('@count' => $count));
 }
 
 /**
@@ -187,5 +187,5 @@ function google_tag_update_7104(&$sandbox) {
     variable_cache_clear();
   }
 
-  return t('Converted @count occurrences of setting', ['@count' => $count]);
+  return t('Converted @count occurrences of setting', array('@count' => $count));
 }
