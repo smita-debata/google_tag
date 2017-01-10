@@ -104,7 +104,7 @@ function _google_tag_file_tag($type, $weight) {
 function _google_tag_inline_tag($type, $weight) {
   $uri = "public://js/google_tag.$type.js";
   $url = \Drupal::service('file_system')->realpath($uri);
-  $contents = file_get_contents($url);
+  $contents = @file_get_contents($url);
   $attachment = $contents ? [
     [
       '#type' => 'html_tag',
@@ -128,7 +128,7 @@ function google_tag_page_top(&$page) {
   // Add noscript snippet to page_top region.
   $uri = 'public://js/google_tag.noscript.js';
   $url = \Drupal::service('file_system')->realpath($uri);
-  $contents = file_get_contents($url);
+  $contents = @file_get_contents($url);
 
   // Note: depending on the theme, this may not place the snippet immediately
   // after the body tag but should be close and it can be altered.
@@ -138,11 +138,13 @@ function google_tag_page_top(&$page) {
   // which strips known vectors while allowing a permissive list of HTML tags
   // that are not XSS vectors. (e.g., <script> and <style> are not allowed.)
   // @todo Core is removing the 'style' attribute from the noscript snippet.
-  $page['google_tag_noscript_tag'] = [
-    '#markup' => $contents,
-    '#allowed_tags' => ['noscript', 'iframe'],
-    '#weight' => -10,
-  ];
+  if ($contents) {
+    $page['google_tag_noscript_tag'] = [
+      '#markup' => $contents,
+      '#allowed_tags' => ['noscript', 'iframe'],
+      '#weight' => -10,
+    ];
+  }
 }
 
 /**
