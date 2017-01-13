@@ -80,7 +80,7 @@ function google_tag_update_7101(&$sandbox) {
   $new_values = array();
   foreach ($old_values as $rid => $old_value) {
     $role_name = $roles[$rid];
-    $new_values[$role_name] = $old_value;
+    $new_values[$role_name] = $old_value ? $role_name : $old_value;
   }
   variable_set('google_tag_role_list', $new_values);
   return t('Converted @count role IDs to role names in google_tag_role_list variable', array('@count' => count($old_values)));
