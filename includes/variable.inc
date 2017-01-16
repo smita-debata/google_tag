@@ -197,6 +197,13 @@ function _google_tag_variable_info_advanced($options) {
     'default' => 1,
   );
 
+  $variables['google_tag_debug_output'] = array(
+    'type' => 'boolean',
+    'title' => t('Show debug output', array(), $options),
+    'description' => t('If checked, then the result of each snippet insertion condition will be shown in the message area. Enable <strong>only for development</strong> purposes.', array(), $options),
+    'default' => 0,
+  );
+
   $variables['google_tag_data_layer'] = array(
     'type' => 'string',
     'title' => t('Data layer', array(), $options),

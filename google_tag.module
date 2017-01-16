@@ -175,6 +175,8 @@ function google_tag_insert_snippet() {
   }
   // Allow other modules to alter the insertion criteria.
   drupal_alter('google_tag_insert', $satisfied);
+  $debug = variable_get('google_tag_debug_output', 0);
+  $debug ? drupal_set_message(t('after alter @satisfied', array('@satisfied' => $satisfied))) : '';
   return $satisfied;
 }
 
@@ -188,6 +190,7 @@ function _google_tag_status_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
+    $debug = variable_get('google_tag_debug_output', 0);
     $toggle = variable_get('google_tag_status_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
     $statuses = variable_get('google_tag_status_list', GOOGLE_TAG_STATUSES);
 
@@ -200,6 +203,8 @@ function _google_tag_status_check() {
       $satisfied = strpos($statuses, $status) !== FALSE;
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
+    $debug ? drupal_set_message(t('google_tag')) : '';
+    $debug ? drupal_set_message(t('status check @satisfied', array('@satisfied' => $satisfied))) : '';
   }
   return $satisfied;
 }
@@ -214,6 +219,7 @@ function _google_tag_path_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
+    $debug = variable_get('google_tag_debug_output', 0);
     $toggle = variable_get('google_tag_path_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
     $paths = variable_get('google_tag_path_list', GOOGLE_TAG_PATHS);
 
@@ -232,6 +238,7 @@ function _google_tag_path_check() {
       }
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
+    $debug ? drupal_set_message(t('path check @satisfied', array('@satisfied' => $satisfied))) : '';
   }
   return $satisfied;
 }
@@ -247,6 +254,7 @@ function _google_tag_role_check() {
   static $satisfied;
 
   if (!isset($satisfied)) {
+    $debug = variable_get('google_tag_debug_output', 0);
     $toggle = variable_get('google_tag_role_toggle', GOOGLE_TAG_EXCLUDE_LISTED);
     $roles = variable_get('google_tag_role_list', array());
     $roles = array_filter($roles);
@@ -260,6 +268,7 @@ function _google_tag_role_check() {
       $satisfied = (bool) array_intersect($roles, $user->roles);
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
+    $debug ? drupal_set_message(t('role check @satisfied', array('@satisfied' => $satisfied))) : '';
   }
   return $satisfied;
 }
