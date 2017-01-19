@@ -191,3 +191,39 @@ function google_tag_update_7104(&$sandbox) {
 
   return t('Converted @count occurrences of setting', array('@count' => $count));
 }
+
+/**
+ * Save snippet files based on current settings.
+ */
+function google_tag_update_7105(&$sandbox) {
+  // This applies if the module is updated from 1.0 release to this commit and
+  // the settings have not been updated manually.
+  // This should have been done in 1.1 release which added the file option and
+  // made it the default over inline. Without snippet files, a site using the
+  // 1.0 release will no longer have anything inserted on any page after update.
+  // (Given the scope of the setting changes, it is arguable whether manual
+  // intervention to update the settings should be required; and hence why this
+  // was omitted in the first place.)
+  module_load_include('inc', 'google_tag', 'includes/admin');
+  $count = 0;
+
+  if (module_exists('variable_realm') && module_exists('variable_store')) {
+    // i18n_variable module depends on variable_realm, variable_store
+    $realms = variable_realm_list();
+    foreach ($realms as $realm_name => $realm_title) {
+      $keys = variable_realm_keys($realm_name);
+      foreach ($keys as $key_name => $key_title) {
+        variable_realm_switch($realm_name, $key_name);
+        _google_tag_prepare_directory($realm_name);
+        _google_tag_snippets_save($realm_name, $key_name);
+        $count++;
+      }
+    }
+  }
+  else {
+    _google_tag_snippets_save();
+    $count++;
+  }
+
+  return t('Created @count snippet files based on configuration', array('@count' => 3 * $count));
+}

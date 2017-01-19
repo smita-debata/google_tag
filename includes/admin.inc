@@ -172,7 +172,32 @@ function google_tag_settings_form_validate($form, &$form_state) {
  * Form submission handler for google_tag_settings_form().
  */
 function google_tag_settings_form_submit($form, &$form_state) {
-  _google_tag_snippets_save();
+  $realm_name = $realm_key = '';
+  if (!empty($form['#realm_keys'])) {
+    $realm_name = key($form['#realm_keys']);
+    $realm_key = current($form['#realm_keys']);
+    _google_tag_prepare_directory($realm_name);
+  }
+
+  _google_tag_snippets_save($realm_name, $realm_key);
+}
+
+/**
+ * Prepares directory for realm specific snippet files.
+ */
+function _google_tag_prepare_directory($realm_name = '') {
+  // From google_tag_requirements(); this should be a helper function (in core).
+  if (!empty($realm_name)) {
+    $directory = variable_get('file_public_path', conf_path() . '/files') . "/js/$realm_name";
+    if (!is_dir($directory) || !is_writable($directory)) {
+      file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+    }
+    $is_writable = is_writable($directory);
+    $is_directory = is_dir($directory);
+    if (!$is_writable || !$is_directory) {
+      // @todo Do something.
+    }
+  }
 }
 
 /**
@@ -181,16 +206,18 @@ function google_tag_settings_form_submit($form, &$form_state) {
  * @return bool
  *   Whether the files were saved.
  */
-function _google_tag_snippets_save() {
+function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
+  $realm_name .= $realm_name ? '/' : '';
+  $realm_key .= $realm_key ? '.' : '';
   // Save the altered snippets after hook_google_tag_snippets_alter().
   module_load_include('inc', 'google_tag', 'includes/snippet');
   $result = TRUE;
   $snippets = google_tag_snippets();
   foreach ($snippets as $type => $snippet) {
-    $path = file_unmanaged_save_data($snippet, "public://js/google_tag.$type.js", FILE_EXISTS_REPLACE);
+    $path = file_unmanaged_save_data($snippet, "public://js/{$realm_name}google_tag.$realm_key$type.js", FILE_EXISTS_REPLACE);
     $result = !$path ? FALSE : $result;
   }
-  if (!$path) {
+  if (!$result) {
     drupal_set_message(t('An error occurred saving one or more snippet files. Please try again or contact the site administrator if it persists.'));
   }
   else {
