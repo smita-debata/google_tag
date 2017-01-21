@@ -186,6 +186,11 @@ function google_tag_realm_values() {
       $realm_name = key($realms);
       $realm_key = variable_realm_status($realm_name);
     }
+    // Allow other modules to alter the realm name and key.
+    $realm_values = array('name' => $realm_name, 'key' => $realm_key);
+    drupal_alter('google_tag_realm', $realm_values);
+    $realm_name = $realm_values['name'];
+    $realm_key = $realm_values['key'];
 
     $realm_name .= $realm_name ? '/' : '';
     $realm_key .= $realm_key ? '.' : '';
