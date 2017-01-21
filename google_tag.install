@@ -8,6 +8,13 @@
  */
 
 /**
+ * Implements hook_enable().
+ */
+function google_tag_enable() {
+  _google_tag_assets_create($count);
+}
+
+/**
  * Implements hook_uninstall().
  */
 function google_tag_uninstall() {
