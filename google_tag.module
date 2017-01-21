@@ -114,12 +114,14 @@ function google_tag_page_build(&$page) {
 
   $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
 
+  list($realm_name, $realm_key) = google_tag_realm_values();
+
   // Add data_layer and script snippets to head (by default).
   $include_script_as_file = variable_get('google_tag_include_file', 1);
   if ($include_script_as_file) {
     $base_path = variable_get('file_public_path', conf_path() . '/files');
     foreach (array('data_layer', 'script') as $type) {
-      $path = "$base_path/js/google_tag.$type.js";
+      $path = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
       // @todo Will it matter if file is empty?
       drupal_add_js($path, array('group' => JS_LIBRARY * 2));
     }
@@ -127,7 +129,7 @@ function google_tag_page_build(&$page) {
   else {
     $base_path = $wrapper->realpath();
     foreach (array('data_layer', 'script') as $type) {
-      $url = "$base_path/js/google_tag.$type.js";
+      $url = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
       $contents = @file_get_contents($url);
       // @see drupal_get_js()
       // For inline JavaScript to validate as XHTML, all JavaScript containing
@@ -140,7 +142,8 @@ function google_tag_page_build(&$page) {
 
   // Add noscript snippet to page_top region.
   $base_path = $wrapper->realpath();
-  $url = "$base_path/js/google_tag.noscript.js";
+  $type = 'noscript';
+  $url = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
   $noscript = @file_get_contents($url);
 
   if ($noscript) {
@@ -153,6 +156,41 @@ function google_tag_page_build(&$page) {
     );
   }
 
+}
+
+/**
+ * Returns applicable realm name and key for the request.
+ *
+ * @return array
+ *   The realm name and key.
+ */
+function google_tag_realm_values() {
+  $realm_name = $realm_key = '';
+
+  if (module_exists('variable_realm') && module_exists('variable_store')) {
+    // If realms exist, then the non-realm snippet files will not be loaded.
+    // These are in the 'js' directory beneath the site files directory.
+    // If variable_realm module is later removed, then visit the module settings
+    // page and update the settings.
+    $realms = variable_realm_current();
+    // Remove the global realm as this is always active.
+    unset($realms['global']);
+    if (empty($realms)) {
+      $realm_name = 'global';
+      $realm_key = 'default';
+    }
+    else {
+      // The variable_realm module allows multiple realms to be 'active' on a
+      // page request which leaves us in the dark as to which one to use.
+      // The realms are weighted; use first one after 'global:default'.
+      $realm_name = key($realms);
+      $realm_key = variable_realm_status($realm_name);
+    }
+
+    $realm_name .= $realm_name ? '/' : '';
+    $realm_key .= $realm_key ? '.' : '';
+  }
+  return array($realm_name, $realm_key);
 }
 
 /**
