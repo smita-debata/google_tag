@@ -180,6 +180,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
   }
 
   _google_tag_snippets_save($realm_name, $realm_key);
+  _google_tag_classes_save($realm_name, $realm_key);
 }
 
 /**
@@ -223,6 +224,25 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
   else {
     drupal_set_message(t('Created three snippet files based on configuration.'));
     drupal_clear_js_cache();
+  }
+}
+
+/**
+ * Stores data layer classes based on current settings.
+ */
+function _google_tag_classes_save($realm_name = '', $realm_key = '') {
+  if (module_exists('datalayer') && $data_layer == 'dataLayer') {
+    // Save classes for data layer.
+    // @todo How to or can we set the name of the data layer?
+    // This is an open issue on datalayer project; after it is implemented in
+    // datalayer then remove second condition on if block.
+    _google_tag_data_layer_snippet($classes);
+    if ($realm_name) {
+      variable_realm_set($realm_name, $realm_key, 'google_tag_data_layer_classes', $classes);
+    }
+    else {
+      variable_set('google_tag_data_layer_classes', $classes);
+    }
   }
 }
 

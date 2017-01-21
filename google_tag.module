@@ -115,12 +115,23 @@ function google_tag_page_build(&$page) {
   $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
 
   list($realm_name, $realm_key) = google_tag_realm_values();
+  $types = array('data_layer', 'script');
+
+  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
+  if (module_exists('datalayer') && $data_layer == 'dataLayer') {
+    $classes = variable_get('google_tag_data_layer_classes', array());
+    if ($classes) {
+      // Add data_layer using dataLayer module.
+      datalayer_add($classes);
+    }
+    $types = array('script');
+  }
 
   // Add data_layer and script snippets to head (by default).
   $include_script_as_file = variable_get('google_tag_include_file', 1);
   if ($include_script_as_file) {
     $base_path = variable_get('file_public_path', conf_path() . '/files');
-    foreach (array('data_layer', 'script') as $type) {
+    foreach ($types as $type) {
       $path = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
       // @todo Will it matter if file is empty?
       drupal_add_js($path, array('group' => JS_LIBRARY * 2));
@@ -128,7 +139,7 @@ function google_tag_page_build(&$page) {
   }
   else {
     $base_path = $wrapper->realpath();
-    foreach (array('data_layer', 'script') as $type) {
+    foreach ($types as $type) {
       $url = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
       $contents = @file_get_contents($url);
       // @see drupal_get_js()

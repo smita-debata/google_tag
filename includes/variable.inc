@@ -26,7 +26,7 @@ function _google_tag_variable_group_info() {
  */
 function _google_tag_variable_info($options) {
   // Gather data.
-  $groups = array('general', 'path', 'role', 'status', 'advanced');
+  $groups = array('general', 'path', 'role', 'status', 'advanced', 'internal');
   $common = array(
     'group' => 'google_tag',
     'localize' => TRUE,
@@ -179,8 +179,8 @@ function _google_tag_variable_info_advanced($options) {
   $args = array('@path' => 'https://developers.google.com/tag-manager/devguide#security');
   $description = t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="@path">developer documentation</a>.', $args);
 
-  $args = array('@path2' => 'https://www.drupal.org/project/datalayer');
-  $markup = t('If the default data layer name is used, then enable the <a href="@path2">data layer</a> module to manage the insertion of tags, triggers, and variables in one place. If a different module is used for this purpose, there may be some contamination and override of values from this and the other module.', $args);
+  $args = array('@path' => 'https://www.drupal.org/project/datalayer');
+  $markup = t('If the default data layer name is used, then enable the <a href="@path">data layer</a> module to manage the insertion of tags, triggers, and variables in one place. If a different module is used for this purpose, there may be some contamination and override of values from this and the other module.', $args);
 
   // Build variables.
   $variables['google_tag_compact_snippet'] = array(
@@ -240,6 +240,31 @@ function _google_tag_variable_info_advanced($options) {
     'element' => array(
       '#rows' => 5,
 //       '#disabled' => $disabled,
+    ),
+  );
+
+  return $variables;
+}
+
+/**
+ * Implements hook_variable_info().
+ */
+function _google_tag_variable_info_internal($options) {
+  // Gather data.
+  $args = array('@path' => 'admin/config/system/variable/realm/language/configure');
+  $markup = t('<strong>NOTE</strong>: If using the dataLayer module to insert these values and variable realms are in effect, then <a href="@path">check this item to be realm-specific</a>.', $args);
+
+  // Build variables.
+  $visible = module_exists('datalayer') && module_exists('variable_realm');
+
+  $variables['google_tag_data_layer_classes'] = array(
+    'type' => 'properties',
+    'title' => t('Data layer classes', array(), $options),
+    'description' => t('The associative array of data layer classes. <strong>NOTE: If using the dataLayer module to insert these values and variable realms are in effect, then check this item.</strong>'),
+    'default' => array(),
+    'element' => array(
+//       '#prefix' => $visible ? '<span>' . $markup . '</span>' : '',
+      '#attributes' => array('class' => array('element-invisible')),
     ),
   );
 

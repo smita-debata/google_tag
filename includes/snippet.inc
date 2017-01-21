@@ -104,7 +104,7 @@ EOS;
  * @return string|null
  *   The data layer snippet or NULL.
  */
-function _google_tag_data_layer_snippet() {
+function _google_tag_data_layer_snippet(&$classes = array()) {
   // Gather data.
   $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
   $data_layer = trim(drupal_json_encode($data_layer), '"');
@@ -121,19 +121,7 @@ function _google_tag_data_layer_snippet() {
     $classes["gtm.$name"] = $$name;
   }
 
-  if ($classes) {
-    // Build data layer items.
-    if (module_exists('datalayer') && $data_layer == 'dataLayer') {
-      // Add classes to data layer.
-      // @todo How to or can we set the name of the data layer?
-      // This is an open issue on datalayer project; after it is implemented in
-      // datalayer then remove second condition on if block.
-      datalayer_add($classes);
-    }
-    else {
-      // Build data layer snippet.
-      $script = "var $data_layer = [" . drupal_json_encode($classes) . '];';
-      return $script;
-    }
-  }
+  // Build data layer snippet.
+  $script = $classes ? "var $data_layer = [" . drupal_json_encode($classes) . '];' : '';
+  return $script;
 }

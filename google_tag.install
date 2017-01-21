@@ -193,7 +193,7 @@ function google_tag_update_7104(&$sandbox) {
 }
 
 /**
- * Save snippet files based on current settings.
+ * Save snippet files and data layer classes based on current settings.
  */
 function google_tag_update_7105(&$sandbox) {
   // This applies if the module is updated from 1.0 release to this commit and
@@ -204,6 +204,14 @@ function google_tag_update_7105(&$sandbox) {
   // (Given the scope of the setting changes, it is arguable whether manual
   // intervention to update the settings should be required; and hence why this
   // was omitted in the first place.)
+  _google_tag_assets_create($count);
+  return t('Created @count snippet files based on configuration', array('@count' => 3 * $count));
+}
+
+/**
+ * Saves snippet files and data layer classes based on current settings.
+ */
+function _google_tag_assets_create(&$count) {
   module_load_include('inc', 'google_tag', 'includes/admin');
   $count = 0;
 
@@ -213,17 +221,18 @@ function google_tag_update_7105(&$sandbox) {
     foreach ($realms as $realm_name => $realm_title) {
       $keys = variable_realm_keys($realm_name);
       foreach ($keys as $key_name => $key_title) {
+        drupal_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
         variable_realm_switch($realm_name, $key_name);
         _google_tag_prepare_directory($realm_name);
         _google_tag_snippets_save($realm_name, $key_name);
+        _google_tag_classes_save($realm_name, $key_name);
         $count++;
       }
     }
   }
   else {
     _google_tag_snippets_save();
+    _google_tag_classes_save();
     $count++;
   }
-
-  return t('Created @count snippet files based on configuration', array('@count' => 3 * $count));
 }
