@@ -81,6 +81,62 @@ function google_tag_variable_info($options) {
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter() for variable_edit_form().
+ *
+ * This applies to:
+ * - individual variables with a path like:
+ * admin/config/system/variable/edit/google_tag_role_toggle
+ *
+ * - all variables by group with a path like:
+ * admin/config/system/variable/group/google_tag
+ *
+ * - all variables by module with a path like:
+ * admin/config/system/variable/module/google_tag
+ *
+ * on the latter two forms:
+ * - comment says 'These are global default variables.'
+ * - regardless the highlighted value in realm switcher
+ * - realm name:key = global:default
+ * - $form[#variable_options][realm]->realm and key
+ *
+ * all of these forms have
+ * - element parents are none
+ * - $form[#variable_edit_form] contains list of variables on the form
+ * - with first form need to check the variable being in this module
+ *
+ * on all pages:
+ * - variable_realm_key_[realm] may be a query argument in the url
+ */
+function google_tag_form_variable_edit_form_alter(&$form, &$form_state, $form_id) {
+  if (strpos($_GET['q'], 'admin/config/system/variable/edit/') === 0) {
+    if (strpos($form['#variable_edit_form'][0], 'google_tag_') === 0) {
+      $form['#submit'][] = 'google_tag_settings_form_submit';
+      form_load_include($form_state, 'inc', 'google_tag', 'includes/admin');
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for variable_realm_edit_variables_form().
+ *
+ * This applies to:
+ * - selected variables by realm with a path like:
+ * admin/config/system/variable/realm/language/edit
+ * - $form[#variable_options][realm]->realm and key
+ * - $form_state[build_info][args] = [ [0] => realm_name, [1] => realm_key ]
+ * - element parents are [variables][google_tag]
+ * - and tree is true on variables key
+ * - $form[#variable_edit_form] contains list of variables on the form
+ * - which includes variables from other modules
+ */
+function google_tag_form_variable_realm_edit_variables_form_alter(&$form, &$form_state, $form_id) {
+  // @todo Why does variable_realm not set this item on this particular form?
+  $form['#realm_keys'][$form['#variable_options']['realm']->realm] = $form['#variable_options']['realm']->key;
+  $form['#submit'][] = 'google_tag_settings_form_submit';
+  form_load_include($form_state, 'inc', 'google_tag', 'includes/admin');
+}
+
+/**
  * Element validation handler for google_tag_container_id.
  */
 function google_tag_validate_container_id($variable, $options, $element, $form, &$form_state) {
