@@ -33,10 +33,8 @@ function google_tag_snippets() {
  */
 function _google_tag_script_snippet() {
   // Gather data.
-  $container_id = variable_get('google_tag_container_id', '');
-  $container_id = trim(drupal_json_encode($container_id), '"');
-  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
-  $data_layer = trim(drupal_json_encode($data_layer), '"');
+  $container_id = _google_tag_variable_clean('google_tag_container_id');
+  $data_layer = _google_tag_variable_clean('google_tag_data_layer', 'dataLayer');
   $compact = variable_get('google_tag_compact_snippet', 1);
 
   // Build script snippet.
@@ -76,8 +74,7 @@ EOS;
  */
 function _google_tag_noscript_snippet() {
   // Gather data.
-  $container_id = variable_get('google_tag_container_id', '');
-  $container_id = trim(drupal_json_encode($container_id), '"');
+  $container_id = _google_tag_variable_clean('google_tag_container_id');
   $compact = variable_get('google_tag_compact_snippet', 1);
 
   // Build noscript snippet.
@@ -124,4 +121,19 @@ function _google_tag_data_layer_snippet(&$classes = array()) {
   // Build data layer snippet.
   $script = $classes ? "var $data_layer = [" . drupal_json_encode($classes) . '];' : '';
   return $script;
+}
+
+/**
+ * Returns a cleansed variable.
+ *
+ * @param string $variable
+ *   The variable name.
+ * @param string $variable
+ *   The default value for the variable.
+ *
+ * @return string
+ *   The cleansed variable.
+ */
+function _google_tag_variable_clean($variable, $default = '') {
+  return trim(drupal_json_encode(variable_get($variable, $default)), '"');
 }
