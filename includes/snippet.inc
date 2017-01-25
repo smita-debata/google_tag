@@ -35,6 +35,7 @@ function _google_tag_script_snippet() {
   // Gather data.
   $container_id = _google_tag_variable_clean('google_tag_container_id');
   $data_layer = _google_tag_variable_clean('google_tag_data_layer', 'dataLayer');
+  $query = _google_tag_environment_query();
   $compact = variable_get('google_tag_compact_snippet', 1);
 
   // Build script snippet.
@@ -47,7 +48,7 @@ function _google_tag_script_snippet() {
   var j=d.createElement(s);
   var dl=l!='dataLayer'?'&l='+l:'';
   j.type='text/javascript';
-  j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;
+  j.src='//www.googletagmanager.com/gtm.js?id='+i+dl+'$query';
   j.async=true;
   f.parentNode.insertBefore(j,f);
 
@@ -75,11 +76,12 @@ EOS;
 function _google_tag_noscript_snippet() {
   // Gather data.
   $container_id = _google_tag_variable_clean('google_tag_container_id');
+  $query = _google_tag_environment_query();
   $compact = variable_get('google_tag_compact_snippet', 1);
 
   // Build noscript snippet.
   $noscript = <<<EOS
-<noscript><iframe src="//www.googletagmanager.com/ns.html?id=$container_id"
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=$container_id$query"
  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 EOS;
   if ($compact) {
@@ -121,6 +123,25 @@ function _google_tag_data_layer_snippet(&$classes = array()) {
   // Build data layer snippet.
   $script = $classes ? "var $data_layer = [" . drupal_json_encode($classes) . '];' : '';
   return $script;
+}
+
+/**
+ * Returns a query string with the environment parameters.
+ *
+ * @return string
+ *   The query string.
+ */
+function _google_tag_environment_query() {
+  if (!variable_get('google_tag_include_environment', 0)) {
+    return '';
+  }
+
+  // Gather data.
+  $environment_id = _google_tag_variable_clean('google_tag_environment_id');
+  $environment_token = _google_tag_variable_clean('google_tag_environment_token');
+
+  // Build query string.
+  return "&gtm_auth=$environment_token&gtm_preview=$environment_id&gtm_cookies_win=x";
 }
 
 /**

@@ -156,12 +156,16 @@ function google_tag_settings_form_validate($form, &$form_state) {
 
   // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
   $values['google_tag_container_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_container_id']);
+  $values['google_tag_environment_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_environment_id']);
 
   if (!preg_match('/^GTM-\w{4,}$/', $values['google_tag_container_id'])) {
     // @todo Is there a more specific regular expression that applies?
     // @todo Is there a way to "test the connection" to determine a valid ID for
     // a container? It may be valid but not the correct one for the website.
     form_set_error('google_tag_container_id', t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
+  }
+  if (!preg_match('/^env-\d{1,}$/', $values['google_tag_environment_id'])) {
+    form_set_error('google_tag_environment_id', t('A valid environment ID is case sensitive and formatted like env-x.'));
   }
   if ($message = _google_tag_verify_data_layer($values['google_tag_data_layer'])) {
     form_set_error('google_tag_data_layer', $message);

@@ -182,6 +182,9 @@ function _google_tag_variable_info_advanced($options) {
   $args = array('@path' => 'https://www.drupal.org/project/datalayer');
   $markup = t('If the default data layer name is used, then enable the <a href="@path">data layer</a> module to manage the insertion of tags, triggers, and variables in one place. If a different module is used for this purpose, there may be some contamination and override of values from this and the other module.', $args, $options);
 
+  $args = array('@path' => 'https://tagmanager.google.com/#/admin');
+  $description2 = t('The environment ID to use with this website container. To get an environment ID, <a href="@path">select Environments</a>, create an environment, then click the "Get Snippet" action. The environment ID and token will be in the snippet.', $args, $options);
+
   // Build variables.
   $variables['google_tag_compact_snippet'] = array(
     'type' => 'boolean',
@@ -250,6 +253,40 @@ function _google_tag_variable_info_advanced($options) {
     ),
   );
 
+  $variables['google_tag_include_environment'] = array(
+    'type' => 'boolean',
+    'title' => t('Include an environment', array(), $options),
+    'description' => t('If checked, then the applicable snippets will include the environment items below. Enable <strong>only for development</strong> purposes.', array(), $options),
+    'default' => 0,
+  );
+
+  $variables['google_tag_environment_id'] = array(
+    'type' => 'string',
+    'title' => t('Environment ID', array(), $options),
+    'description' => $description2,
+    'default' => '',
+    'validate callback' => '_google_tag_validate_environment_id',
+    'element' => array(
+      '#attributes' => array('placeholder' => array('env-x')),
+      '#size' => 10,
+      '#maxlength' => 7,
+      '#states' => _google_tag_variable_states('google_tag_include_environment'),
+    ),
+  );
+
+  $variables['google_tag_environment_token'] = array(
+    'type' => 'string',
+    'title' => t('Environment token', array(), $options),
+    'description' => t('The authentication token for this environment.', array(), $options),
+    'default' => '',
+    'element' => array(
+      '#attributes' => array('placeholder' => array('xxxxxxxxxxxxxxxxxxxxxx')),
+      '#size' => 20,
+      '#maxlength' => 25,
+      '#states' => _google_tag_variable_states('google_tag_include_environment'),
+    ),
+  );
+
   return $variables;
 }
 
@@ -314,6 +351,20 @@ function _google_tag_validate_container_id($variable, $options, $element, $form,
     // @todo Is there a way to "test the connection" to determine a valid ID for
     // a container? It may be valid but not the correct one for the website.
     return t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.');
+  }
+}
+
+/**
+ * Element validation handler for google_tag_environment_id.
+ */
+function _google_tag_validate_environment_id($variable, $options, $element, $form, &$form_state) {
+  $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $value = trim($value);
+  $value = str_replace(array('–', '—', '−'), '-', $value);
+  drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
+
+  if (!preg_match('/^env-\d{1,}$/', $value)) {
+    return t('A valid environment ID is case sensitive and formatted like env-x.');
   }
 }
 
