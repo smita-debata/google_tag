@@ -204,6 +204,8 @@ function _google_tag_variable_info_advanced($options) {
     'default' => 0,
   );
 
+  $disabled = !module_exists('datalayer');
+
   $variables['google_tag_data_layer'] = array(
     'type' => 'string',
     'title' => t('Data layer', array(), $options),
@@ -213,10 +215,16 @@ function _google_tag_variable_info_advanced($options) {
     'element' => array(
       '#attributes' => array('placeholder' => array('dataLayer')),
       '#required' => TRUE,
+      '#prefix' => $disabled ? '<span>' . $markup . '</span>' : '',
     ),
   );
 
-  $disabled = !module_exists('datalayer');
+  $variables['google_tag_include_classes'] = array(
+    'type' => 'boolean',
+    'title' => t('Add classes to the data layer', array(), $options),
+    'description' => t('If checked, then the listed classes will be added to the data layer.', array(), $options),
+    'default' => 0,
+  );
 
   $variables['google_tag_whitelist_classes'] = array(
     'type' => 'text',
@@ -226,8 +234,6 @@ function _google_tag_variable_info_advanced($options) {
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 5,
-      '#prefix' => $disabled ? '<span>' . $markup . '</span>' : '',
-//       '#disabled' => $disabled,
     ),
   );
 
@@ -239,7 +245,6 @@ function _google_tag_variable_info_advanced($options) {
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 5,
-//       '#disabled' => $disabled,
     ),
   );
 

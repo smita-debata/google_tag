@@ -169,12 +169,13 @@ function google_tag_page_build(&$page) {
   //     - google_tag_page_process(): callback set here
 
   $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
+  $include_classes = variable_get('google_tag_include_classes', 0);
 
   list($realm_name, $realm_key) = google_tag_realm_values();
-  $types = array('data_layer', 'script');
+  $types = $include_classes ? array('data_layer', 'script') : array('script');
 
   $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
-  if (module_exists('datalayer') && $data_layer == 'dataLayer') {
+  if ($include_classes && module_exists('datalayer') && $data_layer == 'dataLayer') {
     $classes = variable_get('google_tag_data_layer_classes', array());
     if ($classes) {
       // Add data_layer using dataLayer module.
