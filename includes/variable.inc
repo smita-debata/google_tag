@@ -234,6 +234,7 @@ function _google_tag_variable_info_advanced($options) {
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 5,
+      '#states' => _google_tag_variable_states('google_tag_include_classes'),
     ),
   );
 
@@ -245,6 +246,7 @@ function _google_tag_variable_info_advanced($options) {
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
       '#rows' => 5,
+      '#states' => _google_tag_variable_states('google_tag_include_classes'),
     ),
   );
 
@@ -274,6 +276,20 @@ function _google_tag_variable_info_internal($options) {
   );
 
   return $variables;
+}
+
+/**
+ * Returns states array for a form element.
+ */
+function _google_tag_variable_states($variable) {
+  return array(
+    'required' => array(
+      ':input[name="' . $variable . '"]' => array('checked' => TRUE),
+    ),
+    'invisible' => array(
+      ':input[name="' . $variable . '"]' => array('checked' => FALSE),
+    ),
+  );
 }
 
 /**
