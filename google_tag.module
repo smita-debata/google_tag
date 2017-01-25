@@ -108,10 +108,12 @@ function google_tag_variable_info($options) {
  * - variable_realm_key_[realm] may be a query argument in the url
  */
 function google_tag_form_variable_edit_form_alter(&$form, &$form_state, $form_id) {
+  // Also include these on group and module pages for element validation.
+  form_load_include($form_state, 'inc', 'google_tag', 'includes/admin');
+  form_load_include($form_state, 'inc', 'google_tag', 'includes/variable');
   if (strpos($_GET['q'], 'admin/config/system/variable/edit/') === 0) {
     if (strpos($form['#variable_edit_form'][0], 'google_tag_') === 0) {
       $form['#submit'][] = 'google_tag_settings_form_submit';
-      form_load_include($form_state, 'inc', 'google_tag', 'includes/admin');
     }
   }
 }
@@ -134,14 +136,7 @@ function google_tag_form_variable_realm_edit_variables_form_alter(&$form, &$form
   $form['#realm_keys'][$form['#variable_options']['realm']->realm] = $form['#variable_options']['realm']->key;
   $form['#submit'][] = 'google_tag_settings_form_submit';
   form_load_include($form_state, 'inc', 'google_tag', 'includes/admin');
-}
-
-/**
- * Element validation handler for google_tag_container_id.
- */
-function google_tag_validate_container_id($variable, $options, $element, $form, &$form_state) {
-  module_load_include('inc', 'google_tag', 'includes/variable');
-  return _google_tag_validate_container_id($variable, $options, $element, $form, $form_state);
+  form_load_include($form_state, 'inc', 'google_tag', 'includes/variable');
 }
 
 /**
