@@ -52,7 +52,7 @@ function _google_tag_variable_info($options) {
 function _google_tag_variable_info_general($options) {
   // Gather data.
   $args = array('@path' => 'https://tagmanager.google.com/');
-  $description = t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, <a href="@path">sign up for GTM</a> and create a container for your website.', $args);
+  $description = t('The ID assigned by Google Tag Manager (GTM) for this website container. To get a container ID, <a href="@path">sign up for GTM</a> and create a container for your website.', $args, $options);
 
   // Build variables.
   $variables['google_tag_container_id'] = array(
@@ -82,7 +82,7 @@ function _google_tag_variable_info_path($options) {
     '%blog-wildcard' => 'blog/*',
     '%front' => '<front>',
   );
-  $list_description = t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args);
+  $list_description = t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args, $options);
 
   // Build variables.
   $variables['google_tag_path_toggle'] = array(
@@ -144,7 +144,7 @@ function _google_tag_variable_info_role($options) {
 function _google_tag_variable_info_status($options) {
   // Gather data.
   $args = array('@path' => 'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes');
-  $list_description = t('Enter one response status per line. For more information, refer to the <a href="@path">list of HTTP status codes</a>.', $args);
+  $list_description = t('Enter one response status per line. For more information, refer to the <a href="@path">list of HTTP status codes</a>.', $args, $options);
 
   // Build variables.
   $variables['google_tag_status_toggle'] = array(
@@ -177,10 +177,10 @@ function _google_tag_variable_info_status($options) {
 function _google_tag_variable_info_advanced($options) {
   // Gather data.
   $args = array('@path' => 'https://developers.google.com/tag-manager/devguide#security');
-  $description = t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="@path">developer documentation</a>.', $args);
+  $description = t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="@path">developer documentation</a>.', $args, $options);
 
   $args = array('@path' => 'https://www.drupal.org/project/datalayer');
-  $markup = t('If the default data layer name is used, then enable the <a href="@path">data layer</a> module to manage the insertion of tags, triggers, and variables in one place. If a different module is used for this purpose, there may be some contamination and override of values from this and the other module.', $args);
+  $markup = t('If the default data layer name is used, then enable the <a href="@path">data layer</a> module to manage the insertion of tags, triggers, and variables in one place. If a different module is used for this purpose, there may be some contamination and override of values from this and the other module.', $args, $options);
 
   // Build variables.
   $variables['google_tag_compact_snippet'] = array(
@@ -209,7 +209,7 @@ function _google_tag_variable_info_advanced($options) {
   $variables['google_tag_data_layer'] = array(
     'type' => 'string',
     'title' => t('Data layer', array(), $options),
-    'description' => t('The name of the data layer. Default value is "dataLayer". In most cases, use the default.'),
+    'description' => t('The name of the data layer. Default value is "dataLayer". In most cases, use the default.', array(), $options),
     'default' => 'dataLayer',
     'validate callback' => '_google_tag_validate_data_layer',
     'element' => array(
@@ -240,7 +240,7 @@ function _google_tag_variable_info_advanced($options) {
   $variables['google_tag_blacklist_classes'] = array(
     'type' => 'text',
     'title' => t('Black-listed classes', array(), $options),
-    'description' => t('The types of tags, triggers, and variables <strong>forbidden</strong> on a page. Enter one class per line.'),
+    'description' => t('The types of tags, triggers, and variables <strong>forbidden</strong> on a page. Enter one class per line.', array(), $options),
     'default' => GOOGLE_TAG_BLACKLIST_CLASSES,
     'validate callback' => '_google_tag_validate_text',
     'element' => array(
@@ -257,7 +257,7 @@ function _google_tag_variable_info_advanced($options) {
 function _google_tag_variable_info_internal($options) {
   // Gather data.
   $args = array('@path' => 'admin/config/system/variable/realm/language/configure');
-  $markup = t('<strong>NOTE</strong>: If using the dataLayer module to insert these values and variable realms are in effect, then <a href="@path">check this item to be realm-specific</a>.', $args);
+  $markup = t('<strong>NOTE</strong>: If using the dataLayer module to insert these values and variable realms are in effect, then <a href="@path">check this item to be realm-specific</a>.', $args, $options);
 
   // Build variables.
   $visible = module_exists('datalayer') && module_exists('variable_realm');
@@ -265,7 +265,7 @@ function _google_tag_variable_info_internal($options) {
   $variables['google_tag_data_layer_classes'] = array(
     'type' => 'properties',
     'title' => t('Data layer classes', array(), $options),
-    'description' => t('The associative array of data layer classes. <strong>NOTE: If using the dataLayer module to insert these values and variable realms are in effect, then check this item.</strong>'),
+    'description' => t('The associative array of data layer classes. <strong>NOTE: If using the dataLayer module to insert these values and variable realms are in effect, then check this item.</strong>', array(), $options),
     'default' => array(),
     'element' => array(
 //       '#prefix' => $visible ? '<span>' . $markup . '</span>' : '',
