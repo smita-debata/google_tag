@@ -164,7 +164,7 @@ function google_tag_settings_form_validate($form, &$form_state) {
     // a container? It may be valid but not the correct one for the website.
     form_set_error('google_tag_container_id', t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
   }
-  if (!preg_match('/^env-\d{1,}$/', $values['google_tag_environment_id'])) {
+  if ($values['google_tag_include_environment'] && !preg_match('/^env-\d{1,}$/', $values['google_tag_environment_id'])) {
     form_set_error('google_tag_environment_id', t('A valid environment ID is case sensitive and formatted like env-x.'));
   }
   if ($message = _google_tag_verify_data_layer($values['google_tag_data_layer'])) {

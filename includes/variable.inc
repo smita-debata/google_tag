@@ -358,12 +358,19 @@ function _google_tag_validate_container_id($variable, $options, $element, $form,
  * Element validation handler for google_tag_environment_id.
  */
 function _google_tag_validate_environment_id($variable, $options, $element, $form, &$form_state) {
+  // @todo This will not prevent checking 'include_environment' on an individual
+  // variable edit form and never setting the 'environment_id'.
+  $parents = $element['#parents'];
+  array_pop($parents);
+  $parents[] = 'google_tag_include_environment';
+  $include_environment = drupal_array_get_nested_value($form_state['values'], $parents);
+
   $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
   $value = trim($value);
   $value = str_replace(array('–', '—', '−'), '-', $value);
   drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
 
-  if (!preg_match('/^env-\d{1,}$/', $value)) {
+  if ($include_environment && !preg_match('/^env-\d{1,}$/', $value)) {
     return t('A valid environment ID is case sensitive and formatted like env-x.');
   }
 }
