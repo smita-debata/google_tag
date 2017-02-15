@@ -45,7 +45,7 @@ function google_tag_requirements($phase) {
   }
   if ($phase == 'runtime' || $phase == 'install') {
     // Adapted from system_requirements().
-    $directory = variable_get('file_public_path', conf_path() . '/files') . '/js';
+    $directory = 'public://js';
     if (!is_dir($directory) || !is_writable($directory)) {
       file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
@@ -53,13 +53,19 @@ function google_tag_requirements($phase) {
     $is_directory = is_dir($directory);
     if (!$is_writable || !$is_directory) {
       // The snippet directory does not exist or is not writable.
+
+      // If applicable, get the directory path of stream wrapper.
+      $wrapper = file_stream_wrapper_get_instance_by_uri($directory);
+      $path = $wrapper->getDirectoryPath();
+      $path = $path ? $path . '/js' : $directory;
+
       if (!$is_directory) {
-        $error = $t('The directory %directory does not exist.', array('%directory' => $directory));
+        $error = $t('The directory %directory does not exist.', array('%directory' => $path));
         $description = $t('An automated attempt to create the directory failed, possibly due to a permissions problem. Create the directory and make it writable.');
         $value = $t('Does not exist');
       }
       else {
-        $error = $t('The directory %directory is not writable.', array('%directory' => $directory));
+        $error = $t('The directory %directory is not writable.', array('%directory' => $path));
         $description = $t('An automated attempt to make the directory writable failed, possibly due to a permissions problem. Make the directory writable.');
         $value = $t('Not writable');
       }

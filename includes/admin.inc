@@ -193,7 +193,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
 function _google_tag_prepare_directory($realm_name = '') {
   // From google_tag_requirements(); this should be a helper function (in core).
   if (!empty($realm_name)) {
-    $directory = variable_get('file_public_path', conf_path() . '/files') . "/js/$realm_name";
+    $directory = "public://js/$realm_name";
     if (!is_dir($directory) || !is_writable($directory)) {
       file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }

@@ -163,7 +163,7 @@ function google_tag_page_build(&$page) {
   //   - callbacks in $elements['#post_render']
   //     - google_tag_page_process(): callback set here
 
-  $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
+  $base_path = 'public:/';
   $include_classes = variable_get('google_tag_include_classes', 0);
 
   list($realm_name, $realm_key) = google_tag_realm_values();
@@ -182,15 +182,16 @@ function google_tag_page_build(&$page) {
   // Add data_layer and script snippets to head (by default).
   $include_script_as_file = variable_get('google_tag_include_file', 1);
   if ($include_script_as_file) {
-    $base_path = variable_get('file_public_path', conf_path() . '/files');
     foreach ($types as $type) {
+      // A stream wrapper may be passed as $data to drupal_add_js($data) because
+      // drupal_get_js() calls file_create_url($data). The latter will work with
+      // whichever class implements the stream, e.g. local, S3, or App Engine.
       $path = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
       // @todo Will it matter if file is empty?
       drupal_add_js($path, array('group' => JS_LIBRARY * 2));
     }
   }
   else {
-    $base_path = $wrapper->realpath();
     foreach ($types as $type) {
       $url = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
       $contents = @file_get_contents($url);
@@ -204,7 +205,6 @@ function google_tag_page_build(&$page) {
   }
 
   // Add noscript snippet to page_top region.
-  $base_path = $wrapper->realpath();
   $type = 'noscript';
   $url = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
   $noscript = @file_get_contents($url);
