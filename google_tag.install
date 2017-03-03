@@ -21,6 +21,30 @@ function google_tag_uninstall() {
   db_delete('variable')
     ->condition('name', db_like('google_tag_') . '%', 'LIKE')
     ->execute();
+
+  if (module_exists('variable_realm') && module_exists('variable_store')) {
+    db_delete('variable_store')
+      ->condition('name', db_like('google_tag_') . '%', 'LIKE')
+      ->execute();
+
+    // Remove variables from realm variable list.
+    $realms = variable_realm_list();
+    foreach ($realms as $realm => $label) {
+      $variables = variable_get('variable_realm_list_' . $realm, array());
+      if ($variables) {
+        foreach ($variables as $key => $variable) {
+          if (substr($variable, 0, 10) == 'google_tag') {
+            unset($variables[$key]);
+          }
+        }
+        variable_set('variable_realm_list_' . $realm, $variables);
+      }
+    }
+  }
+
+  @file_unmanaged_delete_recursive('public://google_tag');
+
+  // @todo Is this relevant here or in _google_tag_snippets_save()?
   drupal_clear_js_cache();
 }
 
