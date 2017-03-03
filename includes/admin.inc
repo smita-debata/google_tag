@@ -193,7 +193,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
 function _google_tag_prepare_directory($realm_name = '') {
   // From google_tag_requirements(); this should be a helper function (in core).
   if (!empty($realm_name)) {
-    $directory = "public://js/$realm_name";
+    $directory = "public://google_tag/$realm_name";
     if (!is_dir($directory) || !is_writable($directory)) {
       file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
@@ -219,7 +219,7 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
   $result = TRUE;
   $snippets = google_tag_snippets();
   foreach ($snippets as $type => $snippet) {
-    $path = file_unmanaged_save_data($snippet, "public://js/{$realm_name}google_tag.$realm_key$type.js", FILE_EXISTS_REPLACE);
+    $path = file_unmanaged_save_data($snippet, "public://google_tag/{$realm_name}google_tag.$realm_key$type.js", FILE_EXISTS_REPLACE);
     $result = !$path ? FALSE : $result;
   }
   if (!$result) {

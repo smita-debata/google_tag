@@ -45,7 +45,7 @@ function google_tag_requirements($phase) {
   }
   if ($phase == 'runtime' || $phase == 'install') {
     // Adapted from system_requirements().
-    $directory = 'public://js';
+    $directory = 'public://google_tag';
     if (!is_dir($directory) || !is_writable($directory)) {
       file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
@@ -57,7 +57,7 @@ function google_tag_requirements($phase) {
       // If applicable, get the directory path of stream wrapper.
       $wrapper = file_stream_wrapper_get_instance_by_uri($directory);
       $path = $wrapper->getDirectoryPath();
-      $path = $path ? $path . '/js' : $directory;
+      $path = $path ? $path . '/google_tag' : $directory;
 
       if (!$is_directory) {
         $error = $t('The directory %directory does not exist.', array('%directory' => $path));
@@ -115,7 +115,7 @@ function google_tag_update_7102(&$sandbox) {
  */
 function _google_tag_snippet_directory_prepare() {
   // Create directory if not present.
-  $directory = 'public://js';
+  $directory = 'public://google_tag';
   $result = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
   if (!$result) {
     drupal_set_message(t('An error occurred creating a directory for snippet files. Please try again or contact the site administrator if it persists.'));
@@ -248,4 +248,13 @@ function _google_tag_assets_create(&$count) {
     _google_tag_classes_save();
     $count++;
   }
+}
+
+/**
+ * Save snippet files and data layer classes based on current settings.
+ */
+function google_tag_update_7106(&$sandbox) {
+  // Recreate the snippet files in the 'google_tag' directory.
+  // Leave files in the 'js' directory as they will eventually be flushed.
+  return google_tag_update_7105($sandbox);
 }

@@ -186,14 +186,14 @@ function google_tag_page_build(&$page) {
       // A stream wrapper may be passed as $data to drupal_add_js($data) because
       // drupal_get_js() calls file_create_url($data). The latter will work with
       // whichever class implements the stream, e.g. local, S3, or App Engine.
-      $path = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
+      $path = "$base_path/google_tag/{$realm_name}google_tag.$realm_key$type.js";
       // @todo Will it matter if file is empty?
       drupal_add_js($path, array('group' => JS_LIBRARY * 2));
     }
   }
   else {
     foreach ($types as $type) {
-      $url = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
+      $url = "$base_path/google_tag/{$realm_name}google_tag.$realm_key$type.js";
       $contents = @file_get_contents($url);
       // @see drupal_get_js()
       // For inline JavaScript to validate as XHTML, all JavaScript containing
@@ -206,7 +206,7 @@ function google_tag_page_build(&$page) {
 
   // Add noscript snippet to page_top region.
   $type = 'noscript';
-  $url = "$base_path/js/{$realm_name}google_tag.$realm_key$type.js";
+  $url = "$base_path/google_tag/{$realm_name}google_tag.$realm_key$type.js";
   $noscript = @file_get_contents($url);
 
   if ($noscript) {
@@ -232,7 +232,7 @@ function google_tag_realm_values() {
 
   if (module_exists('variable_realm') && module_exists('variable_store')) {
     // If realms exist, then the non-realm snippet files will not be loaded.
-    // These are in the 'js' directory beneath the site files directory.
+    // These are in the 'google_tag' directory beneath the site files directory.
     // If variable_realm module is later removed, then visit the module settings
     // page and update the settings.
     $realms = variable_realm_current();
