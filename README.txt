@@ -93,6 +93,10 @@ steps to debug the situation:
    deployed from one environment to another (e.g. development to production) but
    the snippet files are not deployed.
 
+   Due to a known bug during an update to releases 1.2-rc3 or 1.2, the snippet
+   directory is not created. A simple workaround for this bug is to disable and
+   enable the module (uninstall is not necessary).
+
  * Enable debug output on the 'Advanced' tab of the settings page to display the
    result of each snippet insertion condition in the message area. Modify the
    insertion conditions as needed.
