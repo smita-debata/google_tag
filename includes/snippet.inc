@@ -34,10 +34,8 @@ function google_tag_snippets() {
 function _google_tag_script_snippet() {
   // Gather data.
   $config = \Drupal::config('google_tag.settings');
-  $container_id = $config->get('container_id');
-  $container_id = trim(json_encode($container_id), '"');
-  $data_layer = $config->get('data_layer');
-  $data_layer = trim(json_encode($data_layer), '"');
+  $container_id = _google_tag_variable_clean('container_id');
+  $data_layer = _google_tag_variable_clean('data_layer');
   $compact = $config->get('compact_snippet');
 
   // Build script snippet.
@@ -77,8 +75,7 @@ EOS;
 function _google_tag_noscript_snippet() {
   // Gather data.
   $config = \Drupal::config('google_tag.settings');
-  $container_id = $config->get('container_id');
-  $container_id = trim(json_encode($container_id), '"');
+  $container_id = _google_tag_variable_clean('container_id');
   $compact = $config->get('compact_snippet');
 
   // Build noscript snippet.
@@ -110,8 +107,7 @@ EOS;
 function _google_tag_data_layer_snippet() {
   // Gather data.
   $config = \Drupal::config('google_tag.settings');
-  $data_layer = $config->get('data_layer');
-  $data_layer = trim(json_encode($data_layer), '"');
+  $data_layer = _google_tag_variable_clean('data_layer');
   $whitelist = $config->get('whitelist_classes');
   $blacklist = $config->get('blacklist_classes');
 
@@ -130,4 +126,18 @@ function _google_tag_data_layer_snippet() {
     $script = "var $data_layer = [" . json_encode($classes) . '];';
     return $script;
   }
+}
+
+/**
+ * Returns a cleansed variable.
+ *
+ * @param string $variable
+ *   The variable name.
+ *
+ * @return string
+ *   The cleansed variable.
+ */
+function _google_tag_variable_clean($variable) {
+  $config = \Drupal::config('google_tag.settings');
+  return trim(json_encode($config->get($variable)), '"');
 }
