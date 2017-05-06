@@ -350,7 +350,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
     $result = TRUE;
     $snippets = google_tag_snippets();
     foreach ($snippets as $type => $snippet) {
-      $path = file_unmanaged_save_data($snippet, "public://js/google_tag.$type.js", FILE_EXISTS_REPLACE);
+      $path = file_unmanaged_save_data($snippet, "public://google_tag/google_tag.$type.js", FILE_EXISTS_REPLACE);
       $result = !$path ? FALSE : $result;
     }
     if (!$path) {

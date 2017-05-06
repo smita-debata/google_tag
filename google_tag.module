@@ -78,7 +78,7 @@ function google_tag_page_attachments(&$attachments) {
  *   The tag array.
  */
 function _google_tag_file_tag($type, $weight) {
-  $uri = "public://js/google_tag.$type.js";
+  $uri = "public://google_tag/google_tag.$type.js";
   $url = file_url_transform_relative(file_create_url($uri));
   $query_string = \Drupal::state()->get('system.css_js_query_string') ?: '0';
   $attachment = [
@@ -105,7 +105,7 @@ function _google_tag_file_tag($type, $weight) {
  *   The tag array.
  */
 function _google_tag_inline_tag($type, $weight) {
-  $uri = "public://js/google_tag.$type.js";
+  $uri = "public://google_tag/google_tag.$type.js";
   $url = \Drupal::service('file_system')->realpath($uri);
   $contents = @file_get_contents($url);
   $attachment = $contents ? [
@@ -129,7 +129,7 @@ function google_tag_page_top(&$page) {
   }
 
   // Add noscript snippet to page_top region.
-  $uri = 'public://js/google_tag.noscript.js';
+  $uri = 'public://google_tag/google_tag.noscript.js';
   $url = \Drupal::service('file_system')->realpath($uri);
   $contents = @file_get_contents($url);
 
