@@ -36,6 +36,7 @@ function _google_tag_script_snippet() {
   $config = \Drupal::config('google_tag.settings');
   $container_id = _google_tag_variable_clean('container_id');
   $data_layer = _google_tag_variable_clean('data_layer');
+  $query = _google_tag_environment_query();
   $compact = $config->get('compact_snippet');
 
   // Build script snippet.
@@ -47,14 +48,14 @@ function _google_tag_script_snippet() {
   var f=d.getElementsByTagName(s)[0];
   var j=d.createElement(s);
   var dl=l!='dataLayer'?'&l='+l:'';
-  j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;
+  j.src='//www.googletagmanager.com/gtm.js?id='+i+dl+'$query';
   j.async=true;
   f.parentNode.insertBefore(j,f);
 
 })(window,document,'script','$data_layer','$container_id');
 EOS;
   if ($compact) {
-    $script = str_replace(array("\n", '  '), '', $script);
+    $script = str_replace(["\n", '  '], '', $script);
   }
 /*
   $script = <<<EOS
@@ -76,13 +77,14 @@ function _google_tag_noscript_snippet() {
   // Gather data.
   $config = \Drupal::config('google_tag.settings');
   $container_id = _google_tag_variable_clean('container_id');
+  $query = _google_tag_environment_query();
   $compact = $config->get('compact_snippet');
 
   // Build noscript snippet.
   // @todo Core removes the 'style' attribute from the snippet; so omit it.
   // style="display:none;visibility:hidden"
   $noscript = <<<EOS
-<noscript><iframe src="//www.googletagmanager.com/ns.html?id=$container_id"
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=$container_id$query"
  height="0" width="0"></iframe></noscript>
 EOS;
   if ($compact) {
@@ -126,6 +128,26 @@ function _google_tag_data_layer_snippet() {
     $script = "var $data_layer = [" . json_encode($classes) . '];';
     return $script;
   }
+}
+
+/**
+ * Returns a query string with the environment parameters.
+ *
+ * @return string
+ *   The query string.
+ */
+function _google_tag_environment_query() {
+  $config = \Drupal::config('google_tag.settings');
+  if (!$config->get('include_environment')) {
+    return '';
+  }
+
+  // Gather data.
+  $environment_id = _google_tag_variable_clean('environment_id');
+  $environment_token = _google_tag_variable_clean('environment_token');
+
+  // Build query string.
+  return "&gtm_auth=$environment_token&gtm_preview=$environment_id&gtm_cookies_win=x";
 }
 
 /**

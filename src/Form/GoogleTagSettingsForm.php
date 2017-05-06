@@ -223,6 +223,37 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#states' => $this->statesArray('include_classes'),
     ];
 
+    $form['advanced']['include_environment'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Include an environment'),
+      '#description' => $this->t('If checked, then the applicable snippets will include the environment items below. Enable <strong>only for development</strong> purposes.'),
+      '#default_value' => $config->get('include_environment'),
+    ];
+
+    $description = t('The environment ID to use with this website container. To get an environment ID, <a href="https://tagmanager.google.com/#/admin">select Environments</a>, create an environment, then click the "Get Snippet" action. The environment ID and token will be in the snippet.');
+
+    $form['advanced']['environment_id'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Environment ID'),
+      '#description' => $description,
+      '#default_value' => $config->get('environment_id'),
+      '#attributes' => ['placeholder' => ['env-x']],
+      '#size' => 10,
+      '#maxlength' => 7,
+      '#states' => $this->statesArray('include_environment'),
+    ];
+
+    $form['advanced']['environment_token'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Environment token'),
+      '#description' => $this->t('The authentication token for this environment.'),
+      '#default_value' => $config->get('environment_token'),
+      '#attributes' => ['placeholder' => ['xxxxxxxxxxxxxxxxxxxxxx']],
+      '#size' => 20,
+      '#maxlength' => 25,
+      '#states' => $this->statesArray('include_environment'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -252,6 +283,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // Trim the text values.
     $container_id = trim($form_state->getValue('container_id'));
+    $environment_id = trim($form_state->getValue('environment_id'));
     $form_state->setValue('data_layer', trim($form_state->getValue('data_layer')));
     $form_state->setValue('path_list', $this->cleanText($form_state->getValue('path_list')));
     $form_state->setValue('status_list', $this->cleanText($form_state->getValue('status_list')));
@@ -260,13 +292,18 @@ class GoogleTagSettingsForm extends ConfigFormBase {
 
     // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
     $container_id = str_replace(['–', '—', '−'], '-', $container_id);
+    $environment_id = str_replace(['–', '—', '−'], '-', $environment_id);
     $form_state->setValue('container_id', $container_id);
+    $form_state->setValue('environment_id', $environment_id);
 
     if (!preg_match('/^GTM-\w{4,}$/', $container_id)) {
       // @todo Is there a more specific regular expression that applies?
       // @todo Is there a way to "test the connection" to determine a valid ID for
       // a container? It may be valid but not the correct one for the website.
       $form_state->setError($form['general']['container_id'], $this->t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
+    }
+    if ($form_state->getValue('include_environment') && !preg_match('/^env-\d{1,}$/', $environment_id)) {
+      $form_state->setError($form['advanced']['environment_id'], t('A valid environment ID is case sensitive and formatted like env-x.'));
     }
 
     parent::validateForm($form, $form_state);
@@ -291,6 +328,9 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       ->set('include_classes', $form_state->getValue('include_classes'))
       ->set('whitelist_classes', $form_state->getValue('whitelist_classes'))
       ->set('blacklist_classes', $form_state->getValue('blacklist_classes'))
+      ->set('include_environment', $form_state->getValue('include_environment'))
+      ->set('environment_id', $form_state->getValue('environment_id'))
+      ->set('environment_token', $form_state->getValue('environment_token'))
       ->save();
 
     parent::submitForm($form, $form_state);
