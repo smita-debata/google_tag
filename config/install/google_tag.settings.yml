@@ -10,5 +10,6 @@ compact_snippet: true
 include_file: true
 debug_output: false
 data_layer: 'dataLayer'
+include_classes: false
 whitelist_classes: "google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes"
 blacklist_classes: "customScripts\ncustomPixels"

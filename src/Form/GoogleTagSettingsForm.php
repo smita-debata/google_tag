@@ -196,6 +196,13 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['advanced']['include_classes'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Add classes to the data layer'),
+      '#description' => $this->t('If checked, then the listed classes will be added to the data layer.'),
+      '#default_value' => $config->get('include_classes'),
+    ];
+
     $description = t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="https://developers.google.com/tag-manager/devguide#security">developer documentation</a>.');
 
     $form['advanced']['whitelist_classes'] = [
@@ -259,6 +266,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       ->set('include_file', $form_state->getValue('include_file'))
       ->set('debug_output', $form_state->getValue('debug_output'))
       ->set('data_layer', $form_state->getValue('data_layer'))
+      ->set('include_classes', $form_state->getValue('include_classes'))
       ->set('whitelist_classes', $form_state->getValue('whitelist_classes'))
       ->set('blacklist_classes', $form_state->getValue('blacklist_classes'))
       ->save();

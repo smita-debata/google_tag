@@ -37,6 +37,9 @@ google_tag.settings:
     data_layer:
       type: string
       label: 'Data layer'
+    include_classes:
+      type: boolean
+      label: 'Add classes to the data layer'
     whitelist_classes:
       type: string
       label: 'White-listed classes'
