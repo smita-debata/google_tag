@@ -31,6 +31,9 @@ google_tag.settings:
     include_file:
       type: boolean
       label: 'Include the snippet as a file'
+    debug_output:
+      type: boolean
+      label: 'Show debug output'
     data_layer:
       type: string
       label: 'Data layer'

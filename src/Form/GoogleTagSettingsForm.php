@@ -180,6 +180,13 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('include_file'),
     ];
 
+    $form['advanced']['debug_output'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show debug output'),
+      '#description' => $this->t('If checked, then the result of each snippet insertion condition will be shown in the message area. Enable <strong>only for development</strong> purposes.'),
+      '#default_value' => $config->get('debug_output'),
+    ];
+
     $form['advanced']['data_layer'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Data layer'),
@@ -250,6 +257,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       ->set('status_list', $form_state->getValue('status_list'))
       ->set('compact_snippet', $form_state->getValue('compact_snippet'))
       ->set('include_file', $form_state->getValue('include_file'))
+      ->set('debug_output', $form_state->getValue('debug_output'))
       ->set('data_layer', $form_state->getValue('data_layer'))
       ->set('whitelist_classes', $form_state->getValue('whitelist_classes'))
       ->set('blacklist_classes', $form_state->getValue('blacklist_classes'))

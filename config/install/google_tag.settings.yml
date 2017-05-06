@@ -8,6 +8,7 @@ status_toggle: 'exclude listed'
 status_list: "403\n404"
 compact_snippet: true
 include_file: true
+debug_output: false
 data_layer: 'dataLayer'
 whitelist_classes: "google\nnonGooglePixels\nnonGoogleScripts\nnonGoogleIframes"
 blacklist_classes: "customScripts\ncustomPixels"

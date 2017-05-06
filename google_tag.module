@@ -159,6 +159,7 @@ function google_tag_insert_snippet() {
 
   if (!isset($satisfied)) {
     $config = \Drupal::config('google_tag.settings');
+    $debug = $config->get('debug_output');
     $id = $config->get('container_id');
 
     if (empty($id)) {
@@ -174,6 +175,7 @@ function google_tag_insert_snippet() {
 
     // Allow other modules to alter the insertion criteria.
     \Drupal::moduleHandler()->alter('google_tag_insert', $satisfied);
+    $debug ? drupal_set_message(t('after alter @satisfied', ['@satisfied' => $satisfied])) : '';
   }
   return $satisfied;
 }
@@ -189,6 +191,7 @@ function _google_tag_status_check() {
 
   if (!isset($satisfied)) {
     $config = \Drupal::config('google_tag.settings');
+    $debug = $config->get('debug_output');
     $toggle = $config->get('status_toggle');
     $statuses = $config->get('status_list');
 
@@ -205,6 +208,8 @@ function _google_tag_status_check() {
       $satisfied = strpos($statuses, (string) $status) !== FALSE;
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
+    $debug ? drupal_set_message(t('google_tag')) : '';
+    $debug ? drupal_set_message(t('status check @satisfied', ['@satisfied' => $satisfied])) : '';
   }
   return $satisfied;
 }
@@ -220,6 +225,7 @@ function _google_tag_path_check() {
 
   if (!isset($satisfied)) {
     $config = \Drupal::config('google_tag.settings');
+    $debug = $config->get('debug_output');
     $toggle = $config->get('path_toggle');
     $paths = Unicode::strtolower($config->get('path_list'));
 
@@ -238,6 +244,7 @@ function _google_tag_path_check() {
       $satisfied = $path_matcher->matchPath($path_alias, $paths) || (($path != $path_alias) && $path_matcher->matchPath($path, $paths));
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
+    $debug ? drupal_set_message(t('path check @satisfied', ['@satisfied' => $satisfied])) : '';
   }
   return $satisfied;
 }
@@ -253,6 +260,7 @@ function _google_tag_role_check() {
 
   if (!isset($satisfied)) {
     $config = \Drupal::config('google_tag.settings');
+    $debug = $config->get('debug_output');
     $toggle = $config->get('role_toggle');
     $roles = $config->get('role_list');
     $roles = array_filter($roles);
@@ -266,6 +274,7 @@ function _google_tag_role_check() {
       $satisfied = (bool) array_intersect($roles, \Drupal::currentUser()->getRoles());
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
+    $debug ? drupal_set_message(t('role check @satisfied', ['@satisfied' => $satisfied])) : '';
   }
   return $satisfied;
 }
