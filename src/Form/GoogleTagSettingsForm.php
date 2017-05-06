@@ -211,6 +211,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#description' => $description,
       '#default_value' => $config->get('whitelist_classes'),
       '#rows' => 5,
+      '#states' => $this->statesArray('include_classes'),
     ];
 
     $form['advanced']['blacklist_classes'] = [
@@ -219,9 +220,30 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#description' => $this->t('The types of tags, triggers, and variables <strong>forbidden</strong> on a page. Enter one class per line.'),
       '#default_value' => $config->get('blacklist_classes'),
       '#rows' => 5,
+      '#states' => $this->statesArray('include_classes'),
     ];
 
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * Returns states array for a form element.
+   *
+   * @param string $variable
+   *   The name of the form element.
+   *
+   * @return array
+   *   The states array.
+   */
+  public function statesArray($variable) {
+    return [
+      'required' => [
+        ':input[name="' . $variable . '"]' => ['checked' => TRUE],
+      ],
+      'invisible' => [
+        ':input[name="' . $variable . '"]' => ['checked' => FALSE],
+      ],
+    ];
   }
 
   /**
