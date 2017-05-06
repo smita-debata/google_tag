@@ -236,6 +236,7 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
  * Stores data layer classes based on current settings.
  */
 function _google_tag_classes_save($realm_name = '', $realm_key = '') {
+  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
   if (module_exists('datalayer') && $data_layer == 'dataLayer') {
     // Save classes for data layer.
     // @todo How to or can we set the name of the data layer?
