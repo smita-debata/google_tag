@@ -48,7 +48,7 @@ function _google_tag_script_snippet() {
   var f=d.getElementsByTagName(s)[0];
   var j=d.createElement(s);
   var dl=l!='dataLayer'?'&l='+l:'';
-  j.src='//www.googletagmanager.com/gtm.js?id='+i+dl+'$query';
+  j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl+'$query';
   j.async=true;
   f.parentNode.insertBefore(j,f);
 
@@ -84,7 +84,7 @@ function _google_tag_noscript_snippet() {
   // @todo Core removes the 'style' attribute from the snippet; so omit it.
   // style="display:none;visibility:hidden"
   $noscript = <<<EOS
-<noscript><iframe src="//www.googletagmanager.com/ns.html?id=$container_id$query"
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=$container_id$query"
  height="0" width="0"></iframe></noscript>
 EOS;
   if ($compact) {
