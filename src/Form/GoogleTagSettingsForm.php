@@ -1,9 +1,6 @@
 <?php
 
 /**
- * @file
- * Contains \Drupal\google_tag\Form\GoogleTagSettingsform.
- *
  * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
