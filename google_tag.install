@@ -7,8 +7,6 @@
  * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
-use Drupal\Core\StreamWrapper\PublicStream;
-
 /**
  * Implements hook_requirements().
  */
