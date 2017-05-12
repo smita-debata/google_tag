@@ -105,8 +105,7 @@ EOS;
  */
 function _google_tag_data_layer_snippet(&$classes = array()) {
   // Gather data.
-  $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
-  $data_layer = trim(drupal_json_encode($data_layer), '"');
+  $data_layer = _google_tag_variable_clean('google_tag_data_layer', 'dataLayer');
   $whitelist = variable_get('google_tag_whitelist_classes', GOOGLE_TAG_WHITELIST_CLASSES);
   $blacklist = variable_get('google_tag_blacklist_classes', GOOGLE_TAG_BLACKLIST_CLASSES);
 

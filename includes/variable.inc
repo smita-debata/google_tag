@@ -317,6 +317,12 @@ function _google_tag_variable_info_internal($options) {
 
 /**
  * Returns states array for a form element.
+ *
+ * @param string $variable
+ *   The name of the form element.
+ *
+ * @return array
+ *   The states array.
  */
 function _google_tag_variable_states($variable) {
   return array(
