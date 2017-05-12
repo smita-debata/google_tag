@@ -65,6 +65,16 @@ function google_tag_permission() {
 }
 
 /**
+ * Implements hook_cron().
+ *
+ * @todo Could instead implement hook_flush_caches() called from system_cron()
+ *   and drupal_flush_all_caches().
+ */
+function google_tag_cron() {
+  google_tag_assets_create($count);
+}
+
+/**
  * Implements hook_variable_group_info().
  */
 function google_tag_variable_group_info() {
@@ -380,4 +390,12 @@ function _google_tag_role_check() {
     $debug ? drupal_set_message(t('role check @satisfied', array('@satisfied' => $satisfied))) : '';
   }
   return $satisfied;
+}
+
+/**
+ * Saves snippet files and data layer classes based on current settings.
+ */
+function google_tag_assets_create(&$count) {
+  module_load_include('inc', 'google_tag', 'includes/admin');
+  _google_tag_assets_create($count);
 }
