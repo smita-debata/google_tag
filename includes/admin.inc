@@ -257,6 +257,9 @@ function _google_tag_assets_create(&$count) {
     _google_tag_classes_save();
     $count++;
   }
+
+  _drupal_flush_css_js();
+  drupal_clear_js_cache();
 }
 
 /**
@@ -299,8 +302,6 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
   }
   else {
     drupal_set_message(t('Created three snippet files based on configuration.'));
-    _drupal_flush_css_js();
-    drupal_clear_js_cache();
   }
 }
 
