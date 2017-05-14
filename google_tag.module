@@ -200,7 +200,7 @@ function google_tag_page_build(&$page) {
       // whichever class implements the stream, e.g. local, S3, or App Engine.
       $path = "$base_path/google_tag/{$realm_name}google_tag.$realm_key$type.js";
       // @todo Will it matter if file is empty?
-      drupal_add_js($path, array('group' => JS_LIBRARY * 2));
+      drupal_add_js($path, array('group' => JS_LIBRARY * 2, 'requires_jquery' => FALSE));
     }
   }
   else {
@@ -211,7 +211,7 @@ function google_tag_page_build(&$page) {
       // For inline JavaScript to validate as XHTML, all JavaScript containing
       // XHTML needs to be wrapped in CDATA.
       if ($contents) {
-        drupal_add_js($contents, array('type' => 'inline', 'group' => JS_LIBRARY * 2));
+        drupal_add_js($contents, array('type' => 'inline', 'group' => JS_LIBRARY * 2, 'requires_jquery' => FALSE));
       }
     }
   }
