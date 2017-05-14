@@ -176,19 +176,63 @@ function google_tag_settings_form_validate($form, &$form_state) {
  * Form submission handler for google_tag_settings_form().
  */
 function google_tag_settings_form_submit($form, &$form_state) {
-  $realm_name = $realm_key = '';
-  if (!empty($form['#realm_keys'])) {
-    $realm_name = key($form['#realm_keys']);
-    $realm_key = current($form['#realm_keys']);
-    _google_tag_prepare_directory($realm_name);
+  if (module_exists('variable_realm') && module_exists('variable_store')) {
+    // When this handler runs, $GLOBALS['conf'] will have been updated by the
+    // form submitted values (this includes realm and non-realm specific
+    // variables). However, the variable stores maintained by variable_realm
+    // will not reflect these changes. To counteract this behaviour refresh the
+    // internal variable stores.
+    //
+    // Example: Assume a language realm with 'en' (default) and 'fr' keys.
+    //
+    // Because of how variable_realm_switch() works, the values for one or more
+    // realm:key pairs will include the OLD global (i.e. not realm-specific)
+    // values in effect at form build not the NEW values included with the form
+    // submission. Whether one or more is stale depends on the realm of the URL:
+    //
+    //   default: /admin/config/system/google_tag
+    //   realm: /fr/admin/config/system/google_tag
+    //
+    // The result does not depend on whether any google_tag variables are
+    // configured to be realm-specific.
+    //
+    // The global:default snippet files always reflect the NEW global values
+    // plus the realm-specific values for the realm of the URL. If the form is
+    // submitted from the 'en' (or default) URL, then these files have the 'en'
+    // values.
+    //
+    // The language:en snippet files have OLD global values if the realm URL is
+    // language:fr (indicated by 'fr' prefix), NEW values otherwise. Any realm-
+    // specific values are from language:en.
+    //
+    // The language:fr snippet files always have OLD global values. Any realm-
+    // specific values are from language:fr.
+
+    // Load variables from cache or database.
+    // Merge with current global to get values from settings.php.
+    $variables = variable_initialize();
+    $variables = array_merge($GLOBALS['conf'], $variables); // recursive?
+
+    // Reset internal store with updated variables.
+    $global = variable_realm_controller('global');
+    $global->addStore('default', $variables);
   }
 
-  _google_tag_snippets_save($realm_name, $realm_key);
-  _google_tag_classes_save($realm_name, $realm_key);
+  _google_tag_assets_create($count);
 }
 
 /**
  * Saves snippet files and data layer classes based on current settings.
+ *
+ * Use case: variable_realm is not enabled
+ * - one set of snippet files stored in public://google_tag
+ *
+ * Use case: variable_realm is enabled
+ * - multiple sets of snippet files stored in public://google_tag/{realm}
+ * - sub case: no google_tag variables are realm-specific
+ *   update all snippet files based on global default variables
+ * - sub case: some google_tag variables are realm-specific
+ *   update all snippet files based on global and realm-specific variables
  */
 function _google_tag_assets_create(&$count) {
   $count = 0;
