@@ -177,6 +177,8 @@ function google_tag_page_build(&$page) {
   $include_classes = variable_get('google_tag_include_classes', 0);
 
   list($realm_name, $realm_key) = google_tag_realm_values();
+  $realm_name .= $realm_name ? '/' : '';
+  $realm_key .= $realm_key ? '.' : '';
   $types = $include_classes ? array('data_layer', 'script') : array('script');
 
   $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
@@ -267,9 +269,6 @@ function google_tag_realm_values() {
 
     $debug = variable_get('google_tag_debug_output', 0);
     $debug ? drupal_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $realm_key))) : '';
-
-    $realm_name .= $realm_name ? '/' : '';
-    $realm_key .= $realm_key ? '.' : '';
   }
   return array($realm_name, $realm_key);
 }
