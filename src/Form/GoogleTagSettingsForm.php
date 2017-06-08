@@ -109,7 +109,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
 
     $form['role']['role_toggle'] = [
       '#type' => 'radios',
-      '#title' => t('Add snippet for specific roles'),
+      '#title' => $this->t('Add snippet for specific roles'),
       '#options' => [
         GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All roles except the selected roles'),
         GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the selected roles'),
@@ -123,19 +123,19 @@ class GoogleTagSettingsForm extends ConfigFormBase {
 
     $form['role']['role_list'] = [
       '#type' => 'checkboxes',
-      '#title' => t('Selected roles'),
+      '#title' => $this->t('Selected roles'),
       '#default_value' => $config->get('role_list'),
       '#options' => $user_roles,
     ];
 
     // Response statuses tab.
-    $description = t('Enter one response status per line. For more information, refer to the <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">list of HTTP status codes</a>.');
+    $description = $this->t('Enter one response status per line. For more information, refer to the <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">list of HTTP status codes</a>.');
 
     $form['status'] = [
       '#type' => 'details',
       '#title' => $this->t('Response statuses'),
       '#group' => 'settings',
-      '#description' => t('On this tab, specify the page response status condition.'),
+      '#description' => $this->t('On this tab, specify the page response status condition.'),
     ];
 
     $form['status']['status_toggle'] = [
@@ -200,7 +200,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('include_classes'),
     ];
 
-    $description = t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="https://developers.google.com/tag-manager/devguide#security">developer documentation</a>.');
+    $description = $this->t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="https://developers.google.com/tag-manager/devguide#security">developer documentation</a>.');
 
     $form['advanced']['whitelist_classes'] = [
       '#type' => 'textarea',
@@ -227,7 +227,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('include_environment'),
     ];
 
-    $description = t('The environment ID to use with this website container. To get an environment ID, <a href="https://tagmanager.google.com/#/admin">select Environments</a>, create an environment, then click the "Get Snippet" action. The environment ID and token will be in the snippet.');
+    $description = $this->t('The environment ID to use with this website container. To get an environment ID, <a href="https://tagmanager.google.com/#/admin">select Environments</a>, create an environment, then click the "Get Snippet" action. The environment ID and token will be in the snippet.');
 
     $form['advanced']['environment_id'] = [
       '#type' => 'textfield',
@@ -300,7 +300,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       $form_state->setError($form['general']['container_id'], $this->t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
     }
     if ($form_state->getValue('include_environment') && !preg_match('/^env-\d{1,}$/', $environment_id)) {
-      $form_state->setError($form['advanced']['environment_id'], t('A valid environment ID is case sensitive and formatted like env-x.'));
+      $form_state->setError($form['advanced']['environment_id'], $this->t('A valid environment ID is case sensitive and formatted like env-x.'));
     }
 
     parent::validateForm($form, $form_state);
@@ -351,10 +351,10 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       $result = !$path ? FALSE : $result;
     }
     if (!$path) {
-      drupal_set_message(t('An error occurred saving one or more snippet files. Please try again or contact the site administrator if it persists.'));
+      drupal_set_message($this->t('An error occurred saving one or more snippet files. Please try again or contact the site administrator if it persists.'));
     }
     else {
-      drupal_set_message(t('Created three snippet files based on configuration.'));
+      drupal_set_message($this->t('Created three snippet files based on configuration.'));
       \Drupal::service('asset.js.collection_optimizer')->deleteAll();
       _drupal_flush_css_js();
     }
