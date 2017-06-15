@@ -245,7 +245,7 @@ function _google_tag_assets_create(&$count) {
       foreach ($keys as $key_name => $key_title) {
         drupal_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
         variable_realm_switch($realm_name, $key_name);
-        _google_tag_prepare_directory($realm_name);
+        _google_tag_directory_prepare($realm_name);
         _google_tag_snippets_save($realm_name, $key_name);
         _google_tag_classes_save($realm_name, $key_name);
         $count++;
@@ -253,7 +253,7 @@ function _google_tag_assets_create(&$count) {
     }
   }
   else {
-    _google_tag_prepare_directory();
+    _google_tag_directory_prepare();
     _google_tag_snippets_save();
     _google_tag_classes_save();
     $count++;
@@ -266,7 +266,7 @@ function _google_tag_assets_create(&$count) {
 /**
  * Prepares directory for base or realm specific snippet files.
  */
-function _google_tag_prepare_directory($realm_name = '') {
+function _google_tag_directory_prepare($realm_name = '') {
   // From google_tag_requirements(); this should be a helper function (in core).
   $directory = 'public://google_tag';
   $directory .= $realm_name ? "/$realm_name" : '';
