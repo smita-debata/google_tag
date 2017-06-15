@@ -253,6 +253,7 @@ function _google_tag_assets_create(&$count) {
     }
   }
   else {
+    _google_tag_prepare_directory();
     _google_tag_snippets_save();
     _google_tag_classes_save();
     $count++;
@@ -263,20 +264,19 @@ function _google_tag_assets_create(&$count) {
 }
 
 /**
- * Prepares directory for realm specific snippet files.
+ * Prepares directory for base or realm specific snippet files.
  */
 function _google_tag_prepare_directory($realm_name = '') {
   // From google_tag_requirements(); this should be a helper function (in core).
-  if (!empty($realm_name)) {
-    $directory = "public://google_tag/$realm_name";
-    if (!is_dir($directory) || !is_writable($directory)) {
-      file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-    }
-    $is_writable = is_writable($directory);
-    $is_directory = is_dir($directory);
-    if (!$is_writable || !$is_directory) {
-      // @todo Do something.
-    }
+  $directory = 'public://google_tag';
+  $directory .= $realm_name ? "/$realm_name" : '';
+  if (!is_dir($directory) || !is_writable($directory)) {
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+  }
+  $is_writable = is_writable($directory);
+  $is_directory = is_dir($directory);
+  if (!$is_writable || !$is_directory) {
+    // @todo Do something.
   }
 }
 
