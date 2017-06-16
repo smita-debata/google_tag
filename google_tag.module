@@ -35,6 +35,15 @@ function google_tag_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
+ * Saves snippet files and data layer classes based on current settings.
+ */
+function _google_tag_assets_create() {
+  $config_factory = \Drupal::configFactory();
+  $form = new Drupal\google_tag\Form\GoogleTagSettingsForm($config_factory);
+  $form->createAssets();
+}
+
+/**
  * Implements hook_page_attachments().
  */
 function google_tag_page_attachments(&$attachments) {
