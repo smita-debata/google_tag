@@ -177,6 +177,13 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('include_file'),
     ];
 
+    $form['advanced']['rebuild_snippets'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Recreate snippets on cache rebuild'),
+      '#description' => $this->t('If checked, then the JavaScript snippet files will be created during a cache rebuild. This is <strong>recommended on production sites</strong>.'),
+      '#default_value' => $config->get('rebuild_snippets'),
+    ];
+
     $form['advanced']['debug_output'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show debug output'),
@@ -320,6 +327,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       ->set('status_list', $form_state->getValue('status_list'))
       ->set('compact_snippet', $form_state->getValue('compact_snippet'))
       ->set('include_file', $form_state->getValue('include_file'))
+      ->set('rebuild_snippets', $form_state->getValue('rebuild_snippets'))
       ->set('debug_output', $form_state->getValue('debug_output'))
       ->set('data_layer', $form_state->getValue('data_layer'))
       ->set('include_classes', $form_state->getValue('include_classes'))
