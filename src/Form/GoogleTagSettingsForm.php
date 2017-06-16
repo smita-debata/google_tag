@@ -332,7 +332,28 @@ class GoogleTagSettingsForm extends ConfigFormBase {
 
     parent::submitForm($form, $form_state);
 
-    $this->saveSnippets();
+    $this->createAssets();
+  }
+
+  /**
+   * Prepares directory for and saves snippet files based on current settings.
+   *
+   * @return bool
+   *   Whether the files were saved.
+   */
+  public function createAssets() {
+    $result = TRUE;
+    $directory = 'public://google_tag';
+    if (!is_dir($directory) || !is_writable($directory)) {
+      $result = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+    }
+    if ($result) {
+      $result = $this->saveSnippets();
+    }
+    else {
+      $description = t('Failed to create or make writable the directory %directory, possibly due to a permissions problem. Make the directory writable.', array('%directory' => $directory));
+    }
+    return $result;
   }
 
   /**
@@ -350,7 +371,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       $path = file_unmanaged_save_data($snippet, "public://google_tag/google_tag.$type.js", FILE_EXISTS_REPLACE);
       $result = !$path ? FALSE : $result;
     }
-    if (!$path) {
+    if (!$result) {
       drupal_set_message($this->t('An error occurred saving one or more snippet files. Please try again or contact the site administrator if it persists.'));
     }
     else {
@@ -358,6 +379,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       \Drupal::service('asset.js.collection_optimizer')->deleteAll();
       _drupal_flush_css_js();
     }
+    return $result;
   }
 
   /**
