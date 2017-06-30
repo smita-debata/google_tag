@@ -170,6 +170,13 @@ function google_tag_settings_form_validate($form, &$form_state) {
   if ($message = _google_tag_data_layer_verify($values['google_tag_data_layer'])) {
     form_set_error('google_tag_data_layer', $message);
   }
+  if ($values['google_tag_include_classes']) {
+    if (empty($values['google_tag_whitelist_classes']) && empty($values['google_tag_blacklist_classes'])) {
+      form_set_error('google_tag_include_classes', t('Enter listed classes in at least one field, or uncheck the box.'));
+      form_set_error('google_tag_whitelist_classes', '');
+      form_set_error('google_tag_blacklist_classes', '');
+    }
+  }
 }
 
 /**
