@@ -388,7 +388,7 @@ function _google_tag_validate_data_layer($variable, $options, $element, $form, &
   $value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
   $value = trim($value);
   drupal_array_set_nested_value($form_state['values'], $element['#parents'], $value);
-  return _google_tag_verify_data_layer($value);
+  return _google_tag_data_layer_verify($value);
 }
 
 /**

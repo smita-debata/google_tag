@@ -167,7 +167,7 @@ function google_tag_settings_form_validate($form, &$form_state) {
   if ($values['google_tag_include_environment'] && !preg_match('/^env-\d{1,}$/', $values['google_tag_environment_id'])) {
     form_set_error('google_tag_environment_id', t('A valid environment ID is case sensitive and formatted like env-x.'));
   }
-  if ($message = _google_tag_verify_data_layer($values['google_tag_data_layer'])) {
+  if ($message = _google_tag_data_layer_verify($values['google_tag_data_layer'])) {
     form_set_error('google_tag_data_layer', $message);
   }
 }
@@ -348,7 +348,7 @@ function google_tag_text_clean(&$text, $format = 'string') {
  * @return bool|null
  *   Whether data layer name is incompatible with dataLayer module, if present.
  */
-function _google_tag_verify_data_layer($value) {
+function _google_tag_data_layer_verify($value) {
   if (module_exists('datalayer') && $value != 'dataLayer') {
     // @todo Setting form error does not allow user to save a different name,
     // i.e. to do what message text says.
