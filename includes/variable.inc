@@ -402,7 +402,8 @@ function _google_tag_validate_listed_classes($variable, $options, $element, $for
 
   $keys = array('google_tag_whitelist_classes', 'google_tag_blacklist_classes');
   $variables = isset($form['#variable_edit_form']) ? $form['#variable_edit_form'] : array();
-  if (!empty(array_diff($keys, $variables))) {
+  $items = array_diff($keys, $variables);
+  if (!empty($items)) {
     // Need both variables on form to validate.
     form_set_error('google_tag_include_classes', t('To validate listed classes, include the whitelist and blacklist variables in the realm variables.'));
     return;
