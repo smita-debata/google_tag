@@ -86,8 +86,8 @@ class GoogleTagSettingsForm extends ConfigFormBase {
     ];
 
     $args = [
-      '%blog' => 'blog',
-      '%blog-wildcard' => 'blog/*',
+      '%blog' => '/blog',
+      '%blog-wildcard' => '/blog/*',
       '%front' => '<front>',
     ];
 
