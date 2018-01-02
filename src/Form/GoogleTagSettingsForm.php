@@ -63,9 +63,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
     ];
 
     // Page paths tab.
-    $description = $this->t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
-    $description .= $this->t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
-    $description .= $this->t(' On this tab, specify the path condition.');
+    $description = $this->t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />On this tab, specify the path condition.');
 
     // @todo Use singular for element names.
     $form['path'] = [
