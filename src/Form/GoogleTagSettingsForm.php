@@ -357,7 +357,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       $result = $this->saveSnippets();
     }
     else {
-      $description = t('Failed to create or make writable the directory %directory, possibly due to a permissions problem. Make the directory writable.', array('%directory' => $directory));
+      drupal_set_message($this->t('Failed to create or make writable the directory %directory, possibly due to a permissions problem. Make the directory writable.', ['%directory' => $directory]), 'error');
     }
     return $result;
   }
@@ -378,10 +378,10 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       $result = !$path ? FALSE : $result;
     }
     if (!$result) {
-      drupal_set_message($this->t('An error occurred saving one or more snippet files. Please try again or contact the site administrator if it persists.'));
+      drupal_set_message($this->t('An error occurred saving one or more GoogleTagManager snippet files. Please try again or contact the site administrator if it persists.'), 'error');
     }
     else {
-      drupal_set_message($this->t('Created three snippet files based on configuration.'));
+      drupal_set_message($this->t('Created three GoogleTagManager snippet files based on configuration.'));
       \Drupal::service('asset.js.collection_optimizer')->deleteAll();
       _drupal_flush_css_js();
     }
