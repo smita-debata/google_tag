@@ -225,7 +225,10 @@ function google_tag_settings_form_submit($form, &$form_state) {
     $global->addStore('default', $variables);
   }
 
-  _google_tag_assets_create($count);
+  // Set global to avoid message display to non-admin users on cache flush or cron.
+  global $google_tag_display_message;
+  $google_tag_display_message = TRUE;
+  _google_tag_assets_create();
 }
 
 /**
@@ -241,9 +244,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
  * - sub case: some google_tag variables are realm-specific
  *   update all snippet files based on global and realm-specific variables
  */
-function _google_tag_assets_create(&$count) {
-  $count = 0;
-
+function _google_tag_assets_create() {
   if (module_exists('variable_realm') && module_exists('variable_store')) {
     // i18n_variable module depends on variable_realm, variable_store
     $realms = variable_realm_list();
@@ -255,7 +256,6 @@ function _google_tag_assets_create(&$count) {
         if (_google_tag_directory_prepare($realm_name)) {
           _google_tag_snippets_save($realm_name, $key_name);
           _google_tag_classes_save($realm_name, $key_name);
-          $count++;
         }
       }
     }
@@ -264,7 +264,6 @@ function _google_tag_assets_create(&$count) {
     if (_google_tag_directory_prepare()) {
       _google_tag_snippets_save();
       _google_tag_classes_save();
-      $count++;
     }
   }
 
@@ -282,42 +281,36 @@ function _google_tag_directory_prepare($realm_name = '') {
   // From google_tag_requirements(); this should be a helper function (in core).
   $directory = 'public://google_tag';
   $directory .= $realm_name ? "/$realm_name" : '';
-  if (!is_dir($directory) || !is_writable($directory) || !_google_tag_is_executable($directory)) {
-    file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+  if (is_dir($directory) && is_writable($directory) && _google_tag_is_executable($directory)) {
+    return TRUE;
   }
-  $is_executable = _google_tag_is_executable($directory);
-  $is_writable = is_writable($directory);
-  $is_directory = is_dir($directory);
-  if (!$is_executable || !$is_writable || !$is_directory) {
-    // The snippet directory does not exist or is not writable or searchable.
+  if (file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+    return TRUE;
+  }
 
-    // If applicable, get the directory path of stream wrapper.
-    $wrapper = file_stream_wrapper_get_instance_by_uri($directory);
-    if (method_exists($wrapper, 'getDirectoryPath') && ($path = $wrapper->getDirectoryPath())) {
-      // getDirectoryPath() is not defined in StreamWrapperInterface; it
-      // exists in LocalStream and the local storage replacement classes in
-      // google_appengine; s3fs returns an empty string.
-      $path .= str_replace('public://', '/', $directory);
-    }
-    elseif (!($path = $wrapper->getExternalUrl())) {
-      $path = $directory;
-    }
+  // The snippet directory does not exist or is not writable or searchable.
 
-    $args = array('%directory' => $path);
+  // If applicable, get the directory path of stream wrapper.
+  $wrapper = file_stream_wrapper_get_instance_by_uri($directory);
+  if (method_exists($wrapper, 'getDirectoryPath') && ($path = $wrapper->getDirectoryPath())) {
+    // getDirectoryPath() is not defined in StreamWrapperInterface; it
+    // exists in LocalStream and the local storage replacement classes in
+    // google_appengine; s3fs returns an empty string.
+    $path .= str_replace('public://', '/', $directory);
+  }
+  elseif (!($path = $wrapper->getExternalUrl())) {
+    $path = $directory;
+  }
 
-    // @todo Combine these into a single message.
-    if (!$is_directory) {
-      $message = 'The directory %directory does not exist. An automated attempt to create the directory failed, possibly due to a permissions problem. Create the directory and make it writable and searchable.';
-    }
-    elseif (!$is_writable) {
-      $message = 'The directory %directory is not writable. An automated attempt to make the directory writable failed, possibly due to a permissions problem. Make the directory writable.';
-    }
-    else {
-      $message = 'The directory %directory is not searchable. An automated attempt to make the directory searchable failed, possibly due to a permissions problem. Make the directory searchable.';
-    }
+  $args = array('%directory' => $path);
+  $message = 'The directory %directory could not be prepared for use, possibly due to file system permissions. The directory either does not exist, or is not writable or searchable.';
+  global $google_tag_display_message;
+  if ($google_tag_display_message) {
+    // Only display message to admin users.
     drupal_set_message(t($message, $args), 'error');
   }
-  return $is_executable && $is_writable && $is_directory;
+  watchdog('google_tag', $message, $args, WATCHDOG_ERROR);
+  return FALSE;
 }
 
 /**
@@ -327,6 +320,7 @@ function _google_tag_directory_prepare($realm_name = '') {
  *   Whether the files were saved.
  */
 function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
+  $realm_string = $realm_name ? "$realm_name:$realm_key" : 'default';
   $realm_name .= $realm_name ? '/' : '';
   $realm_key .= $realm_key ? '.' : '';
   // Save the altered snippets after hook_google_tag_snippets_alter().
@@ -337,11 +331,34 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
     $path = file_unmanaged_save_data($snippet, "public://google_tag/{$realm_name}google_tag.$realm_key$type.js", FILE_EXISTS_REPLACE);
     $result = !$path ? FALSE : $result;
   }
-  if (!$result) {
-    drupal_set_message(t('An error occurred saving one or more snippet files. Please try again or contact the site administrator if it persists.'));
+
+  $args = array(
+    '@count' => count($snippets),
+    '@realm' => $realm_string,
+  );
+  if ($realm_name) {
+    if (!$result) {
+      $message = 'An error occurred saving @count snippet files for @realm realm. Try again or contact the site administrator if this persists.';
+    }
+    else {
+      $message = 'Created @count snippet files for @realm realm based on configuration.';
+    }
   }
   else {
-    drupal_set_message(t('Created three snippet files based on configuration.'));
+    if (!$result) {
+      $message = 'An error occurred saving @count snippet files. Try again or contact the site administrator if this persists.';
+    }
+    else {
+      $message = 'Created @count snippet files based on configuration.';
+    }
+  }
+  global $google_tag_display_message;
+  if ($google_tag_display_message) {
+    // Only display message to admin users.
+    drupal_set_message(t($message, $args), $result ? 'status' : 'error');
+  }
+  if (!$result) {
+    watchdog('google_tag', $message, $args, WATCHDOG_ERROR);
   }
 }
 
