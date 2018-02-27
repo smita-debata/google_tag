@@ -252,18 +252,20 @@ function _google_tag_assets_create(&$count) {
       foreach ($keys as $key_name => $key_title) {
         drupal_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
         variable_realm_switch($realm_name, $key_name);
-        _google_tag_directory_prepare($realm_name);
-        _google_tag_snippets_save($realm_name, $key_name);
-        _google_tag_classes_save($realm_name, $key_name);
-        $count++;
+        if (_google_tag_directory_prepare($realm_name)) {
+          _google_tag_snippets_save($realm_name, $key_name);
+          _google_tag_classes_save($realm_name, $key_name);
+          $count++;
+        }
       }
     }
   }
   else {
-    _google_tag_directory_prepare();
-    _google_tag_snippets_save();
-    _google_tag_classes_save();
-    $count++;
+    if (_google_tag_directory_prepare()) {
+      _google_tag_snippets_save();
+      _google_tag_classes_save();
+      $count++;
+    }
   }
 
   _drupal_flush_css_js();
@@ -272,19 +274,50 @@ function _google_tag_assets_create(&$count) {
 
 /**
  * Prepares directory for base or realm specific snippet files.
+ *
+ * @return bool
+ *   Whether the directory was prepared.
  */
 function _google_tag_directory_prepare($realm_name = '') {
   // From google_tag_requirements(); this should be a helper function (in core).
   $directory = 'public://google_tag';
   $directory .= $realm_name ? "/$realm_name" : '';
-  if (!is_dir($directory) || !is_writable($directory)) {
+  if (!is_dir($directory) || !is_writable($directory) || !_google_tag_is_executable($directory)) {
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
   }
+  $is_executable = _google_tag_is_executable($directory);
   $is_writable = is_writable($directory);
   $is_directory = is_dir($directory);
-  if (!$is_writable || !$is_directory) {
-    // @todo Do something.
+  if (!$is_executable || !$is_writable || !$is_directory) {
+    // The snippet directory does not exist or is not writable or searchable.
+
+    // If applicable, get the directory path of stream wrapper.
+    $wrapper = file_stream_wrapper_get_instance_by_uri($directory);
+    if (method_exists($wrapper, 'getDirectoryPath') && ($path = $wrapper->getDirectoryPath())) {
+      // getDirectoryPath() is not defined in StreamWrapperInterface; it
+      // exists in LocalStream and the local storage replacement classes in
+      // google_appengine; s3fs returns an empty string.
+      $path .= str_replace('public://', '/', $directory);
+    }
+    elseif (!($path = $wrapper->getExternalUrl())) {
+      $path = $directory;
+    }
+
+    $args = array('%directory' => $path);
+
+    // @todo Combine these into a single message.
+    if (!$is_directory) {
+      $message = 'The directory %directory does not exist. An automated attempt to create the directory failed, possibly due to a permissions problem. Create the directory and make it writable and searchable.';
+    }
+    elseif (!$is_writable) {
+      $message = 'The directory %directory is not writable. An automated attempt to make the directory writable failed, possibly due to a permissions problem. Make the directory writable.';
+    }
+    else {
+      $message = 'The directory %directory is not searchable. An automated attempt to make the directory searchable failed, possibly due to a permissions problem. Make the directory searchable.';
+    }
+    drupal_set_message(t($message, $args), 'error');
   }
+  return $is_executable && $is_writable && $is_directory;
 }
 
 /**
@@ -360,5 +393,29 @@ function _google_tag_data_layer_verify($value) {
     // @todo Setting form error does not allow user to save a different name,
     // i.e. to do what message text says.
     return t('The 1.1 release of the dataLayer module does not support a data layer name other than "dataLayer." If you need a different layer name, then either disable the dataLayer module or alter the JavaScript added to the page response.');
+  }
+}
+
+/**
+ * Determines whether a directory is searchable.
+ *
+ * Remove this if PHP is_executable() is changed to not return FALSE simply
+ * because the URI points to a directory (not a file) in a stream wrapper other
+ * than the local file wrapper provided by PHP.
+ *
+ * @param string $uri
+ *   A directory path or stream wrapper URI.
+ *
+ * @return bool
+ *   Whether the directory is searchable.
+ */
+function _google_tag_is_executable($uri) {
+  if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
+    $stat = $wrapper->url_stat($uri, 0);
+    // Return true if directory is searchable by user or group.
+    return ($stat['mode'] & 0110) != 0;
+  }
+  else {
+    return is_executable($uri);
   }
 }
