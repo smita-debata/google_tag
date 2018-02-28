@@ -299,3 +299,27 @@ function _google_tag_role_check() {
   }
   return $satisfied;
 }
+
+/**
+ * Determines whether a directory is searchable.
+ *
+ * Remove this if PHP is_executable() is changed to not return FALSE simply
+ * because the URI points to a directory (not a file) in a stream wrapper other
+ * than the local file wrapper provided by PHP.
+ *
+ * @param string $uri
+ *   A directory path or stream wrapper URI.
+ *
+ * @return bool
+ *   Whether the directory is searchable.
+ */
+function _google_tag_is_executable($uri) {
+  if ($wrapper = \Drupal::service('stream_wrapper_manager')->getViaUri($uri)) {
+    $stat = $wrapper->url_stat($uri, 0);
+    // Return true if directory is searchable by user or group.
+    return ($stat['mode'] & 0110) != 0;
+  }
+  else {
+    return is_executable($uri);
+  }
+}

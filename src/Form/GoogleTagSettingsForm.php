@@ -350,14 +350,14 @@ class GoogleTagSettingsForm extends ConfigFormBase {
   public function createAssets() {
     $result = TRUE;
     $directory = 'public://google_tag';
-    if (!is_dir($directory) || !is_writable($directory)) {
+    if (!is_dir($directory) || !is_writable($directory) || !_google_tag_is_executable($directory)) {
       $result = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
     if ($result) {
       $result = $this->saveSnippets();
     }
     else {
-      drupal_set_message($this->t('Failed to create or make writable the directory %directory, possibly due to a permissions problem. Make the directory writable.', ['%directory' => $directory]), 'error');
+      drupal_set_message($this->t('The directory %directory could not be prepared for use, possibly due to file system permissions. The directory either does not exist, or is not writable or searchable.', ['%directory' => $directory]), 'error');
     }
     return $result;
   }
