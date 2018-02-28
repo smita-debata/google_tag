@@ -338,6 +338,8 @@ class GoogleTagSettingsForm extends ConfigFormBase {
 
     parent::submitForm($form, $form_state);
 
+    global $google_tag_display_message;
+    $google_tag_display_message = TRUE;
     $this->createAssets();
   }
 
@@ -357,7 +359,10 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       $result = $this->saveSnippets();
     }
     else {
-      drupal_set_message($this->t('The directory %directory could not be prepared for use, possibly due to file system permissions. The directory either does not exist, or is not writable or searchable.', ['%directory' => $directory]), 'error');
+      $args = ['%directory' => $directory];
+      $message = 'The directory %directory could not be prepared for use, possibly due to file system permissions. The directory either does not exist, or is not writable or searchable.';
+      $this->displayMessage($message, $args, 'error');
+      \Drupal::logger('google_tag')->error($message, $args);
     }
     return $result;
   }
@@ -377,11 +382,15 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       $path = file_unmanaged_save_data($snippet, "public://google_tag/google_tag.$type.js", FILE_EXISTS_REPLACE);
       $result = !$path ? FALSE : $result;
     }
+    $args = ['@count' => count($snippets)];
     if (!$result) {
-      drupal_set_message($this->t('An error occurred saving one or more GoogleTagManager snippet files. Please try again or contact the site administrator if it persists.'), 'error');
+      $message = 'An error occurred saving @count snippet files. Contact the site administrator if this persists.';
+      $this->displayMessage($message, $args, 'error');
+      \Drupal::logger('google_tag')->error($message, $args);
     }
     else {
-      drupal_set_message($this->t('Created three GoogleTagManager snippet files based on configuration.'));
+      $message = 'Created @count snippet files based on configuration.';
+      $this->displayMessage($message, $args);
       \Drupal::service('asset.js.collection_optimizer')->deleteAll();
       _drupal_flush_css_js();
     }
@@ -407,5 +416,17 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       $text = implode("\n", $text);
     }
     return $text;
+  }
+
+  /**
+   * Displays a message to admin users.
+   *
+   * @see arguments to t() and drupal_set_message()
+   */
+  public function displayMessage($message, $args = [], $type = 'status') {
+    global $google_tag_display_message;
+    if ($google_tag_display_message) {
+      drupal_set_message($this->t($message, $args), $type);
+    }
   }
 }
