@@ -304,11 +304,7 @@ function _google_tag_directory_prepare($realm_name = '') {
 
   $args = array('%directory' => $path);
   $message = 'The directory %directory could not be prepared for use, possibly due to file system permissions. The directory either does not exist, or is not writable or searchable.';
-  global $google_tag_display_message;
-  if ($google_tag_display_message) {
-    // Only display message to admin users.
-    drupal_set_message(t($message, $args), 'error');
-  }
+  _google_tag_message_display($message, $args, 'error');
   watchdog('google_tag', $message, $args, WATCHDOG_ERROR);
   return FALSE;
 }
@@ -332,31 +328,19 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
     $result = !$path ? FALSE : $result;
   }
 
-  $args = array(
-    '@count' => count($snippets),
-    '@realm' => $realm_string,
-  );
+  $args = array('@count' => count($snippets));
   if ($realm_name) {
-    if (!$result) {
-      $message = 'An error occurred saving @count snippet files for @realm realm. Try again or contact the site administrator if this persists.';
-    }
-    else {
-      $message = 'Created @count snippet files for @realm realm based on configuration.';
-    }
+    $args += array('@realm' => $realm_string);
+    $message = $result
+      ? 'Created @count snippet files for @realm realm based on configuration.'
+      : 'An error occurred saving @count snippet files for @realm realm. Contact the site administrator if this persists.';
   }
   else {
-    if (!$result) {
-      $message = 'An error occurred saving @count snippet files. Try again or contact the site administrator if this persists.';
-    }
-    else {
-      $message = 'Created @count snippet files based on configuration.';
-    }
+    $message = $result
+      ? 'Created @count snippet files based on configuration.'
+      : 'An error occurred saving @count snippet files. Contact the site administrator if this persists.';
   }
-  global $google_tag_display_message;
-  if ($google_tag_display_message) {
-    // Only display message to admin users.
-    drupal_set_message(t($message, $args), $result ? 'status' : 'error');
-  }
+  _google_tag_message_display($message, $args, $result ? 'status' : 'error');
   if (!$result) {
     watchdog('google_tag', $message, $args, WATCHDOG_ERROR);
   }
@@ -465,5 +449,17 @@ function _google_tag_is_executable($uri) {
   }
   else {
     return is_executable($uri);
+  }
+}
+
+/**
+ * Displays a message to admin users.
+ *
+ * @see arguments to t() and drupal_set_message()
+ */
+function _google_tag_message_display($message, $args = array(), $type = 'status') {
+  global $google_tag_display_message;
+  if ($google_tag_display_message) {
+    drupal_set_message(t($message, $args), $type);
   }
 }
