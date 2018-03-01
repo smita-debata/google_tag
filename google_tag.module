@@ -301,6 +301,37 @@ function _google_tag_role_check() {
 }
 
 /**
+ * Checks that the directory exists and is writable.
+ *
+ * @todo Remove this function if core is updated to check the executable bit.
+ *
+ * @see file_prepare_directory()
+ */
+function __file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS) {
+  if (!file_stream_wrapper_valid_scheme(\Drupal::service('file_system')->uriScheme($directory))) {
+    // Only trim if we're not dealing with a stream.
+    $directory = rtrim($directory, '/\\');
+  }
+
+  // Check if directory exists.
+  if (!is_dir($directory)) {
+    // Let mkdir() recursively create directories and use the default directory
+    // permissions.
+    if ($options & FILE_CREATE_DIRECTORY) {
+      return @drupal_mkdir($directory, NULL, TRUE);
+    }
+    return FALSE;
+  }
+  // The directory exists, so check to see if it is writable.
+  $writable = is_writable($directory) && _google_tag_is_executable($directory);
+  if (!$writable && ($options & FILE_MODIFY_PERMISSIONS)) {
+    return drupal_chmod($directory);
+  }
+
+  return $writable;
+}
+
+/**
  * Determines whether a directory is searchable.
  *
  * Remove this if PHP is_executable() is changed to not return FALSE simply

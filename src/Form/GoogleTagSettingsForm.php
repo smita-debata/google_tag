@@ -353,7 +353,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
     $result = TRUE;
     $directory = 'public://google_tag';
     if (!is_dir($directory) || !is_writable($directory) || !_google_tag_is_executable($directory)) {
-      $result = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+      $result = __file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
     if ($result) {
       $result = $this->saveSnippets();
