@@ -345,12 +345,28 @@ function __file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSION
  *   Whether the directory is searchable.
  */
 function _google_tag_is_executable($uri) {
+  if ($realpath = \Drupal::service('file_system')->realpath($uri)) {
+    // The URI is a local stream wrapper or a local path.
+    // Use the local path since PHP only checks ACLs on its local file wrapper.
+    return is_executable($realpath);
+  }
   if ($wrapper = \Drupal::service('stream_wrapper_manager')->getViaUri($uri)) {
-    $stat = $wrapper->url_stat($uri, 0);
-    // Return true if directory is searchable by user or group.
-    return ($stat['mode'] & 0110) != 0;
+    // The URI is a remote stream wrapper.
+    if (!($stat = $wrapper->url_stat($uri, 0))) {
+      return FALSE;
+    }
+
+    // Determine the appropriate permissions bit mask as an octal.
+    // The stat array is likely to have uid=gid=0 so that the mask is octal 01.
+    // This is true for Amazon S3 and Google Cloud Storage.
+    $mask = 1;
+    if ($stat['uid'] == posix_getuid()) {
+      $mask = $mask << 6;
+    }
+    elseif ($stat['gid'] == posix_getgid()) {
+      $mask = $mask << 3;
+    }
+    return ($stat['mode'] & $mask) != 0;
   }
-  else {
-    return is_executable($uri);
-  }
+  return FALSE;
 }
