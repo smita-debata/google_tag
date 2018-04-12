@@ -27,12 +27,12 @@ function google_tag_requirements($phase) {
   if ($phase == 'runtime' || $phase == 'update' || $phase == 'install') {
     // Adapted from system_requirements().
     $directory = 'public://google_tag';
-    if (!is_dir($directory) || !is_writable($directory) || !_google_tag_is_executable($directory)) {
+    if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
       $phase == 'install' ? module_load_include('module', 'google_tag') : '';
       __file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
     $is_executable = _google_tag_is_executable($directory);
-    $is_writable = is_writable($directory);
+    $is_writable = _google_tag_is_writable($directory);
     $is_directory = is_dir($directory);
     if (!$is_executable || !$is_writable || !$is_directory) {
       // The snippet directory does not exist or is not writable or searchable.

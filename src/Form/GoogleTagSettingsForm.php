@@ -352,7 +352,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
   public function createAssets() {
     $result = TRUE;
     $directory = 'public://google_tag';
-    if (!is_dir($directory) || !is_writable($directory) || !_google_tag_is_executable($directory)) {
+    if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
       $result = __file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
     if ($result) {
