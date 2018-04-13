@@ -246,28 +246,17 @@ function google_tag_update_7104(&$sandbox) {
 }
 
 /**
- * Save snippet files and data layer classes based on current settings.
+ * Deprecated update hook; no changes will be made.
  */
 function google_tag_update_7105(&$sandbox) {
-  // This applies if the module is updated from 1.0 release to this commit and
-  // the settings have not been updated manually.
-  // This should have been done in 1.1 release which added the file option and
-  // made it the default over inline. Without snippet files, a site using the
-  // 1.0 release will no longer have anything inserted on any page after update.
-  // (Given the scope of the setting changes, it is arguable whether manual
-  // intervention to update the settings should be required; and hence why this
-  // was omitted in the first place.)
-  global $google_tag_display_message;
-  $google_tag_display_message = TRUE;
-  google_tag_assets_create();
-  return t('Attempted to create snippet files based on configuration. Review the log for any error messages.');
+  // This update used to [re]create the snippet files, but this is no longer
+  // necessary here as hook_enable() and hook_cron() were implemented.
 }
 
 /**
- * Save snippet files and data layer classes based on current settings.
+ * Deprecated update hook; no changes will be made.
  */
 function google_tag_update_7106(&$sandbox) {
-  // Recreate the snippet files in the 'google_tag' directory.
-  // Leave files in the 'js' directory as they will eventually be flushed.
-  return google_tag_update_7105($sandbox);
+  // This update used to [re]create the snippet files, but this is no longer
+  // necessary here as hook_enable() and hook_cron() were implemented.
 }
