@@ -281,7 +281,7 @@ function _google_tag_directory_prepare($realm_name = '') {
   // From google_tag_requirements(); this should be a helper function (in core).
   $directory = 'public://google_tag';
   $directory .= $realm_name ? "/$realm_name" : '';
-  if (is_dir($directory) && is_writable($directory) && _google_tag_is_executable($directory)) {
+  if (is_dir($directory) && _google_tag_is_writable($directory) && _google_tag_is_executable($directory)) {
     return TRUE;
   }
   if (__file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
@@ -420,12 +420,34 @@ function __file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSION
     return FALSE;
   }
   // The directory exists, so check to see if it is writable.
-  $writable = is_writable($directory) && _google_tag_is_executable($directory);
+  $writable = _google_tag_is_writable($directory) && _google_tag_is_executable($directory);
   if (!$writable && ($options & FILE_MODIFY_PERMISSIONS)) {
     return drupal_chmod($directory);
   }
 
   return $writable;
+}
+
+/**
+ * Determines whether a directory is writable.
+ *
+ * Remove this if PHP is_writable() is changed to respect ACLS on a 'local'
+ * stream wrapper other than the local file wrapper provided by PHP.
+ *
+ * @param string $uri
+ *   A directory path or stream wrapper URI.
+ *
+ * @return bool
+ *   Whether the directory is writable.
+ */
+function _google_tag_is_writable($uri) {
+  // Use the local path, if applicable, since PHP only checks ACLs on its local
+  // file wrapper.
+  $realpath = FALSE;
+  if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
+    $realpath = $wrapper->realpath($uri);
+  }
+  return is_writable($realpath ? $realpath : $uri);
 }
 
 /**

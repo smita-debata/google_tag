@@ -73,11 +73,11 @@ function google_tag_requirements($phase) {
     // Adapted from system_requirements().
     $directory = 'public://google_tag';
     module_load_include('inc', 'google_tag', 'includes/admin');
-    if (!is_dir($directory) || !is_writable($directory) || !_google_tag_is_executable($directory)) {
+    if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
       __file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
     $is_executable = _google_tag_is_executable($directory);
-    $is_writable = is_writable($directory);
+    $is_writable = _google_tag_is_writable($directory);
     $is_directory = is_dir($directory);
     if (!$is_executable || !$is_writable || !$is_directory) {
       // The snippet directory does not exist or is not writable or searchable.
