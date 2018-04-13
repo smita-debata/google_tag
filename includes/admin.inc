@@ -443,11 +443,31 @@ function __file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSION
  */
 function _google_tag_is_executable($uri) {
   if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
-    $stat = $wrapper->url_stat($uri, 0);
-    // Return true if directory is searchable by user or group.
-    return ($stat['mode'] & 0110) != 0;
+    if ($realpath = $wrapper->realpath($uri)) {
+      // The URI is a local stream wrapper.
+      // Use local path since PHP only checks ACLs on its local file wrapper.
+      return is_executable($realpath);
+    }
+
+    // The URI is a remote stream wrapper.
+    if (!($stat = $wrapper->url_stat($uri, 0))) {
+      return FALSE;
+    }
+
+    // Determine the appropriate permissions bit mask as an octal.
+    // The stat array is likely to have uid=gid=0 so that the mask is octal 01.
+    // This is true for Amazon S3 and Google Cloud Storage.
+    $mask = 1;
+    if ($stat['uid'] == posix_getuid()) {
+      $mask = $mask << 6;
+    }
+    elseif ($stat['gid'] == posix_getgid()) {
+      $mask = $mask << 3;
+    }
+    return ($stat['mode'] & $mask) != 0;
   }
   else {
+    // The URI is a local path.
     return is_executable($uri);
   }
 }
