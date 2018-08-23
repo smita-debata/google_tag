@@ -260,7 +260,7 @@ function _google_tag_path_check() {
       $path_matcher = \Drupal::service('path.matcher');
       // @todo Are not some paths case sensitive???
       // Compare the lowercase path alias (if any) and internal path.
-      $path = rtrim($current_path->getPath($request), '/');
+      $path = $current_path->getPath($request);
       $path_alias = Unicode::strtolower($alias_manager->getAliasByPath($path));
       $satisfied = $path_matcher->matchPath($path_alias, $paths) || (($path != $path_alias) && $path_matcher->matchPath($path, $paths));
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
