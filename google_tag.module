@@ -159,11 +159,12 @@ function google_tag_page_top(&$page) {
   // The markup is passed through \Drupal\Component\Utility\Xss::filterAdmin()
   // which strips known vectors while allowing a permissive list of HTML tags
   // that are not XSS vectors. (e.g., <script> and <style> are not allowed.)
-  // @todo Core is removing the 'style' attribute from the noscript snippet.
+  // As markup, core removes the 'style' attribute from the noscript snippet.
+  // With the inline template type, core does not alter the noscript snippet.
   if ($contents) {
     $page['google_tag_noscript_tag'] = [
-      '#markup' => $contents,
-      '#allowed_tags' => ['noscript', 'iframe'],
+      '#type' => 'inline_template',
+      '#template' => $contents,
       '#weight' => -10,
     ];
   }
