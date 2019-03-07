@@ -318,7 +318,7 @@ function _google_tag_status_check() {
     else {
       // Get the HTTP response status.
       $status = drupal_get_http_header('status');
-      $satisfied = strpos($statuses, $status) !== FALSE;
+      $satisfied = $status && strpos($statuses, $status) !== FALSE;
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
     $debug ? drupal_set_message(t('google_tag')) : '';
