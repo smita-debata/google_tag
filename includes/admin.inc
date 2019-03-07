@@ -476,6 +476,14 @@ function _google_tag_is_executable($uri) {
       return FALSE;
     }
 
+    if (!function_exists('posix_getuid') || !function_exists('posix_getgid')) {
+      // These functions are never defined on Windows and the extension that
+      // provides them may not be included on a Linux distribution.
+      // If directory is not searchable, then fault the site deployment process.
+      // @todo Is it worse to return true or false at this point?
+      return TRUE;
+    }
+
     // Determine the appropriate permissions bit mask as an octal.
     // The stat array is likely to have uid=gid=0 so that the mask is octal 01.
     // This is true for Amazon S3 and Google Cloud Storage.
