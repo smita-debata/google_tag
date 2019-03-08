@@ -319,7 +319,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       ->set('path_toggle', $form_state->getValue('path_toggle'))
       ->set('path_list', $form_state->getValue('path_list'))
       ->set('role_toggle', $form_state->getValue('role_toggle'))
-      ->set('role_list', $form_state->getValue('role_list'))
+      ->set('role_list', array_filter($form_state->getValue('role_list')))
       ->set('status_toggle', $form_state->getValue('status_toggle'))
       ->set('status_list', $form_state->getValue('status_list'))
       ->set('compact_snippet', $form_state->getValue('compact_snippet'))
