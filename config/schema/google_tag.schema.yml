@@ -58,4 +58,3 @@ google_tag.settings:
     environment_token:
       type: string
       label: 'Environment token'
-

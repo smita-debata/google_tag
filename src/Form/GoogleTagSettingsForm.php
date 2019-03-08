@@ -10,8 +10,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class GoogleTagSettingsForm
- * @package Drupal\google_tag\Form
+ * Configure Google tag manager settings for this site.
  */
 class GoogleTagSettingsForm extends ConfigFormBase {
 
@@ -115,7 +114,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('role_toggle'),
     ];
 
-    $user_roles = array_map(function($role) {
+    $user_roles = array_map(function ($role) {
       return $role->label();
     }, user_roles());
 
@@ -300,8 +299,8 @@ class GoogleTagSettingsForm extends ConfigFormBase {
 
     if (!preg_match('/^GTM-\w{4,}$/', $container_id)) {
       // @todo Is there a more specific regular expression that applies?
-      // @todo Is there a way to "test the connection" to determine a valid ID for
-      // a container? It may be valid but not the correct one for the website.
+      // @todo Is there a way to validate the container ID?
+      // It may be valid but not the correct one for the website.
       $form_state->setError($form['general']['container_id'], $this->t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
     }
     if ($form_state->getValue('include_environment') && !preg_match('/^env-\d{1,}$/', $environment_id)) {
@@ -338,8 +337,8 @@ class GoogleTagSettingsForm extends ConfigFormBase {
 
     parent::submitForm($form, $form_state);
 
-    global $google_tag_display_message;
-    $google_tag_display_message = TRUE;
+    global $_google_tag_display_message;
+    $_google_tag_display_message = TRUE;
     $this->createAssets();
   }
 
@@ -421,11 +420,18 @@ class GoogleTagSettingsForm extends ConfigFormBase {
   /**
    * Displays a message to admin users.
    *
-   * @see arguments to t() and drupal_set_message()
+   * See arguments to t() and drupal_set_message().
+   *
+   * @param string $message
+   *   The message to display.
+   * @param array $args
+   *   (optional) An associative array of replacements.
+   * @param string $type
+   *   (optional) The message type. Defaults to 'status'.
    */
-  public function displayMessage($message, $args = [], $type = 'status') {
-    global $google_tag_display_message;
-    if ($google_tag_display_message) {
+  public function displayMessage($message, array $args = [], $type = 'status') {
+    global $_google_tag_display_message;
+    if ($_google_tag_display_message) {
       drupal_set_message($this->t($message, $args), $type);
     }
   }
