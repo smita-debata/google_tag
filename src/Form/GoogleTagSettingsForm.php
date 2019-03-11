@@ -297,6 +297,8 @@ class GoogleTagSettingsForm extends ConfigFormBase {
     $form_state->setValue('container_id', $container_id);
     $form_state->setValue('environment_id', $environment_id);
 
+    $form_state->setValue('role_list', array_filter($form_state->getValue('role_list')));
+
     if (!preg_match('/^GTM-\w{4,}$/', $container_id)) {
       // @todo Is there a more specific regular expression that applies?
       // @todo Is there a way to validate the container ID?
@@ -319,7 +321,7 @@ class GoogleTagSettingsForm extends ConfigFormBase {
       ->set('path_toggle', $form_state->getValue('path_toggle'))
       ->set('path_list', $form_state->getValue('path_list'))
       ->set('role_toggle', $form_state->getValue('role_toggle'))
-      ->set('role_list', array_filter($form_state->getValue('role_list')))
+      ->set('role_list', $form_state->getValue('role_list'))
       ->set('status_toggle', $form_state->getValue('status_toggle'))
       ->set('status_list', $form_state->getValue('status_list'))
       ->set('compact_snippet', $form_state->getValue('compact_snippet'))
