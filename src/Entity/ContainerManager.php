@@ -184,10 +184,13 @@ class ContainerManager implements ContainerManagerInterface {
    * {@inheritdoc}
    */
   public function createAllAssets() {
+    $ids = $this->loadContainerIDs();
+    if (!$ids) {
+      return;
+    }
     // Remove any stale files (e.g. module update or machine name change).
     @file_unmanaged_delete_recursive(\Drupal::config('google_tag.settings')->get('uri') . '/');
     // Create snippet files for enabled containers.
-    $ids = $this->loadContainerIDs();
     $containers = $this->entityTypeManager->getStorage('google_tag_container')->loadMultiple($ids);
     $result = TRUE;
     foreach ($containers as $container) {
