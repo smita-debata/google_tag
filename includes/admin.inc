@@ -468,7 +468,9 @@ function _google_tag_is_executable($uri) {
     if ($realpath = $wrapper->realpath($uri)) {
       // The URI is a local stream wrapper.
       // Use local path since PHP only checks ACLs on its local file wrapper.
-      return is_executable($realpath);
+      // Remove the OS check if PHP is_executable() is changed to not return FALSE
+      // simply because the URI points to a directory (not a file) on Windows.
+      return _google_tag_is_windows() || is_executable($realpath);
     }
 
     // The URI is a remote stream wrapper.
@@ -500,6 +502,17 @@ function _google_tag_is_executable($uri) {
     // The URI is a local path.
     return is_executable($uri);
   }
+}
+
+/**
+ * Determines whether the operating system is Windows.
+ *
+ * @return bool
+ *   Whether the operating system is Windows.
+ */
+function _google_tag_is_windows() {
+  return (defined('PHP_OS_FAMILY') && PHP_OS_FAMILY == 'Windows') ||
+    (defined('PHP_OS') && strcasecmp(substr(PHP_OS, 0, 3), 'win') == 0);
 }
 
 /**
