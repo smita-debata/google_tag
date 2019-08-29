@@ -544,15 +544,16 @@ EOS;
     $uri = $this->snippetURI($type);
     $url = \Drupal::service('file_system')->realpath($uri);
     $contents = @file_get_contents($url);
-    $attachment = $contents ? [
-      [
+    $attachment = [
+      $contents ? [
         '#type' => 'html_tag',
         '#tag' => 'script',
         '#value' => new FormattableMarkup($contents, []),
         '#weight' => $weight,
-      ],
+      ]
+      : ['#type' => 'ignore_tag'],
       "google_tag_{$type}_tag__{$this->id()}",
-    ] : [];
+    ];
     return $attachment;
   }
 
