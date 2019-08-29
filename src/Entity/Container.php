@@ -2,6 +2,7 @@
 
 namespace Drupal\google_tag\Entity;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
@@ -547,7 +548,7 @@ EOS;
       [
         '#type' => 'html_tag',
         '#tag' => 'script',
-        '#value' => $contents,
+        '#value' => new FormattableMarkup($contents, []),
         '#weight' => $weight,
       ],
       "google_tag_{$type}_tag__{$this->id()}",
