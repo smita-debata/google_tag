@@ -110,7 +110,7 @@ function google_tag_requirements($phase) {
         $value = $t('Not searchable');
       }
       if ($phase == 'install') {
-        $description .= $t(' For more information, see INSTALL.txt or the <a href=":handbook_url">online handbook</a>.', array(':handbook_url' => 'https://www.drupal.org/server-permissions'));
+        $description .= $t(' For more information, see INSTALL.txt or the <a href="!handbook_url">online handbook</a>.', array('!handbook_url' => 'https://www.drupal.org/server-permissions'));
         $value = '';
       }
       $requirements['google_tag_snippet_directory'] = array(
