@@ -141,3 +141,15 @@ function google_tag_update_8101(&$sandbox) {
 
   return t('Converted config item to separate settings and container config items');
 }
+
+/**
+ * Install the container configuration entity type.
+ */
+function google_tag_update_8102(&$sandbox) {
+  $type_manager = \Drupal::entityTypeManager();
+  $type_manager->clearCachedDefinitions();
+  $entity_type = $type_manager->getDefinition('google_tag_container');
+  \Drupal::entityDefinitionUpdateManager()->installEntityType($entity_type);
+
+  return t('Installed the google_tag_container entity type');
+}
