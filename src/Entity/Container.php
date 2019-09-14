@@ -360,28 +360,28 @@ EOS;
    *   TRUE if the conditions are met; FALSE otherwise.
    */
   public function insertSnippet() {
-    static $satisfied;
+    static $satisfied = [];
 
-    if (!isset($satisfied)) {
+    if (!isset($satisfied[$this->id])) {
       $debug = \Drupal::config('google_tag.settings')->get('debug_output');
       $id = $this->get('container_id');
 
       if (empty($id)) {
         // No container ID.
-        return FALSE;
+        return $satisfied[$this->id] = FALSE;
       }
 
-      $satisfied = TRUE;
+      $satisfied[$this->id] = TRUE;
       if (!$this->statusCheck() || !$this->pathCheck() || !$this->roleCheck()) {
         // Omit snippet if any condition is not met.
-        $satisfied = FALSE;
+        $satisfied[$this->id] = FALSE;
       }
 
       // Allow other modules to alter the insertion criteria.
-      \Drupal::moduleHandler()->alter('google_tag_insert', $satisfied);
-      $debug ? drupal_set_message(t('after alter @satisfied', ['@satisfied' => $satisfied])) : '';
+      \Drupal::moduleHandler()->alter('google_tag_insert', $satisfied[$this->id]);
+      $debug ? drupal_set_message(t('after alter @satisfied', ['@satisfied' => $satisfied[$this->id]])) : '';
     }
-    return $satisfied;
+    return $satisfied[$this->id];
   }
 
   /**
@@ -391,29 +391,25 @@ EOS;
    *   TRUE if the status conditions are met; FALSE otherwise.
    */
   protected function statusCheck() {
-    static $satisfied;
+    $debug = \Drupal::config('google_tag.settings')->get('debug_output');
+    $toggle = $this->get('status_toggle');
+    $statuses = $this->get('status_list');
 
-    if (!isset($satisfied)) {
-      $debug = \Drupal::config('google_tag.settings')->get('debug_output');
-      $toggle = $this->get('status_toggle');
-      $statuses = $this->get('status_list');
-
-      if (empty($statuses)) {
-        $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
-      }
-      else {
-        // Get the HTTP response status.
-        $request = \Drupal::request();
-        $status = '200';
-        if ($exception = $request->attributes->get('exception')) {
-          $status = $exception->getStatusCode();
-        }
-        $satisfied = strpos($statuses, (string) $status) !== FALSE;
-        $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
-      }
-      $debug ? drupal_set_message(t('google_tag')) : '';
-      $debug ? drupal_set_message(t('status check @satisfied', ['@satisfied' => $satisfied])) : '';
+    if (empty($statuses)) {
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
+    else {
+      // Get the HTTP response status.
+      $request = \Drupal::request();
+      $status = '200';
+      if ($exception = $request->attributes->get('exception')) {
+        $status = $exception->getStatusCode();
+      }
+      $satisfied = strpos($statuses, (string) $status) !== FALSE;
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
+    }
+    $debug ? drupal_set_message(t('google_tag')) : '';
+    $debug ? drupal_set_message(t('status check @satisfied', ['@satisfied' => $satisfied])) : '';
     return $satisfied;
   }
 
@@ -424,30 +420,26 @@ EOS;
    *   TRUE if the path conditions are met; FALSE otherwise.
    */
   protected function pathCheck() {
-    static $satisfied;
+    $debug = \Drupal::config('google_tag.settings')->get('debug_output');
+    $toggle = $this->get('path_toggle');
+    $paths = Unicode::strtolower($this->get('path_list'));
 
-    if (!isset($satisfied)) {
-      $debug = \Drupal::config('google_tag.settings')->get('debug_output');
-      $toggle = $this->get('path_toggle');
-      $paths = Unicode::strtolower($this->get('path_list'));
-
-      if (empty($paths)) {
-        $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
-      }
-      else {
-        $request = \Drupal::request();
-        $current_path = \Drupal::service('path.current');
-        $alias_manager = \Drupal::service('path.alias_manager');
-        $path_matcher = \Drupal::service('path.matcher');
-        // @todo Are not some paths case sensitive???
-        // Compare the lowercase path alias (if any) and internal path.
-        $path = $current_path->getPath($request);
-        $path_alias = Unicode::strtolower($alias_manager->getAliasByPath($path));
-        $satisfied = $path_matcher->matchPath($path_alias, $paths) || (($path != $path_alias) && $path_matcher->matchPath($path, $paths));
-        $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
-      }
-      $debug ? drupal_set_message(t('path check @satisfied', ['@satisfied' => $satisfied])) : '';
+    if (empty($paths)) {
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
+    else {
+      $request = \Drupal::request();
+      $current_path = \Drupal::service('path.current');
+      $alias_manager = \Drupal::service('path.alias_manager');
+      $path_matcher = \Drupal::service('path.matcher');
+      // @todo Are not some paths case sensitive???
+      // Compare the lowercase path alias (if any) and internal path.
+      $path = $current_path->getPath($request);
+      $path_alias = Unicode::strtolower($alias_manager->getAliasByPath($path));
+      $satisfied = $path_matcher->matchPath($path_alias, $paths) || (($path != $path_alias) && $path_matcher->matchPath($path, $paths));
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
+    }
+    $debug ? drupal_set_message(t('path check @satisfied', ['@satisfied' => $satisfied])) : '';
     return $satisfied;
   }
 
@@ -458,24 +450,20 @@ EOS;
    *   TRUE if the role conditions are met; FALSE otherwise.
    */
   protected function roleCheck() {
-    static $satisfied;
+    $debug = \Drupal::config('google_tag.settings')->get('debug_output');
+    $toggle = $this->get('role_toggle');
+    $roles = array_filter($this->get('role_list'));
 
-    if (!isset($satisfied)) {
-      $debug = \Drupal::config('google_tag.settings')->get('debug_output');
-      $toggle = $this->get('role_toggle');
-      $roles = array_filter($this->get('role_list'));
-
-      if (empty($roles)) {
-        $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
-      }
-      else {
-        $satisfied = FALSE;
-        // Check user roles against listed roles.
-        $satisfied = (bool) array_intersect($roles, \Drupal::currentUser()->getRoles());
-        $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
-      }
-      $debug ? drupal_set_message(t('role check @satisfied', ['@satisfied' => $satisfied])) : '';
+    if (empty($roles)) {
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
+    else {
+      $satisfied = FALSE;
+      // Check user roles against listed roles.
+      $satisfied = (bool) array_intersect($roles, \Drupal::currentUser()->getRoles());
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
+    }
+    $debug ? drupal_set_message(t('role check @satisfied', ['@satisfied' => $satisfied])) : '';
     return $satisfied;
   }
 
