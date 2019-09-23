@@ -32,7 +32,7 @@ class SettingsForm extends ConfigFormBase {
 
     // Build form elements.
 
-    $description = $this->t('After configuring the module settings and default container settings, <strong>add a container</strong> on the <a href=":url">container management page</a>.', array(':url' => \Drupal::url('entity.google_tag_container.collection')));
+    $description = $this->t('<br />After configuring the module settings and default container settings, <strong>add a container</strong> on the <a href=":url">container management page</a>.', array(':url' => \Drupal::url('entity.google_tag_container.collection')));
 
     $form['instruction'] = [
       '#type' => 'markup',
