@@ -245,6 +245,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
  *   update all snippet files based on global and realm-specific variables
  */
 function _google_tag_assets_create() {
+  @file_unmanaged_delete_recursive('public://google_tag');
   if (module_exists('variable_realm') && module_exists('variable_store')) {
     // i18n_variable module depends on variable_realm, variable_store
     $realms = variable_realm_list();
