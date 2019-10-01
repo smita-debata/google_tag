@@ -284,7 +284,7 @@ function _google_tag_directory_prepare($realm_name = '') {
   if (is_dir($directory) && _google_tag_is_writable($directory) && _google_tag_is_executable($directory)) {
     return TRUE;
   }
-  if (__file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+  if (_file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
     return TRUE;
   }
 
@@ -404,7 +404,7 @@ function _google_tag_data_layer_verify($value) {
  *
  * @see file_prepare_directory()
  */
-function __file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS) {
+function _file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS) {
   if (!file_stream_wrapper_valid_scheme(file_uri_scheme($directory))) {
     // Only trim if we're not dealing with a stream.
     $directory = rtrim($directory, '/\\');
