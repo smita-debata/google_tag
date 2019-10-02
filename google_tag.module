@@ -75,7 +75,7 @@ function google_tag_page_top(array &$page) {
  *
  * @see file_prepare_directory()
  */
-function __file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS) {
+function _file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS) {
   if (!file_stream_wrapper_valid_scheme(\Drupal::service('file_system')->uriScheme($directory))) {
     // Only trim if we're not dealing with a stream.
     $directory = rtrim($directory, '/\\');
