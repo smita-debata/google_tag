@@ -3,10 +3,10 @@
 namespace Drupal\google_tag\Entity;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Defines the container configuration entity.
@@ -63,6 +63,8 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     "clone-form" = "/admin/structure/google_tag/manage/{google_tag_container}/clone",
  */
 class Container extends ConfigEntityBase implements ConfigEntityInterface {
+
+  use StringTranslationTrait;
 
   /**
    * The machine name for the configuration entity.
@@ -363,7 +365,6 @@ EOS;
     static $satisfied = [];
 
     if (!isset($satisfied[$this->id])) {
-      $debug = \Drupal::config('google_tag.settings')->get('debug_output');
       $id = $this->get('container_id');
 
       if (empty($id)) {
@@ -371,6 +372,7 @@ EOS;
         return $satisfied[$this->id] = FALSE;
       }
 
+      $this->displayMessage('google_tag container ' . $this->id);
       $satisfied[$this->id] = TRUE;
       if (!$this->statusCheck() || !$this->pathCheck() || !$this->roleCheck()) {
         // Omit snippet if any condition is not met.
@@ -379,7 +381,7 @@ EOS;
 
       // Allow other modules to alter the insertion criteria.
       \Drupal::moduleHandler()->alter('google_tag_insert', $satisfied[$this->id]);
-      $debug ? drupal_set_message(t('after alter @satisfied', ['@satisfied' => $satisfied[$this->id]])) : '';
+      $this->displayMessage('after alter @satisfied', ['@satisfied' => $satisfied[$this->id]]);
     }
     return $satisfied[$this->id];
   }
@@ -391,7 +393,6 @@ EOS;
    *   TRUE if the status conditions are met; FALSE otherwise.
    */
   protected function statusCheck() {
-    $debug = \Drupal::config('google_tag.settings')->get('debug_output');
     $toggle = $this->get('status_toggle');
     $statuses = $this->get('status_list');
 
@@ -408,8 +409,7 @@ EOS;
       $satisfied = strpos($statuses, (string) $status) !== FALSE;
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
-    $debug ? drupal_set_message(t('google_tag')) : '';
-    $debug ? drupal_set_message(t('status check @satisfied', ['@satisfied' => $satisfied])) : '';
+    $this->displayMessage('status check @satisfied', ['@satisfied' => $satisfied]);
     return $satisfied;
   }
 
@@ -420,9 +420,8 @@ EOS;
    *   TRUE if the path conditions are met; FALSE otherwise.
    */
   protected function pathCheck() {
-    $debug = \Drupal::config('google_tag.settings')->get('debug_output');
     $toggle = $this->get('path_toggle');
-    $paths = Unicode::strtolower($this->get('path_list'));
+    $paths = mb_strtolower($this->get('path_list'));
 
     if (empty($paths)) {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
@@ -435,11 +434,11 @@ EOS;
       // @todo Are not some paths case sensitive???
       // Compare the lowercase path alias (if any) and internal path.
       $path = $current_path->getPath($request);
-      $path_alias = Unicode::strtolower($alias_manager->getAliasByPath($path));
+      $path_alias = mb_strtolower($alias_manager->getAliasByPath($path));
       $satisfied = $path_matcher->matchPath($path_alias, $paths) || (($path != $path_alias) && $path_matcher->matchPath($path, $paths));
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
-    $debug ? drupal_set_message(t('path check @satisfied', ['@satisfied' => $satisfied])) : '';
+    $this->displayMessage('path check @satisfied', ['@satisfied' => $satisfied]);
     return $satisfied;
   }
 
@@ -450,7 +449,6 @@ EOS;
    *   TRUE if the role conditions are met; FALSE otherwise.
    */
   protected function roleCheck() {
-    $debug = \Drupal::config('google_tag.settings')->get('debug_output');
     $toggle = $this->get('role_toggle');
     $roles = array_filter($this->get('role_list'));
 
@@ -463,8 +461,22 @@ EOS;
       $satisfied = (bool) array_intersect($roles, \Drupal::currentUser()->getRoles());
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
-    $debug ? drupal_set_message(t('role check @satisfied', ['@satisfied' => $satisfied])) : '';
+    $this->displayMessage('role check @satisfied', ['@satisfied' => $satisfied]);
     return $satisfied;
+  }
+
+  /**
+   * Displays a message.
+   *
+   * @param string $message
+   *   The message to display.
+   * @param array $args
+   *   (optional) An associative array of replacements.
+   */
+  protected function displayMessage($message, array $args = []) {
+    if (\Drupal::config('google_tag.settings')->get('debug_output')) {
+      \Drupal::service('messenger')->addStatus($this->t($message, $args), TRUE);
+    }
   }
 
   /**

@@ -385,7 +385,7 @@ class ContainerForm extends EntityForm {
     $manager->createAssets($this->entity);
 
     // Redirect to collection page.
-    return new RedirectResponse($this->entity->url('collection', ['absolute' => TRUE]));
+    return new RedirectResponse($this->entity->toUrl('collection', ['absolute' => TRUE])->toString());
   }
 
   /**

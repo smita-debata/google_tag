@@ -4,6 +4,7 @@ namespace Drupal\google_tag\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Defines the Google tag manager module and default container settings form.
@@ -32,7 +33,7 @@ class SettingsForm extends ConfigFormBase {
 
     // Build form elements.
 
-    $description = $this->t('<br />After configuring the module settings and default container settings, <strong>add a container</strong> on the <a href=":url">container management page</a>.', array(':url' => \Drupal::url('entity.google_tag_container.collection')));
+    $description = $this->t('<br />After configuring the module settings and default container settings, <strong>add a container</strong> on the <a href=":url">container management page</a>.', array(':url' => Url::fromRoute('entity.google_tag_container.collection')->toString()));
 
     $form['instruction'] = [
       '#type' => 'markup',
