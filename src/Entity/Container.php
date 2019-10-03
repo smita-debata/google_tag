@@ -49,12 +49,12 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *     "environment_token",
  *   },
  *   links = {
- *     "add-form" = "/admin/structure/google_tag/add",
- *     "edit-form" = "/admin/structure/google_tag/manage/{google_tag_container}",
- *     "delete-form" = "/admin/structure/google_tag/manage/{google_tag_container}/delete",
- *     "enable" = "/admin/structure/google_tag/manage/{google_tag_container}/enable",
- *     "disable" = "/admin/structure/google_tag/manage/{google_tag_container}/disable",
- *     "collection" = "/admin/structure/google_tag",
+ *     "add-form" = "/admin/config/system/google-tag/add",
+ *     "edit-form" = "/admin/config/system/google-tag/manage/{google_tag_container}",
+ *     "delete-form" = "/admin/config/system/google-tag/manage/{google_tag_container}/delete",
+ *     "enable" = "/admin/config/system/google-tag/manage/{google_tag_container}/enable",
+ *     "disable" = "/admin/config/system/google-tag/manage/{google_tag_container}/disable",
+ *     "collection" = "/admin/config/system/google-tag",
  *   }
  * )
  *
