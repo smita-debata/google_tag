@@ -385,7 +385,7 @@ class ContainerForm extends EntityForm {
     $manager->createAssets($this->entity);
 
     // Redirect to collection page.
-    return new RedirectResponse($this->entity->toUrl('collection', ['absolute' => TRUE])->toString());
+    $form_state->setRedirect('entity.google_tag_container.collection');
   }
 
   /**
