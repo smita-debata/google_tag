@@ -247,19 +247,22 @@ function google_tag_settings_form_submit($form, &$form_state) {
 function _google_tag_assets_create() {
   @file_unmanaged_delete_recursive('public://google_tag');
   if (module_exists('variable_realm') && module_exists('variable_store')) {
+    // Backup global config as switching realm overwrites this array.
+    $backup = $GLOBALS['conf'];
     // i18n_variable module depends on variable_realm, variable_store
     $realms = variable_realm_list();
     foreach ($realms as $realm_name => $realm_title) {
       $keys = variable_realm_keys($realm_name);
       foreach ($keys as $key_name => $key_title) {
         drupal_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
-        variable_realm_switch($realm_name, $key_name, FALSE);
+        variable_realm_switch($realm_name, $key_name);
         if (_google_tag_directory_prepare($realm_name)) {
           _google_tag_snippets_save($realm_name, $key_name);
           _google_tag_classes_save($realm_name, $key_name);
         }
       }
     }
+    $GLOBALS['conf'] = $backup;
   }
   else {
     if (_google_tag_directory_prepare()) {
