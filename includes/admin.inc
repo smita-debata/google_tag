@@ -254,7 +254,7 @@ function _google_tag_assets_create() {
     foreach ($realms as $realm_name => $realm_title) {
       $keys = variable_realm_keys($realm_name);
       foreach ($keys as $key_name => $key_title) {
-        drupal_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
+        _google_tag_message_display('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name));
         variable_realm_switch($realm_name, $key_name);
         if (_google_tag_directory_prepare($realm_name)) {
           _google_tag_snippets_save($realm_name, $key_name);
