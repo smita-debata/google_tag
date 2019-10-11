@@ -4,3 +4,13 @@ package = Statistics
 core = 7.x
 
 configure = admin/config/system/google_tag
+
+files[] = tests/google_tag.base.test
+files[] = tests/google_tag.norealm.test
+files[] = tests/google_tag.realm.test
+
+dependencies[] = drupal:system (>= 7.40)
+
+;test_dependencies[] = variable:variable
+test_dependencies[] = variable:variable_realm
+test_dependencies[] = variable:variable_store
