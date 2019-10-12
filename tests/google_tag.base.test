@@ -36,7 +36,7 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    */
   protected function setUp() {
     $modules = func_get_args();
-    parent::setUp($modules[0]);
+    parent::setUp($modules ? $modules[0] : array());
   }
 
   /**
