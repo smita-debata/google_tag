@@ -22,9 +22,7 @@ function google_tag_settings_form($form, &$form_state) {
   // @todo Set this on validation errors.
   $default_tab = !empty($form_state['default_tab']) ? $form_state['default_tab'] : '';
 
-  $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics.');
-  $description .= t(' All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />');
-  $description .= t(' On this tab, specify the path condition.');
+  $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />On this tab, specify the path condition.');
 
   $groups = array(
     'general' => array('title' => t('General'), 'collapse' => FALSE),
@@ -84,7 +82,7 @@ function google_tag_fieldset($group, $items) {
  * @return array
  *   Associative array of form elements.
  */
-function google_tag_form_elements($variables) {
+function google_tag_form_elements(array $variables) {
   static $keys = array(
     'type' => '#type',
     'title' => '#title',
@@ -225,9 +223,9 @@ function google_tag_settings_form_submit($form, &$form_state) {
     $global->addStore('default', $variables);
   }
 
-  // Set global to avoid message display to non-admin users on cache flush or cron.
-  global $google_tag_display_message;
-  $google_tag_display_message = TRUE;
+  // Set global to avoid message display to non-admin users on cache flush.
+  global $_google_tag_display_message;
+  $_google_tag_display_message = TRUE;
   _google_tag_assets_create();
 }
 
@@ -472,7 +470,7 @@ function _google_tag_is_executable($uri) {
     if ($realpath = $wrapper->realpath($uri)) {
       // The URI is a local stream wrapper.
       // Use local path since PHP only checks ACLs on its local file wrapper.
-      // Remove the OS check if PHP is_executable() is changed to not return FALSE
+      // Remove OS check if PHP is_executable() is changed to not return FALSE
       // simply because the URI points to a directory (not a file) on Windows.
       return _google_tag_is_windows() || is_executable($realpath);
     }
@@ -522,11 +520,11 @@ function _google_tag_is_windows() {
 /**
  * Displays a message to admin users.
  *
- * @see arguments to t() and drupal_set_message()
+ * See arguments to t() and drupal_set_message().
  */
 function _google_tag_message_display($message, $args = array(), $type = 'status') {
-  global $google_tag_display_message;
-  if ($google_tag_display_message) {
+  global $_google_tag_display_message;
+  if ($_google_tag_display_message) {
     drupal_set_message(t($message, $args), $type);
   }
 }

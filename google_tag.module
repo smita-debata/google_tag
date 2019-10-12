@@ -108,7 +108,7 @@ function google_tag_variable_info($options) {
  * - realm name:key = global:default
  * - $form[#variable_options][realm]->realm and key
  *
- * all of these forms have
+ * all of these forms have:
  * - element parents are none
  * - $form[#variable_edit_form] contains list of variables on the form
  * - with first form need to check the variable being in this module

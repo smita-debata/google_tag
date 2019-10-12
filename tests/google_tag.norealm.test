@@ -46,7 +46,7 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
   protected function checkSnippetFiles() {
     $realm_name = $key_name = '';
     foreach ($this->types as $type) {
-      $url = "$this->base_path/google_tag/{$realm_name}google_tag.$key_name$type.js";
+      $url = "$this->basePath/google_tag/{$realm_name}google_tag.$key_name$type.js";
       $contents = @file_get_contents($url);
       $function = "verify{$type}Snippet";
       $this->$function($contents, $this->variables);
@@ -61,7 +61,7 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
     $this->drupalGet('');
     $realm_name = $key_name = '';
     foreach ($this->types as $type) {
-      $uri = "$this->base_path/google_tag/{$realm_name}google_tag.$key_name$type.js";
+      $uri = "$this->basePath/google_tag/{$realm_name}google_tag.$key_name$type.js";
       if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
         $realpath = $wrapper->getExternalUrl($uri);
         $function = "verify{$type}Tag";

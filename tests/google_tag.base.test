@@ -17,7 +17,7 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * @var string|array
    */
   protected $group = 'Google Tag module';
-  protected $base_path = 'public:/';
+  protected $basePath = 'public:/';
   protected $types = array('script', 'noscript');
 
   /**
@@ -153,7 +153,7 @@ class GTMBaseTestCase extends DrupalWebTestCase {
     $xpath = '//div//noscript//iframe';
     $elements = $this->xpath($xpath);
 
-    $contents = (array) $elements[0]['src']/*[0]*/;
+    $contents = (array) $elements[0]['src'];
     $contents = $contents[0];
 
     $status = strpos($contents, "id=$variables->google_tag_container_id") !== FALSE;
