@@ -70,6 +70,8 @@ function google_tag_permission() {
  * This is called from system_cron() and drupal_flush_all_caches().
  */
 function google_tag_flush_caches() {
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
   google_tag_assets_create();
 }
 
@@ -87,6 +89,40 @@ function google_tag_variable_group_info() {
 function google_tag_variable_info($options) {
   module_load_include('inc', 'google_tag', 'includes/variable');
   return _google_tag_variable_info($options);
+}
+
+/**
+ * Implements hook_variable_settings_form_alter().
+ *
+ * This is called for each of above forms and our settings form.
+ * all of these forms have:
+ * - $form[#realm_keys] contains list of realm name:key which indicates the active key on the form
+ * - $form[#realm_variables] contains associative array of variables on the form keyed by realm
+ */
+function google_tag_variable_settings_form_alter(&$form, &$form_state, $form_id) {
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
+sdp($form, '$form');
+// sdp($form_state, '$form_state');
+google_tag_language_dump();
+}
+
+/**
+ * Outputs current language code.
+ */
+function google_tag_language_dump() {
+  global $language;
+  $lancode = $language->language;
+sdm('$lancode = ' . $lancode);
+}
+
+/**
+ * Implements hook_html_head_alter().
+ */
+function google_tag_html_head_alter(&$elements) {
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
+sdp($elements, '$elements');
 }
 
 /**
@@ -156,6 +192,13 @@ function google_tag_form_variable_realm_edit_variables_form_alter(&$form, &$form
  * @see drupal_render_page()
  */
 function google_tag_page_build(&$page) {
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
+
+sdm(__FUNCTION__);
+google_tag_language_dump();
+// module_load_include('inc', 'google_tag', 'includes/admin');
+// _google_tag_directory_prepare($realm_name = 'foo');
   if (!google_tag_insert_snippet()) {
     return;
   }
@@ -182,16 +225,23 @@ function google_tag_page_build(&$page) {
 
   $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
   if ($include_classes && module_exists('datalayer') && $data_layer == 'dataLayer') {
+    // @todo Using the datalayer module is a step backward as it includes the
+    // snippet inline.
     $classes = variable_get('google_tag_data_layer_classes', array());
     if ($classes) {
       // Add data_layer using dataLayer module.
       datalayer_add($classes);
+// TEMP for testing
+datalayer_preprocess_html(/*$variables*/);
+sdm('include data layer');
     }
     $types = array('script');
   }
 
   // Add data_layer and script snippets to head (by default).
   $include_script_as_file = variable_get('google_tag_include_file', 1);
+// TEMP to test
+// $include_script_as_file = FALSE;
   if ($include_script_as_file) {
     foreach ($types as $type) {
       // A stream wrapper may be passed as $data to drupal_add_js($data) because
@@ -228,8 +278,25 @@ function google_tag_page_build(&$page) {
       '#markup' => $noscript,
       '#weight' => -10,
     );
+sdp(__FUNCTION__);
+sdp($page['page_top'], '$page page_top');
   }
 
+//   $scripts = drupal_get_js();
+//   $scripts = drupal_add_js();
+// sdp(__FUNCTION__);
+// sdp($scripts, '$scripts');
+
+//   $data = ['#type' => 'html_tag', '#tag' => 'script',
+//     '#attributes' => ['type' => 'text/javascript'],
+//     '#value' => $script,
+//   ];
+//   drupal_add_html_head($data, 'google_tag');
+
+  // datalayer_preprocess_html()
+  // drupal_add_html_head($render, 'datalayer_meta');
+  // $render['#value'] = 'dataLayer = [' . $output . '];';
+  // so the layer name is not a variable.
 }
 
 /**
@@ -247,6 +314,8 @@ function google_tag_realm_values() {
     // If variable_realm module is later removed, then visit the module settings
     // page and update the settings.
     $realms = variable_realm_current();
+sdp(__FUNCTION__);
+sdp($realms, '$realms');
     // Remove the global realm as this is always active.
     unset($realms['global']);
     if (empty($realms)) {
@@ -262,7 +331,11 @@ function google_tag_realm_values() {
     }
     // Allow other modules to alter the realm name and key.
     $realm_values = array('name' => $realm_name, 'key' => $realm_key);
+sdp(__FUNCTION__);
+sdp($realm_values, '$realm_values a');
     drupal_alter('google_tag_realm', $realm_values);
+sdp(__FUNCTION__);
+sdp($realm_values, '$realm_values b');
     $realm_name = $realm_values['name'];
     $realm_key = $realm_values['key'];
 
@@ -279,6 +352,8 @@ function google_tag_realm_values() {
  *   TRUE if the conditions are met; FALSE otherwise.
  */
 function google_tag_insert_snippet() {
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
   $id = variable_get('google_tag_container_id', '');
 
   if (empty($id)) {
@@ -322,6 +397,9 @@ function _google_tag_status_check() {
     }
     $debug ? drupal_set_message(t('google_tag')) : '';
     $debug ? drupal_set_message(t('status check @satisfied', array('@satisfied' => $satisfied))) : '';
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
+sdp($satisfied, '$satisfied');
   }
   return $satisfied;
 }
@@ -356,6 +434,9 @@ function _google_tag_path_check() {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
     $debug ? drupal_set_message(t('path check @satisfied', array('@satisfied' => $satisfied))) : '';
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
+sdp($satisfied, '$satisfied');
   }
   return $satisfied;
 }
@@ -386,6 +467,9 @@ function _google_tag_role_check() {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
     $debug ? drupal_set_message(t('role check @satisfied', array('@satisfied' => $satisfied))) : '';
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
+sdp($satisfied, '$satisfied');
   }
   return $satisfied;
 }
@@ -396,4 +480,42 @@ function _google_tag_role_check() {
 function google_tag_assets_create() {
   module_load_include('inc', 'google_tag', 'includes/admin');
   _google_tag_assets_create();
+}
+
+// COPIED FROM datalayer module FOR TESTING
+function datalayer_add($data = array(), $overwrite = FALSE) {
+  $output_data = &drupal_static(__FUNCTION__, /*_datalayer_defaults()*/ []);
+//   $output_data = [];
+
+  // If we've been given data, add it to the output.
+  if (!empty($data)) {
+    if ($overwrite) {
+      $output_data = array_merge($output_data, $data);
+    }
+    else {
+      $output_data += $data;
+    }
+  }
+
+  return $output_data;
+}
+function datalayer_preprocess_html(/*&$variables*/) {
+  // Get active data, includes defaults.
+  $output_data = datalayer_add();
+  // Allow modules to alter data with hook_datalayer_alter().
+//   drupal_alter('datalayer', $output_data);
+
+  $output = !empty($output_data) ? drupal_json_encode($output_data) : '';
+  $render = array(
+    '#type' => 'html_tag',
+    '#tag' => 'script',
+    '#value' => 'dataLayer = [' . $output . '];',
+    '#attributes' => array(
+      'type' => 'text/javascript',
+    ),
+  );
+  drupal_add_html_head($render, 'datalayer_meta');
+sdp(__FUNCTION__);
+sdp($output_data, '$output_data');
+sdp($render, '$render');
 }

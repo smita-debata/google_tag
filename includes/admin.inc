@@ -131,6 +131,10 @@ function google_tag_form_element_type($type) {
  * Element after build callback for google_tag_settings_form().
  */
 function google_tag_settings_form_after_build($element, &$form_state) {
+sdp(__FUNCTION__);
+if (!empty($element['#realm_keys'])) {
+  sdp($element['#realm_keys'], '#realm_keys');
+}
   // This will follow:
   // variable_realm_variable_settings_form_submit
   // variable_settings_form_submit
@@ -143,6 +147,10 @@ function google_tag_settings_form_after_build($element, &$form_state) {
  */
 function google_tag_settings_form_validate($form, &$form_state) {
   $values = &$form_state['values'];
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
+sdp($values, '$values');
+// sdp($form_state, '$form_state');
 
   // Trim the text values.
   $values['google_tag_container_id'] = trim($values['google_tag_container_id']);
@@ -181,6 +189,12 @@ function google_tag_settings_form_validate($form, &$form_state) {
  * Form submission handler for google_tag_settings_form().
  */
 function google_tag_settings_form_submit($form, &$form_state) {
+solotandem_force_path_clear();
+sdp(__FUNCTION__);
+if (!empty($form['#realm_keys'])) {
+  sdp($form['#realm_keys'], '#realm_keys');
+}
+
   if (module_exists('variable_realm') && module_exists('variable_store')) {
     // When this handler runs, $GLOBALS['conf'] will have been updated by the
     // form submitted values (this includes realm and non-realm specific
@@ -243,24 +257,54 @@ function google_tag_settings_form_submit($form, &$form_state) {
  *   update all snippet files based on global and realm-specific variables
  */
 function _google_tag_assets_create() {
+solotandem_force_path_clear();
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
+_google_tag_variable_dump();
+
+// See comment in google_tag_settings_form_submit()
+// The contamination of $GLOBALS['conf'] is NOT avoidable without reading settings.php
+// @todo Start from https://gtag7.solotandem.com/fr/admin/config/development/solotandem
+// $GLOBALS['conf'] has french values
+// do cache clear all to recreate snippet files
+// the default.script.js has french values when $debug = !TRUE or TRUE
+// so this is still not correct
+// as with the tests, how do you get variable_realm to reset values to global:default???
+// since global realm reads from $GLOBALS['conf']
+// unlike d8 the config gets contaminated by the current realm
+// and there is no easy way to recollect values from settings.php
+//
+// the global:default realm is a misnomer; it does not equate to default key in
+// default realm (e.g. language:en) if the page is loaded from another realm key.
+// if a realm exists then it is always used and the global:default has no place.
+// so the contents of snippet files in this realm:key are never read.
+
+$debug = TRUE;
   @file_unmanaged_delete_recursive('public://google_tag');
   if (module_exists('variable_realm') && module_exists('variable_store')) {
     // Backup global config as switching realm overwrites this array.
-    $backup = $GLOBALS['conf'];
+    $debug ? $backup = $GLOBALS['conf'] : sdp('NO BACKUP OF GLOBALS');
     // i18n_variable module depends on variable_realm, variable_store
     $realms = variable_realm_list();
     foreach ($realms as $realm_name => $realm_title) {
       $keys = variable_realm_keys($realm_name);
       foreach ($keys as $key_name => $key_title) {
         _google_tag_message_display('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name));
-        variable_realm_switch($realm_name, $key_name);
+sdp(__FUNCTION__);
+sdp(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
+// sdp($GLOBALS['conf'], 'conf a');
+        variable_realm_switch($realm_name, $key_name, $debug);
+_google_tag_variable_dump();
+// sdp($GLOBALS['conf'], 'conf b');
         if (_google_tag_directory_prepare($realm_name)) {
           _google_tag_snippets_save($realm_name, $key_name);
           _google_tag_classes_save($realm_name, $key_name);
         }
       }
     }
-    $GLOBALS['conf'] = $backup;
+    $debug ? $GLOBALS['conf'] = $backup : sdp('NO RESTORE OF GLOBALS');
+sdp(__FUNCTION__);
+sdp($GLOBALS['conf'], '$GLOBALS b');
   }
   else {
     if (_google_tag_directory_prepare()) {
@@ -280,6 +324,8 @@ function _google_tag_assets_create() {
  *   Whether the directory was prepared.
  */
 function _google_tag_directory_prepare($realm_name = '') {
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
   // From google_tag_requirements(); this should be a helper function (in core).
   $directory = 'public://google_tag';
   $directory .= $realm_name ? "/$realm_name" : '';
@@ -293,6 +339,8 @@ function _google_tag_directory_prepare($realm_name = '') {
   // The snippet directory does not exist or is not writable or searchable.
 
   // If applicable, get the directory path of stream wrapper.
+  // @todo Remove this here and in hook_requirements() as not worth the fuss; if
+  // user does not understand stream notation, then should not be admin.
   $wrapper = file_stream_wrapper_get_instance_by_uri($directory);
   if (method_exists($wrapper, 'getDirectoryPath') && ($path = $wrapper->getDirectoryPath())) {
     // getDirectoryPath() is not defined in StreamWrapperInterface; it
@@ -346,14 +394,16 @@ function _google_tag_snippets_save($realm_name = '', $realm_key = '') {
   if (!$result) {
     watchdog('google_tag', $message, $args, WATCHDOG_ERROR);
   }
+  return $result;
 }
 
 /**
  * Stores data layer classes based on current settings.
  */
 function _google_tag_classes_save($realm_name = '', $realm_key = '') {
+sdm(__FUNCTION__);
   $data_layer = variable_get('google_tag_data_layer', 'dataLayer');
-  if (module_exists('datalayer') && $data_layer == 'dataLayer') {
+  if (module_exists('datalayer') && $data_layer == 'dataLayer' || TRUE) {
     // Save classes for data layer.
     // @todo How to or can we set the name of the data layer?
     // This is an open issue on datalayer project; after it is implemented in
@@ -407,6 +457,8 @@ function _google_tag_data_layer_verify($value) {
  * @see file_prepare_directory()
  */
 function _file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS) {
+sdm(__FUNCTION__);
+sdm($directory);
   if (!file_stream_wrapper_valid_scheme(file_uri_scheme($directory))) {
     // Only trim if we're not dealing with a stream.
     $directory = rtrim($directory, '/\\');
@@ -414,9 +466,11 @@ function _file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS
 
   // Check if directory exists.
   if (!is_dir($directory)) {
+sdm(__FUNCTION__ . ' NOT is_dir');
     // Let mkdir() recursively create directories and use the default directory
     // permissions.
     if (($options & FILE_CREATE_DIRECTORY) && @drupal_mkdir($directory, NULL, TRUE)) {
+sdm(__FUNCTION__ . ' drupal_mkdir');
       return drupal_chmod($directory);
     }
     return FALSE;
@@ -424,6 +478,7 @@ function _file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS
   // The directory exists, so check to see if it is writable.
   $writable = _google_tag_is_writable($directory) && _google_tag_is_executable($directory);
   if (!$writable && ($options & FILE_MODIFY_PERMISSIONS)) {
+sdm(__FUNCTION__ . ' drupal_chmod');
     return drupal_chmod($directory);
   }
 
@@ -443,6 +498,8 @@ function _file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS
  *   Whether the directory is writable.
  */
 function _google_tag_is_writable($uri) {
+sdm(__FUNCTION__);
+sdp(__FUNCTION__);
   // Use the local path, if applicable, since PHP only checks ACLs on its local
   // file wrapper.
   $realpath = FALSE;
@@ -466,17 +523,25 @@ function _google_tag_is_writable($uri) {
  *   Whether the directory is searchable.
  */
 function _google_tag_is_executable($uri) {
+sdm(__FUNCTION__);
+  if (_google_tag_is_windows()) {
+    // Remove the OS check if PHP is_executable() is changed to not return FALSE
+    // simply because the URI points to a directory (not a file) on Windows.
+    return TRUE;
+  }
+
   if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
     if ($realpath = $wrapper->realpath($uri)) {
       // The URI is a local stream wrapper.
       // Use local path since PHP only checks ACLs on its local file wrapper.
       // Remove OS check if PHP is_executable() is changed to not return FALSE
       // simply because the URI points to a directory (not a file) on Windows.
-      return _google_tag_is_windows() || is_executable($realpath);
+      return /*_google_tag_is_windows() ||*/ is_executable($realpath);
     }
 
     // The URI is a remote stream wrapper.
     if (!($stat = $wrapper->url_stat($uri, 0))) {
+sdp('STAT FAILS; RETURN FALSE');
       return FALSE;
     }
 
@@ -487,6 +552,7 @@ function _google_tag_is_executable($uri) {
       // @todo Is it worse to return true or false at this point?
       return TRUE;
     }
+sdm('POSIX functions exist on this site');
 
     // Determine the appropriate permissions bit mask as an octal.
     // The stat array is likely to have uid=gid=0 so that the mask is octal 01.
@@ -498,6 +564,10 @@ function _google_tag_is_executable($uri) {
     elseif ($stat['gid'] == posix_getgid()) {
       $mask = $mask << 3;
     }
+sdp($mask, '$mask');
+sdp(decoct($mask), 'octal $mask');
+sdp(($stat['mode'] & $mask) != 0, 'result');
+sdp($stat, '$stat');
     return ($stat['mode'] & $mask) != 0;
   }
   else {
@@ -527,4 +597,37 @@ function _google_tag_message_display($message, $args = array(), $type = 'status'
   if ($_google_tag_display_message) {
     drupal_set_message(t($message, $args), $type);
   }
+}
+
+/**
+ * TEMP: Outputs variables to debug file.
+ */
+function _google_tag_variable_dump() {
+  global $conf;
+  sdp(__FUNCTION__);
+//   sdp($conf['google_tag_container_id']);
+//   sdp($conf['google_tag_data_layer']);
+//   return;
+  $keys = array_flip([
+    'google_tag_blacklist_classes',
+    'google_tag_compact_snippet',
+    'google_tag_container_id',
+    'google_tag_data_layer',
+    'google_tag_data_layer_classes',
+    'google_tag_debug_output',
+    'google_tag_environment_id',
+    'google_tag_environment_token',
+    'google_tag_include_classes',
+    'google_tag_include_environment',
+    'google_tag_include_file',
+    'google_tag_path_list',
+    'google_tag_path_toggle',
+    'google_tag_role_list',
+    'google_tag_role_toggle',
+    'google_tag_status_list',
+    'google_tag_status_toggle',
+    'google_tag_whitelist_classes',
+  ]);
+  $temp = array_intersect_key($conf, $keys);
+  sdp($temp);
 }

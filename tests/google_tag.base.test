@@ -36,6 +36,8 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    */
   protected function setUp() {
     $modules = func_get_args();
+//     $args = func_get_args();
+//     $modules = isset($args[0]) && is_array($args[0]) ? $args[0] : array();
     parent::setUp($modules ? $modules[0] : array());
   }
 
@@ -46,6 +48,15 @@ class GTMBaseTestCase extends DrupalWebTestCase {
     variable_set('google_tag_debug_output', '1');
     // This does not carry through to the gtm_test realm. Why?
 //     variable_set('google_tag_include_environment', '1');
+
+variable_set('solotandem_directory', '/upload');
+variable_set('solotandem_filename', 'gtag7x-test');
+variable_set('solotandem_clear', '0');
+
+solotandem_force_path_clear();
+sdm(__METHOD__);
+sdp(__METHOD__);
+sdp($GLOBALS['conf'], '$GLOBALS a');
 
     try {
       $this->createData();
@@ -65,18 +76,25 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Create test data: configuration variables and snippet files.
    */
   protected function createData() {
+sdm(__METHOD__);
+sdp(__METHOD__);
   }
 
   /**
    * Inspect the snippet files.
    */
   protected function checkSnippetFiles() {
+sdm(__METHOD__);
+sdp(__METHOD__);
   }
 
   /**
    * Verify the snippet file contents.
    */
   protected function verifyScriptSnippet($contents, $variables) {
+sdm(__METHOD__);
+sdp(__METHOD__);
+sdp($variables, '$variables');
     $status = strpos($contents, "'$variables->google_tag_container_id'") !== FALSE;
     $message = 'Found in script snippet file: container_id';
     $this->assert($status, $message, $this->group);
@@ -94,6 +112,8 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Verify the snippet file contents.
    */
   protected function verifyNoScriptSnippet($contents, $variables) {
+sdm(__METHOD__);
+sdp(__METHOD__);
     $status = strpos($contents, "id=$variables->google_tag_container_id") !== FALSE;
     $message = 'Found in noscript snippet file: container_id';
     $this->assert($status, $message, $this->group);
@@ -111,12 +131,16 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Verify the snippet file contents.
    */
   protected function verifyDataLayerSnippet($contents, $variables) {
+sdm(__METHOD__);
+sdp(__METHOD__);
   }
 
   /**
    * Inspect the page response.
    */
   protected function checkPageResponse() {
+sdm(__METHOD__);
+sdp(__METHOD__);
     variable_set('google_tag_role_toggle', 'include listed');
     variable_set('google_tag_role_list', array(
       'content viewer' => 'content viewer',
@@ -134,6 +158,8 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Verify the tag in page response.
    */
   protected function verifyScriptTag($realpath) {
+sdm(__METHOD__);
+sdp(__METHOD__);
     $string = variable_get('css_js_query_string', '');
     $text = "src=\"$realpath?$string\"";
     $message = 'Found script source string in page response';
@@ -150,6 +176,8 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Verify the tag in page response.
    */
   protected function verifyNoScriptTag($realpath, $variables) {
+sdm(__METHOD__);
+sdp(__METHOD__);
     $xpath = '//div//noscript//iframe';
     $elements = $this->xpath($xpath);
 

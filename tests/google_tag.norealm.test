@@ -20,13 +20,15 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
    * {@inheritdoc}
    */
   protected function setUp() {
-    parent::setUp(array('google_tag'));
+    parent::setUp(array('google_tag', 'solotandem'));
   }
 
   /**
    * {@inheritdoc}
    */
   protected function createData() {
+sdm(__METHOD__);
+sdp(__METHOD__);
     $this->variables = (object) $variables = array(
       'google_tag_container_id' => 'GTM-norealm',
       'google_tag_environment_id' => 'env-6',
@@ -36,6 +38,8 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
     array_walk($variables, function ($value, $key) {
       variable_set($key, $value);
     });
+sdp($GLOBALS['conf'], '$GLOBALS c');
+sdp($this->variables, '$this->variables');
 
     google_tag_assets_create();
   }
@@ -44,10 +48,14 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
    * {@inheritdoc}
    */
   protected function checkSnippetFiles() {
+sdm(__METHOD__);
+sdp(__METHOD__);
     $realm_name = $key_name = '';
     foreach ($this->types as $type) {
+sdp($type, '$type');
       $url = "$this->basePath/google_tag/{$realm_name}google_tag.$key_name$type.js";
       $contents = @file_get_contents($url);
+sdp($contents, '$contents');
       $function = "verify{$type}Snippet";
       $this->$function($contents, $this->variables);
     }
@@ -57,13 +65,19 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
    * {@inheritdoc}
    */
   protected function checkPageResponse() {
+sdm(__METHOD__);
+sdp(__METHOD__);
     parent::checkPageResponse();
     $this->drupalGet('');
     $realm_name = $key_name = '';
     foreach ($this->types as $type) {
+sdp(__METHOD__);
+sdp($type, '$type');
       $uri = "$this->basePath/google_tag/{$realm_name}google_tag.$key_name$type.js";
+sdp($uri, '$uri');
       if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
         $realpath = $wrapper->getExternalUrl($uri);
+sdp($realpath, '$realpath');
         $function = "verify{$type}Tag";
         $this->$function($realpath, $this->variables);
       }

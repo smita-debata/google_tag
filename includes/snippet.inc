@@ -37,6 +37,8 @@ function _google_tag_script_snippet() {
   $data_layer = _google_tag_variable_clean('google_tag_data_layer', 'dataLayer');
   $query = _google_tag_environment_query();
   $compact = variable_get('google_tag_compact_snippet', 1);
+// TEMP to test contamination of realm values on call to variable_realm_switch().
+$site_name = variable_get('site_name', '');
 
   // Build script snippet.
   $script = <<<EOS
@@ -52,7 +54,7 @@ function _google_tag_script_snippet() {
   j.async=true;
   f.parentNode.insertBefore(j,f);
 
-})(window,document,'script','$data_layer','$container_id');
+})(window,document,'script','$data_layer','$container_id', '$site_name');
 EOS;
   if ($compact) {
     $script = str_replace(array("\n", '  '), '', $script);
