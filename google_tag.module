@@ -255,9 +255,9 @@ function google_tag_realm_values() {
     }
     else {
       // The variable_realm module allows multiple realms to be 'active' on a
-      // page request which leaves us in the dark as to which one to use.
-      // The realms are weighted; use first one after 'global:default'.
-      $realm_name = key($realms);
+      // page request. The realms are ordered with 'greater' weight having
+      // precedence. Select the last realm but allow other modules to override.
+      $realm_name = key(array_reverse($realms));
       $realm_key = variable_realm_status($realm_name);
     }
     // Allow other modules to alter the realm name and key.
