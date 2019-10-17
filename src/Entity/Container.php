@@ -521,7 +521,7 @@ EOS;
       [
         '#type' => 'html_tag',
         '#tag' => 'script',
-        '#attributes' => ['src' => $url . '?' . $query_string, 'defer' => 'true'],
+        '#attributes' => ['src' => $url . '?' . $query_string, 'defer' => TRUE],
         '#weight' => $weight,
       ],
       "google_tag_{$type}_tag__{$this->id()}",
