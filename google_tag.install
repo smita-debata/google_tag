@@ -31,7 +31,18 @@ function google_tag_requirements($phase) {
     $phase == 'install' ? require_once __DIR__ . '/google_tag.module' : '';
     // Adapted from system_requirements().
     $directory = \Drupal::config('google_tag.settings')->get('uri');
-    $directory = $directory ?: 'public://google_tag';
+    if (empty($directory)) {
+//       $description = t('The snippet parent directory is not set. Configure default settings on the <a href=":url1">module settings page</a>.', array(':url1' => Url::fromRoute('google_tag.settings_form')->toString()));
+//       $value = t('Not configured');
+      $requirements['google_tag_snippet_parent_directory'] = array(
+        'title' => t('Google Tag Manager'),
+        'description' => t('The snippet parent directory is not set. Configure default settings on the <a href=":url1">module settings page</a>.', array(':url1' => Url::fromRoute('google_tag.settings_form')->toString())),
+        'severity' => REQUIREMENT_ERROR,
+        'value' => t('Not configured'),
+      );
+      return $requirements;
+    }
+    $directory .= '/google_tag';
     if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
       _file_prepare_directory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     }
@@ -155,4 +166,35 @@ function google_tag_update_8102(&$sandbox) {
   \Drupal::entityDefinitionUpdateManager()->installEntityType($entity_type);
 
   return t('Installed the google_tag_container entity type');
+}
+
+/**
+ * Update the snippet parent URI and add the flush_snippets setting.
+ */
+function google_tag_update_8103(&$sandbox) {
+  $module_config = \Drupal::service('config.factory')->getEditable('google_tag.settings');
+  $module_data = $module_config->get();
+
+  // Update the module settings.
+  $snippet_uri_changed = TRUE;
+  $uri = isset($module_data['uri']) ? $module_data['uri'] : 'public:/';
+  if (substr($uri, -11) == '/google_tag') {
+    // Remove the default directory as this will be appended in code.
+    $uri = substr($uri, 0, -11);
+    $snippet_uri_changed = FALSE;
+  }
+  if (substr($uri, -3) == '://') {
+    // Remove the last slash from a bare stream wrapper.
+    $uri = substr($uri, 0, -1);
+  }
+
+  $module_data = ['uri' => $uri, 'flush_snippets' => FALSE] + $module_data;
+  $keys = array_flip(['uri', 'compact_snippet', 'include_file', 'rebuild_snippets', 'flush_snippets', 'debug_output']);
+  $module_data = array_merge($keys, $module_data);
+  $module_config->setData($module_data)->save();
+
+  if ($snippet_uri_changed) {
+    return t('Updated the snippet parent URI and added the flush_snippets setting. The old snippet directory was not deleted.');
+  }
+  return t('Added the flush_snippets setting and retained the snippet parent URI.');
 }

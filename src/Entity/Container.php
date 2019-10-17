@@ -486,7 +486,7 @@ EOS;
    *   The snippet directory path.
    */
   public function snippetDirectory() {
-    return \Drupal::config('google_tag.settings')->get('uri') . "/{$this->id()}";
+    return \Drupal::config('google_tag.settings')->get('uri') . "/google_tag/{$this->id()}";
   }
 
   /**

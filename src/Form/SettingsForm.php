@@ -51,10 +51,10 @@ class SettingsForm extends ConfigFormBase {
 
     $form['settings']['uri'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Snippet base URI'),
-      '#description' => $this->t('The base URI for saving snippet files.'),
+      '#title' => $this->t('Snippet parent URI'),
+      '#description' => $this->t('The parent URI for saving snippet files. Snippet files will be saved to "[uri]/google_tag". Enter a plain stream wrapper with a single trailing slash like "public:/".'),
       '#default_value' => $config->get('uri'),
-      '#attributes' => ['placeholder' => ['public://google_tag']],
+      '#attributes' => ['placeholder' => ['public:/']],
       '#required' => TRUE,
     ];
 
@@ -77,6 +77,13 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Recreate snippets on cache rebuild'),
       '#description' => $this->t('If checked, then the JavaScript snippet files will be created during a cache rebuild. This is <strong>recommended on production sites</strong>.'),
       '#default_value' => $config->get('rebuild_snippets'),
+    ];
+
+    $form['settings']['flush_snippets'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Flush snippet directory on cache rebuild'),
+      '#description' => $this->t('If checked, then the snippet directory will be deleted and recreated during a cache rebuild. If not checked, then manual intervention may be required to tidy up the snippet directory (e.g. remove snippet files for a deleted container).'),
+      '#default_value' => $config->get('flush_snippets'),
     ];
 
     $form['settings']['debug_output'] = [
@@ -339,6 +346,7 @@ class SettingsForm extends ConfigFormBase {
     // Trim the text values.
 //     $container_id = trim($form_state->getValue('container_id'));
     $environment_id = trim($form_state->getValue('environment_id'));
+    $form_state->setValue('uri', trim($form_state->getValue('uri')));
     $form_state->setValue('data_layer', trim($form_state->getValue('data_layer')));
     $form_state->setValue('path_list', $this->cleanText($form_state->getValue('path_list')));
     $form_state->setValue('status_list', $this->cleanText($form_state->getValue('status_list')));
@@ -364,6 +372,21 @@ class SettingsForm extends ConfigFormBase {
       $form_state->setError($form['advanced']['environment_id'], $this->t('A valid environment ID is case sensitive and formatted like env-x.'));
     }
 
+    $directory = $form_state->getValue('uri');
+    if (substr($directory, -3) == '://') {
+      $args = ['%directory' => $directory];
+      $message = 'The snippet parent uri %directory is invalid. Enter a single trailing slash to specify a plain stream wrapper.';
+      $form_state->setError($form['settings']['uri'], $this->t($message, $args));
+    }
+
+    // Allow for a plain stream wrapper with one trailing slash.
+    $directory .= substr($directory, -2) == ':/' ? '/' : '';
+    if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
+      $args = ['%directory' => $directory];
+      $message = 'The snippet parent uri %directory is invalid, possibly due to file system permissions. The directory either does not exist, or is not writable or searchable.';
+      $form_state->setError($form['settings']['uri'], $this->t($message, $args));
+    }
+
     parent::validateForm($form, $form_state);
   }
 
@@ -371,12 +394,14 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // @todo If uri changes, then recreate snippets for all containers.
+    $old_uri = $this->config('google_tag.settings')->get('uri');
+
     $this->config('google_tag.settings')
       ->set('uri', $form_state->getValue('uri'))
       ->set('compact_snippet', $form_state->getValue('compact_snippet'))
       ->set('include_file', $form_state->getValue('include_file'))
       ->set('rebuild_snippets', $form_state->getValue('rebuild_snippets'))
+      ->set('flush_snippets', $form_state->getValue('flush_snippets'))
       ->set('debug_output', $form_state->getValue('debug_output'))
 //       ->set('_default_container.container_id', $form_state->getValue('container_id'))
       ->set('_default_container.path_toggle', $form_state->getValue('path_toggle'))
@@ -399,6 +424,18 @@ class SettingsForm extends ConfigFormBase {
       ->save();
 
     parent::submitForm($form, $form_state);
+
+    $new_uri = $this->config('google_tag.settings')->get('uri');
+    if ($old_uri != $new_uri) {
+      // The snippet uri changed; recreate snippets for all containers.
+      global $_google_tag_display_message;
+      $_google_tag_display_message = TRUE;
+      _google_tag_assets_create();
+
+      $message = 'The snippet directory was changed and the snippet files were created in the new directory. The old directory at %directory was not deleted.';
+      $args = ['%directory' => $old_uri . '/google_tag'];
+      $this->messenger()->addWarning($this->t($message, $args));
+    }
   }
 
   /**

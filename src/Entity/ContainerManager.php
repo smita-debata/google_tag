@@ -98,14 +98,14 @@ class ContainerManager implements ContainerManagerInterface {
       $path = $this->fileSystem->saveData($snippet, $uri, FileSystemInterface::EXISTS_REPLACE);
       $result = !$path ? FALSE : $result;
     }
-    $args = ['@count' => count($snippets)];
+    $args = ['@count' => count($snippets), '%container' => $container->get('label')];
     if (!$result) {
-      $message = 'An error occurred saving @count snippet files. Contact the site administrator if this persists.';
+      $message = 'An error occurred saving @count snippet files for %container container. Contact the site administrator if this persists.';
       $this->displayMessage($message, $args, MessengerInterface::TYPE_ERROR);
       $this->logger->error($message, $args);
     }
     else {
-      $message = 'Created @count snippet files based on configuration.';
+      $message = 'Created @count snippet files for %container container based on configuration.';
       $this->displayMessage($message, $args);
       // Reset the URL query argument so browsers reload snippet files.
       _drupal_flush_css_js();
@@ -205,8 +205,13 @@ class ContainerManager implements ContainerManagerInterface {
     if (!$ids) {
       return;
     }
-    // Remove any stale files (e.g. module update or machine name change).
-    $this->fileSystem->deleteRecursive(\Drupal::config('google_tag.settings')->get('uri'));
+    if (\Drupal::config('google_tag.settings')->get('flush_snippets')) {
+      $directory = \Drupal::config('google_tag.settings')->get('uri');
+      if (!empty($directory)) {
+        // Remove any stale files (e.g. module update or machine name change).
+        $this->fileSystem->deleteRecursive($directory . '/google_tag');
+      }
+    }
     // Create snippet files for enabled containers.
     $containers = $this->entityTypeManager->getStorage('google_tag_container')->loadMultiple($ids);
     $result = TRUE;

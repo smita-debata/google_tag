@@ -76,6 +76,9 @@ google_tag.settings:
     rebuild_snippets:
       type: boolean
       label: 'Recreate snippets on cache rebuild'
+    flush_snippets:
+      type: boolean
+      label: 'Recreate snippet directory on cache rebuild'
     debug_output:
       type: boolean
       label: 'Show debug output'
