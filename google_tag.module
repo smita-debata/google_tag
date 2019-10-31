@@ -397,3 +397,81 @@ function google_tag_assets_create() {
   module_load_include('inc', 'google_tag', 'includes/admin');
   _google_tag_assets_create();
 }
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function google_tag_ctools_plugin_directory($module, $plugin_type) {
+  if ($module == 'ctools' && $plugin_type == 'export_ui') {
+    return 'plugins/' . $plugin_type;
+  }
+}
+
+/**
+ * Returns a single exportable object.
+ *
+ * This routine exists to deal with a bug in ctools_export_load_object() with
+ * a $type of 'names' being treated differently than a $type of 'conditions' as
+ * far as building the object arrays.
+ *
+ * After google_tag_object_factory() is called, the object consists of the items
+ * from the data column of the table. The $export['key'] of 'name' in the data
+ * column is the actual machine name while the $name parameter passed to the
+ * function is the value in the name column of the table.
+ *
+ * The last key in $cache[$table][$object->{$export['key']}] is not $name but
+ * the last segment of $name (after explode on '.') which matches the actual
+ * machine name of the item stored in the data column of the table. The code
+ * involving 'names' looks for an entry in this array with a $name key while the
+ * corresponding code involving 'conditions' correctly uses the $export['key']
+ * entry in the array. The former entry is absent.
+ *
+ * @param $table
+ *   The name of the table to use to retrieve $schema values. This table
+ *   must have an 'export' section containing data or this function
+ *   will fail.
+ * @param $name
+ *   The unique ID to load. The field for this ID will be specified by
+ *   the export key, which normally defaults to 'name'.
+ *
+ * @return
+ *   The loaded object.
+ */
+function gtag_export_crud_load($table, $name) {
+  ctools_include('export');
+  $parts = explode('.', $name);
+  $machine_name = array_pop($parts);
+  $result = ctools_export_load_object('gtag_config', 'conditions', array('name' => $name));
+  if (isset($result[$machine_name])) {
+    return $result[$machine_name];
+  }
+}
+
+/**
+ * Callback: object factory for ctools_export_load_object().
+ *
+ * See 'export' items in google_tag_schema().
+ *
+ * @return object
+ *   The unpacked object with the $export['key'] property being the actual
+ *   machine name not the name column in the export table.
+ */
+function google_tag_object_factory($schema, $item) {
+  $container = (object) unserialize($item->data);
+  return $container;
+}
+
+/**
+ * Callback: load all for ctools_export_crud_load_all().
+ *
+ * See 'export' items in google_tag_schema().
+ *
+ * @return array
+ *   An array of all loaded objects, keyed by the unique IDs of the export key.
+ */
+function google_tag_export_load($reset) {
+  $keys = array_flip(array('settings'));
+  $items = ctools_export_load_object('gtag_config', 'all');
+  $items = array_diff_key($items, $keys);
+  return $items;
+}

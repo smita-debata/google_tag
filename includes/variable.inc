@@ -26,7 +26,7 @@ function _google_tag_variable_group_info() {
  */
 function _google_tag_variable_info($options) {
   // Gather data.
-  $groups = array('general', 'path', 'role', 'status', 'advanced', 'internal');
+  $groups = array('general', 'path', 'role', 'status', 'advanced', 'settings', 'internal');
   $common = array(
     'group' => 'google_tag',
     'localize' => TRUE,
@@ -67,6 +67,13 @@ function _google_tag_variable_info_general($options) {
       '#maxlength' => 15,
       '#required' => TRUE,
     ),
+  );
+
+  $variables['weight'] = array(
+    'type' => 'select',
+    'type' => 'weight',
+    'title' => t('Weight', array(), $options),
+    'default' => 1,
   );
 
   return $variables;
@@ -203,27 +210,6 @@ function _google_tag_variable_info_advanced($options) {
   $description2 = t('The environment ID to use with this website container. To get an environment ID, <a href="@path">select Environments</a>, create an environment, then click the "Get Snippet" action. The environment ID and token will be in the snippet.', $args, $options);
 
   // Build variables.
-  $variables['google_tag_compact_snippet'] = array(
-    'type' => 'boolean',
-    'title' => t('Compact the JavaScript snippet', array(), $options),
-    'description' => t('If checked, then the JavaScript snippet will be compacted to remove unnecessary whitespace. This is <strong>recommended on production sites</strong>. Leave unchecked to output a snippet that can be examined using a JavaScript debugger in the browser.', array(), $options),
-    'default' => 1,
-  );
-
-  $variables['google_tag_include_file'] = array(
-    'type' => 'boolean',
-    'title' => t('Include the snippet as a file', array(), $options),
-    'description' => t('If checked, then each JavaScript snippet will be included as a file. This is <strong>recommended</strong>. Leave unchecked to inline each snippet into the page. This only applies to data layer and script snippets.', array(), $options),
-    'default' => 1,
-  );
-
-  $variables['google_tag_debug_output'] = array(
-    'type' => 'boolean',
-    'title' => t('Show debug output', array(), $options),
-    'description' => t('If checked, then the result of each snippet insertion condition will be shown in the message area. Enable <strong>only for development</strong> purposes.', array(), $options),
-    'default' => 0,
-  );
-
   $disabled = !module_exists('datalayer');
 
   $variables['google_tag_data_layer'] = array(
@@ -303,6 +289,63 @@ function _google_tag_variable_info_advanced($options) {
       '#maxlength' => 25,
       '#states' => _google_tag_variable_states('google_tag_include_environment'),
     ),
+  );
+
+  return $variables;
+}
+
+/**
+ * Implements hook_variable_info().
+ */
+function _google_tag_variable_info_settings($options) {
+  // Gather data.
+
+  // Build variables.
+  $variables['google_tag_uri'] = array(
+    'type' => 'string',
+    'title' => t('Snippet parent URI'),
+    'description' => t('The parent URI for saving snippet files. Snippet files will be saved to "[uri]/google_tag". Enter a plain stream wrapper with a single trailing slash like "public:/".', array(), $options),
+    'default' => 'public:/',
+    'validate callback' => '_google_tag_validate_uri',
+    'element' => array(
+      '#attributes' => array('placeholder' => array('public:/')),
+      '#required' => TRUE,
+    ),
+  );
+
+  $variables['google_tag_compact_snippet'] = array(
+    'type' => 'boolean',
+    'title' => t('Compact the JavaScript snippet', array(), $options),
+    'description' => t('If checked, then the JavaScript snippet will be compacted to remove unnecessary whitespace. This is <strong>recommended on production sites</strong>. Leave unchecked to output a snippet that can be examined using a JavaScript debugger in the browser.', array(), $options),
+    'default' => 1,
+  );
+
+  $variables['google_tag_include_file'] = array(
+    'type' => 'boolean',
+    'title' => t('Include the snippet as a file', array(), $options),
+    'description' => t('If checked, then each JavaScript snippet will be included as a file. This is <strong>recommended</strong>. Leave unchecked to inline each snippet into the page. This only applies to data layer and script snippets.', array(), $options),
+    'default' => 1,
+  );
+
+  $variables['google_tag_rebuild_snippets'] = array(
+    'type' => 'boolean',
+    'title' => t('Recreate snippets on cache rebuild'),
+    'description' => t('If checked, then the JavaScript snippet files will be created during a cache rebuild. This is <strong>recommended on production sites</strong>.', array(), $options),
+    'default' => 1,
+  );
+
+  $variables['google_tag_flush_snippets'] = array(
+    'type' => 'boolean',
+    'title' => t('Flush snippet directory on cache rebuild'),
+    'description' => t('If checked, then the snippet directory will be deleted and recreated during a cache rebuild. If not checked, then manual intervention may be required to tidy up the snippet directory (e.g. remove snippet files for a deleted container).', array(), $options),
+    'default' => 0,
+  );
+
+  $variables['google_tag_debug_output'] = array(
+    'type' => 'boolean',
+    'title' => t('Show debug output', array(), $options),
+    'description' => t('If checked, then the result of each snippet insertion condition will be shown in the message area. Enable <strong>only for development</strong> purposes.', array(), $options),
+    'default' => 0,
   );
 
   return $variables;

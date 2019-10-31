@@ -125,6 +125,46 @@ function google_tag_requirements($phase) {
 }
 
 /**
+ * Implements hook_schema().
+ */
+function google_tag_schema() {
+  $schema = array();
+  // Configuration table.
+  $schema['gtag_config'] = array(
+    'description' => 'The base table for configuration data.',
+    'export' => array(
+      'admin_title' => 'label',
+      'key' => 'name',
+      'key name' => 'Machine-readable name',
+      'primary key' => 'name',
+      'identifier' => 'gtag',
+      'object factory' => 'google_tag_object_factory',
+      'load all callback' => 'google_tag_export_load',
+      'cache defaults' => TRUE,
+    ),
+    'fields' => array(
+      'name' => array(
+        'description' => 'The configuration object name (primary identifier).',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'data' => array(
+        'description' => 'The serialized configuration data.',
+        'type' => 'text',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('name'),
+    'unique keys' => array(
+      'machine_name' => array('name'),
+    ),
+  );
+  return $schema;
+}
+
+/**
  * Convert values in role_list variable from rid to role name.
  */
 function google_tag_update_7101(&$sandbox) {
