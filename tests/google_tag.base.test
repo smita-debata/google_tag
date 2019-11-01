@@ -43,9 +43,13 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Test the module.
    */
   public function testModule() {
-    variable_set('google_tag_debug_output', '1');
-    // This does not carry through to the gtm_test realm. Why?
-//     variable_set('google_tag_include_environment', '1');
+    // Modify default settings.
+    // These should propagate to each container created in test.
+    $settings = \GTMSettings::getInstance();
+    $settings->debug_output = 1;
+    $settings->role_toggle = 'include listed';
+    $settings->role_list = array('content viewer' => 'content viewer');
+    $settings->save();
 
     try {
       $this->createData();
@@ -68,6 +72,26 @@ class GTMBaseTestCase extends DrupalWebTestCase {
   }
 
   /**
+   * Save container in the database and create snippet files.
+   */
+  protected function saveContainer(array $variables) {
+    $export = new GTMContainerExport();
+    $default = $export->default_container();
+    unset($default->data, $default->export_type, $default->type);
+
+    array_walk($variables, function ($value, $key) use ($default) {
+      $default->$key = $value;
+    });
+    // Save container.
+    $container = new GTMContainer((array) $default);
+    $container->save(NULL);
+
+    // Create snippet files.
+    $manager = \GTMContainerManager::getInstance();
+    $manager->createAssets($container);
+  }
+
+  /**
    * Inspect the snippet files.
    */
   protected function checkSnippetFiles() {
@@ -77,15 +101,15 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Verify the snippet file contents.
    */
   protected function verifyScriptSnippet($contents, $variables) {
-    $status = strpos($contents, "'$variables->google_tag_container_id'") !== FALSE;
+    $status = strpos($contents, "'$variables->container_id'") !== FALSE;
     $message = 'Found in script snippet file: container_id';
     $this->assert($status, $message, $this->group);
 
-    $status = strpos($contents, "gtm_preview=$variables->google_tag_environment_id") !== FALSE;
+    $status = strpos($contents, "gtm_preview=$variables->environment_id") !== FALSE;
     $message = 'Found in script snippet file: environment_id';
     $this->assert($status, $message, $this->group);
 
-    $status = strpos($contents, "gtm_auth=$variables->google_tag_environment_token") !== FALSE;
+    $status = strpos($contents, "gtm_auth=$variables->environment_token") !== FALSE;
     $message = 'Found in script snippet file: environment_token';
     $this->assert($status, $message, $this->group);
   }
@@ -94,15 +118,15 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Verify the snippet file contents.
    */
   protected function verifyNoScriptSnippet($contents, $variables) {
-    $status = strpos($contents, "id=$variables->google_tag_container_id") !== FALSE;
+    $status = strpos($contents, "id=$variables->container_id") !== FALSE;
     $message = 'Found in noscript snippet file: container_id';
     $this->assert($status, $message, $this->group);
 
-    $status = strpos($contents, "gtm_preview=$variables->google_tag_environment_id") !== FALSE;
+    $status = strpos($contents, "gtm_preview=$variables->environment_id") !== FALSE;
     $message = 'Found in noscript snippet file: environment_id';
     $this->assert($status, $message, $this->group);
 
-    $status = strpos($contents, "gtm_auth=$variables->google_tag_environment_token") !== FALSE;
+    $status = strpos($contents, "gtm_auth=$variables->environment_token") !== FALSE;
     $message = 'Found in noscript snippet file: environment_token';
     $this->assert($status, $message, $this->group);
   }
@@ -117,11 +141,6 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Inspect the page response.
    */
   protected function checkPageResponse() {
-    variable_set('google_tag_role_toggle', 'include listed');
-    variable_set('google_tag_role_list', array(
-      'content viewer' => 'content viewer',
-    ));
-
     // Create and login a test user.
     $role_id = $this->drupalCreateRole(array('access content'), 'content viewer');
     $non_admin_user = $this->drupalCreateUser();
@@ -156,15 +175,15 @@ class GTMBaseTestCase extends DrupalWebTestCase {
     $contents = (array) $elements[0]['src'];
     $contents = $contents[0];
 
-    $status = strpos($contents, "id=$variables->google_tag_container_id") !== FALSE;
+    $status = strpos($contents, "id=$variables->container_id") !== FALSE;
     $message = 'Found in noscript tag: container_id';
     $this->assert($status, $message, $this->group);
 
-    $status = strpos($contents, "gtm_preview=$variables->google_tag_environment_id") !== FALSE;
+    $status = strpos($contents, "gtm_preview=$variables->environment_id") !== FALSE;
     $message = 'Found in noscript tag: environment_id';
     $this->assert($status, $message, $this->group);
 
-    $status = strpos($contents, "gtm_auth=$variables->google_tag_environment_token") !== FALSE;
+    $status = strpos($contents, "gtm_auth=$variables->environment_token") !== FALSE;
     $message = 'Found in noscript tag: environment_token';
     $this->assert($status, $message, $this->group);
   }
