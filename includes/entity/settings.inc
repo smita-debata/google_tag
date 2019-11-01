@@ -18,9 +18,6 @@ class GTMSettings {
 //     $values = (array) ctools_export_crud_load('gtag_config', 'google_tag.settings');
     $values = (array) gtag_export_crud_load('gtag_config', 'google_tag.settings');
     foreach ($values as $key => $value) {
-      // @todo The form values have keys with 'google_tag_' prefix. Remove it.
-      // @todo Remove prefix from property names in config table.
-      $key = str_replace('google_tag_', '', $key);
       $this->$key = $value;
     }
   }
@@ -47,7 +44,6 @@ class GTMSettings {
    *   The property.
    */
   public function get($property) {
-//     $property = 'google_tag_' . $property;
     return isset($this->$property) ? $this->$property : NULL; // '';
   }
 

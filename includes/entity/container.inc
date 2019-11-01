@@ -134,6 +134,20 @@ class GTMContainer {
   public $status_list;
 
   /**
+   * Whether to include or exclude the listed realms.
+   *
+   * @var string
+   */
+  public $realm_toggle;
+
+  /**
+   * The listed realms.
+   *
+   * @var string
+   */
+  public $realm_list;
+
+  /**
    * Constructs a container configuration object.
    *
    * @param array $values
@@ -148,8 +162,6 @@ class GTMContainer {
     }
     // @todo Always append default container values to mimic variable_get()?
     foreach ($values as $key => $value) {
-      // @todo The form values have keys with 'google_tag_' prefix.
-      $key = str_replace('google_tag_', '', $key);
       $this->$key = $value;
     }
 
@@ -170,15 +182,12 @@ class GTMContainer {
    *
    * @param string $property
    *   The property name.
-   * @param bool $add_prefix
-   *    (optional) Whether to add a prefix to the property name.
    *
    * @return string
    *   The property.
    */
-  public function get($property, $add_prefix = FALSE) { // TRUE
+  public function get($property) {
     $property = $property == 'id' ? 'name' : $property;
-    $property = $add_prefix ? 'google_tag_' . $property : $property;
     return isset($this->$property) ? $this->$property : '';
   }
 
@@ -189,7 +198,7 @@ class GTMContainer {
    *   The property.
    */
   public function id() {
-    return str_replace('google_tag.container.', '', $this->get('name', FALSE));
+    return $this->get('name');
   }
 
   /**
@@ -368,7 +377,7 @@ EOS;
 
       $this->displayMessage('google_tag container ' . $this->name);
       $satisfied[$this->name] = TRUE;
-      if (!$this->statusCheck() || !$this->pathCheck() || !$this->roleCheck()) {
+      if (!$this->realmCheck() || !$this->statusCheck() || !$this->pathCheck() || !$this->roleCheck()) {
         // Omit snippet if any condition is not met.
         $satisfied[$this->name] = FALSE;
       }
@@ -455,6 +464,49 @@ EOS;
     }
     $this->displayMessage('role check @satisfied', array('@satisfied' => $satisfied));
     return $satisfied;
+  }
+
+  /**
+   * Determines whether to insert the snippet based on the realm key settings.
+   *
+   * @return bool
+   *   TRUE if the realm conditions are met; FALSE otherwise.
+   */
+  protected function realmCheck() {
+    if (!module_exists('variable_realm') || !module_exists('variable_store')) {
+      return TRUE;
+    }
+
+    $toggle = $this->get('realm_toggle');
+    $realms = $this->get('realm_list');
+    $realms = array_filter($realms);
+
+    if (empty($realms)) {
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
+    }
+    else {
+      $satisfied = FALSE;
+      // Check active realms against listed realms.
+      $satisfied = (bool) array_intersect($realms, $this->realmKey());
+      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
+    }
+    $this->displayMessage('realm check @satisfied', array('@satisfied' => $satisfied));
+    return $satisfied;
+  }
+
+  /**
+   * Returns applicable realm name and key for the request.
+   *
+   * @return string
+   *   The realm name and key.
+   */
+  protected function realmKey() {
+    static $value;
+    if (!isset($value)) {
+      list($realm_name, $realm_key) = google_tag_realm_values();
+      $value = array("$realm_name:$realm_key");
+    }
+    return $value;
   }
 
   /**

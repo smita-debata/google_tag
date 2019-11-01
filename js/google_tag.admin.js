@@ -18,9 +18,9 @@ Drupal.behaviors.gtmInsertionSettings = {
     }
 
     $('fieldset#edit-path', context).drupalSetSummary(function (context) {
-      var $radio = $('input[name="google_tag_path_toggle"]:checked', context);
+      var $radio = $('input[name="path_toggle"]:checked', context);
       if ($radio.val() == 'exclude listed') {
-        if (!$('textarea[name="google_tag_path_list"]', context).val()) {
+        if (!$('textarea[name="path_list"]', context).val()) {
           return Drupal.t('All paths');
         }
         else {
@@ -28,7 +28,7 @@ Drupal.behaviors.gtmInsertionSettings = {
         }
       }
       else {
-        if (!$('textarea[name="google_tag_path_list"]', context).val()) {
+        if (!$('textarea[name="path_list"]', context).val()) {
           return Drupal.t('No paths');
         }
         else {
@@ -42,7 +42,7 @@ Drupal.behaviors.gtmInsertionSettings = {
       $('input[type="checkbox"]:checked', context).each(function () {
         vals.push($.trim($(this).next('label').text()));
       });
-      var $radio = $('input[name="google_tag_role_toggle"]:checked', context);
+      var $radio = $('input[name="role_toggle"]:checked', context);
       if ($radio.val() == 'exclude listed') {
         if (!vals.length) {
           return Drupal.t('All roles');
@@ -62,9 +62,9 @@ Drupal.behaviors.gtmInsertionSettings = {
     });
 
     $('fieldset#edit-status', context).drupalSetSummary(function (context) {
-      var $radio = $('input[name="google_tag_status_toggle"]:checked', context);
+      var $radio = $('input[name="status_toggle"]:checked', context);
       if ($radio.val() == 'exclude listed') {
-        if (!$('textarea[name="google_tag_status_list"]', context).val()) {
+        if (!$('textarea[name="status_list"]', context).val()) {
           return Drupal.t('All statuses');
         }
         else {
@@ -72,11 +72,35 @@ Drupal.behaviors.gtmInsertionSettings = {
         }
       }
       else {
-        if (!$('textarea[name="google_tag_status_list"]', context).val()) {
+        if (!$('textarea[name="status_list"]', context).val()) {
           return Drupal.t('No statuses');
         }
         else {
           return Drupal.t('Only listed statuses');
+        }
+      }
+    });
+
+    $('fieldset#edit-realm', context).drupalSetSummary(function (context) {
+      var vals = [];
+      $('input[type="checkbox"]:checked', context).each(function () {
+        vals.push($.trim($(this).next('label').text()));
+      });
+      var $radio = $('input[name="realm_toggle"]:checked', context);
+      if ($radio.val() == 'exclude listed') {
+        if (!vals.length) {
+          return Drupal.t('All keys');
+        }
+        else {
+          return Drupal.t('All keys except selected keys');
+        }
+      }
+      else {
+        if (!vals.length) {
+          return Drupal.t('No keys');
+        }
+        else {
+          return Drupal.t('Only selected keys');
         }
       }
     });

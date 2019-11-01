@@ -149,7 +149,7 @@ class GTMContainerExport extends ctools_export_ui {
 
     $this->rows[$name]['data'][] = array('data' => check_plain($item->{$this->plugin['export']['admin_title']}), 'class' => array('ctools-export-ui-label'));
     $this->rows[$name]['data'][] = array('data' => check_plain($name), 'class' => array('ctools-export-ui-machine-name'));
-    $this->rows[$name]['data'][] = array('data' => check_plain($item->google_tag_container_id), 'class' => array('ctools-export-ui-container-id'));
+    $this->rows[$name]['data'][] = array('data' => check_plain($item->container_id), 'class' => array('ctools-export-ui-container-id'));
     $this->rows[$name]['data'][] = array('data' => check_plain($item->weight), 'class' => array('ctools-export-ui-weight'));
 
     $ops = theme('links__ctools_dropbutton', array('links' => $operations, 'attributes' => array('class' => array('links', 'inline'))));
@@ -299,7 +299,7 @@ class GTMContainerExport extends ctools_export_ui {
    * @return array
    *   Associative array of default values keyed by variable name.
    */
-  public static function variables_get() {
+  public static function variables_get($include_settings = FALSE) {
     static $items;
 
     if (!isset($items)) {
@@ -307,7 +307,8 @@ class GTMContainerExport extends ctools_export_ui {
       $defaults = \GTMSettings::getInstance();
       $items = array();
       // @todo Avoid loops by storing in a '__default_container' key?
-      $groups = array('general', 'path', 'role', 'status', 'advanced');
+      $groups = array('general', 'advanced', 'path', 'role', 'status', 'realm');
+      $include_settings ? array_unshift($groups, 'settings') : '';
       foreach ($groups as $group) {
         $function = "_google_tag_variable_info_$group";
         $variables = $function(array());

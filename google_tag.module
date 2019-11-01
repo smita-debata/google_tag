@@ -78,9 +78,15 @@ function google_tag_flush_caches() {
 /**
  * Implements hook_variable_group_info().
  *
- * @deprecated
+ * @deprecated in 7.x-2.0 will be removed in release 7.x-2.1.
  */
 function google_tag_variable_group_info() {
+  require_once DRUPAL_ROOT . '/includes/install.inc';
+  $version = (int) drupal_get_installed_schema_version('google_tag');
+  if ($version >= 7200) {
+    // After update hook finishes, remove the variable integration.
+    return;
+  }
   module_load_include('inc', 'google_tag', 'includes/variable');
   return _google_tag_variable_group_info();
 }
@@ -88,11 +94,17 @@ function google_tag_variable_group_info() {
 /**
  * Implements hook_variable_info().
  *
- * @deprecated
+ * @deprecated in 7.x-2.0 will be removed in release 7.x-2.1.
  */
 function google_tag_variable_info($options) {
+  require_once DRUPAL_ROOT . '/includes/install.inc';
+  $version = (int) drupal_get_installed_schema_version('google_tag');
+  if ($version >= 7200) {
+    // After update hook finishes, remove the variable integration.
+    return;
+  }
   module_load_include('inc', 'google_tag', 'includes/variable');
-  return _google_tag_variable_info($options);
+  return _google_tag_variable_info($options + array('use_prefix' => TRUE));
 }
 
 /**
@@ -142,7 +154,7 @@ function google_tag_realm_values() {
     $realm_name = $realm_values['name'];
     $realm_key = $realm_values['key'];
 
-    $debug = \GTMSettings::getInstance()->get('google_tag_debug_output');
+    $debug = \GTMSettings::getInstance()->get('debug_output');
     $debug ? drupal_set_message(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $realm_key))) : '';
   }
   return array($realm_name, $realm_key);

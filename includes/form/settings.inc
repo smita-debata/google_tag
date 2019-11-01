@@ -27,8 +27,10 @@ function google_tag_settings_form($form, &$form_state) {
 
   $export_type = EXPORT_IN_DATABASE;
   if (empty($config->get('uri'))) {
-    // @todo Remove the 'general' keys. This call now omits the settings keys.
-    $config = (object) GTMContainerExport::variables_get();
+    // @todo This appears somewhat circular as variables_get() uses
+    // \GTMSettings::getInstance() for default values but does appeal to the
+    // variable definition if settings object does not exist.
+    $config = (object) GTMContainerExport::variables_get(TRUE);
     $export_type = NULL;
   }
   $form_state['item'] = $config;
@@ -52,17 +54,21 @@ function google_tag_settings_form($form, &$form_state) {
   }
 
   // Default container settings.
-  $description = t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />On this tab, specify the path condition.');
+  $description = t('On this and the following tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />On this tab, specify the path condition.');
   $text = t('The default container settings that apply to a new container.');
   $suffix = '<div id="edit-default--description" class="description">' . $text . '</div>';
 
   $groups = array(
 //     'general' => array('title' => t('General'), 'collapse' => FALSE),
+    'advanced' => array('title' => t('Advanced')),
     'path' => array('title' => t('Page paths'), 'description' => $description),
     'role' => array('title' => t('User roles'), 'description' => t('On this tab, specify the user role condition.')),
     'status' => array('title' => t('Response statuses'), 'description' => t('On this tab, specify the page response status condition.')),
-    'advanced' => array('title' => t('Advanced')),
+    'realm' => array('title' => t('Realm keys'), 'description' => t('On this tab, specify the realm keys condition.')),
   );
+  if (!module_exists('variable_realm') || !module_exists('variable_store')) {
+    unset($groups['realm']);
+  }
 
   // Use prefix and suffix as title and description are not rendered.
   $form['tabs'] = array(
@@ -147,9 +153,8 @@ function google_tag_form_elements(array $variables, $container) {
         $element[$property] = $variable[$key];
       }
     }
-    $key = str_replace('google_tag_', '', $name);
     $element['#type'] = google_tag_form_element_type($element['#type']);
-    $element['#default_value'] = $container->$key;
+    $element['#default_value'] = $container->$name;
     $element += isset($variable['element']) ? $variable['element'] : array();
     $elements[$name] = $element;
   }
@@ -185,45 +190,48 @@ function google_tag_settings_form_validate($form, &$form_state) {
   $values = &$form_state['values'];
 
   // Trim the text values.
-//   $values['google_tag_container_id'] = trim($values['google_tag_container_id']);
-  $values['google_tag_uri'] = trim($values['google_tag_uri']);
-  $values['google_tag_environment_id'] = trim($values['google_tag_environment_id']);
-  $values['google_tag_data_layer'] = trim($values['google_tag_data_layer']);
-  google_tag_text_clean($values['google_tag_path_list']);
-  google_tag_text_clean($values['google_tag_status_list']);
-  google_tag_text_clean($values['google_tag_whitelist_classes']);
-  google_tag_text_clean($values['google_tag_blacklist_classes']);
+//   $values['container_id'] = trim($values['container_id']);
+  $values['uri'] = trim($values['uri']);
+  $values['environment_id'] = trim($values['environment_id']);
+  $values['data_layer'] = trim($values['data_layer']);
+  google_tag_text_clean($values['path_list']);
+  google_tag_text_clean($values['status_list']);
+  google_tag_text_clean($values['whitelist_classes']);
+  google_tag_text_clean($values['blacklist_classes']);
 
   // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
-//   $values['google_tag_container_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_container_id']);
-  $values['google_tag_environment_id'] = str_replace(array('–', '—', '−'), '-', $values['google_tag_environment_id']);
+//   $values['container_id'] = str_replace(array('–', '—', '−'), '-', $values['container_id']);
+  $values['environment_id'] = str_replace(array('–', '—', '−'), '-', $values['environment_id']);
+
+  $values['role_list'] = array_filter($values['role_list']);
+  $values['realm_list'] = array_filter($values['realm_list']);
 /*
-  if (!preg_match('/^GTM-\w{4,}$/', $values['google_tag_container_id'])) {
+  if (!preg_match('/^GTM-\w{4,}$/', $values['container_id'])) {
     // @todo Is there a more specific regular expression that applies?
     // @todo Is there a way to "test the connection" to determine a valid ID for
     // a container? It may be valid but not the correct one for the website.
-    form_set_error('google_tag_container_id', t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
+    form_set_error('container_id', t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
   }
 */
-  if ($values['google_tag_include_environment'] && !preg_match('/^env-\d{1,}$/', $values['google_tag_environment_id'])) {
-    form_set_error('google_tag_environment_id', t('A valid environment ID is case sensitive and formatted like env-x.'));
+  if ($values['include_environment'] && !preg_match('/^env-\d{1,}$/', $values['environment_id'])) {
+    form_set_error('environment_id', t('A valid environment ID is case sensitive and formatted like env-x.'));
   }
-  if ($message = _google_tag_data_layer_verify($values['google_tag_data_layer'])) {
-    form_set_error('google_tag_data_layer', $message);
+  if ($message = _google_tag_data_layer_verify($values['data_layer'])) {
+    form_set_error('data_layer', $message);
   }
-  if ($values['google_tag_include_classes']) {
-    if (empty($values['google_tag_whitelist_classes']) && empty($values['google_tag_blacklist_classes'])) {
-      form_set_error('google_tag_include_classes', t('Enter listed classes in at least one field, or uncheck the box.'));
-      form_set_error('google_tag_whitelist_classes', '');
-      form_set_error('google_tag_blacklist_classes', '');
+  if ($values['include_classes']) {
+    if (empty($values['whitelist_classes']) && empty($values['blacklist_classes'])) {
+      form_set_error('include_classes', t('Enter listed classes in at least one field, or uncheck the box.'));
+      form_set_error('whitelist_classes', '');
+      form_set_error('blacklist_classes', '');
     }
   }
 
-  $directory = $values['google_tag_uri'];
+  $directory = $values['uri'];
   if (substr($directory, -3) == '://') {
     $args = array('%directory' => $directory);
     $message = 'The snippet parent uri %directory is invalid. Enter a single trailing slash to specify a plain stream wrapper.';
-    form_set_error('google_tag_uri', t($message, $args));
+    form_set_error('uri', t($message, $args));
   }
 
   // Allow for a plain stream wrapper with one trailing slash.
@@ -231,7 +239,7 @@ function google_tag_settings_form_validate($form, &$form_state) {
   if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
     $args = array('%directory' => $directory);
     $message = 'The snippet parent uri %directory is invalid, possibly due to file system permissions. The directory either does not exist, or is not writable or searchable.';
-    form_set_error('google_tag_uri', t($message, $args));
+    form_set_error('uri', t($message, $args));
   }
 }
 
@@ -244,7 +252,7 @@ function google_tag_settings_form_submit($form, &$form_state) {
   // @todo Just like fields that change the 'value' during load-save,
   // backup the current form_state 'item' and restore it after save.
   // @todo Add the status property to data.
-  $variables = GTMContainerExport::variables_get();
+  $variables = GTMContainerExport::variables_get(TRUE);
   // Set name and label so we can load all rows in config table and then remove
   // the settings item before building the container list page.
   // See google_tag_export_load().
