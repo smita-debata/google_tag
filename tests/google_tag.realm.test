@@ -20,15 +20,13 @@ class GTMRealmTestCase extends GTMBaseTestCase {
    * {@inheritdoc}
    */
   protected function setUp() {
-    parent::setUp(array('google_tag', 'gtm_test', /*'variable',*/ 'variable_realm', 'variable_store', 'solotandem'));
+    parent::setUp(array('google_tag', 'gtm_test', /*'variable',*/ 'variable_realm', 'variable_store'));
   }
 
   /**
    * {@inheritdoc}
    */
   protected function createData() {
-sdm(__METHOD__);
-sdp(__METHOD__);
     // variable_realm_add() calls $store->variable_add($name, $value)
     // this sets the value in the in-memory variable store
     //
@@ -65,10 +63,6 @@ sdp(__METHOD__);
     array_walk($variables, function ($value, $key) {
       variable_set($key, $value);
     });
-$realm = 'global';
-$controller = variable_realm_controller($realm);
-sdp(__METHOD__);
-sdp($controller, '$controller global');
 
     // Set variables for gtm_test:primary.
     $this->variables['primary'] = (object) $variables = array(
@@ -87,11 +81,6 @@ sdp($controller, '$controller global');
 //       'google_tag_include_environment' => '1',
     );
     variable_realm_add('gtm_test', 'secondary', $variables, NULL, FALSE);
-$realm = 'gtm_test';
-$controller = variable_realm_controller($realm);
-sdp(__METHOD__);
-sdp($controller, '$controller secondary');
-
 /*
     $this->setRealmVariables();
 */
@@ -103,10 +92,6 @@ sdp($controller, '$controller secondary');
    * Set realm variables in the variable_store table.
    */
   protected function setRealmVariables__DEP() {
-sdm(__METHOD__);
-sdp(__METHOD__);
-sdp(array_keys($this->variables), 'keys of $this->variables');
-sdp($GLOBALS['conf'], '$GLOBALS a');
     foreach ($this->variables as $key => $variables) {
       $realm = $key == 'default' ? 'global' : 'gtm_test';
       foreach ($variables as $name => $value) {
@@ -115,47 +100,21 @@ sdp($GLOBALS['conf'], '$GLOBALS a');
         variable_realm_set($realm, $key, $name, $value, $rebuild = FALSE);
       }
     }
-// @todo After above the $GLOBALS array is contaminated with secondary realm values.
-sdp(__METHOD__);
-sdp($GLOBALS['conf'], '$GLOBALS b');
   }
 
   /**
    * {@inheritdoc}
    */
   protected function checkSnippetFiles() {
-sdm(__METHOD__);
-sdp(__METHOD__);
-/*
-    // Restore $GLOBALS values to those for gtm_test:primary == global:default.
-    // The two arrays differ by a few keys added during the page response.
-    $realm = 'global';
-    $key = 'default';
-    $store = variable_realm($realm, $key);
-    $variables = $store->variable_list();
-    ksort($GLOBALS['conf']);
-    ksort($variables);
-sdp($GLOBALS['conf'] == $variables, 'GLOBALS equal store variables');
-sdp(__METHOD__);
-sdp($GLOBALS['conf'], '$GLOBALS c');
-sdp($variables, '$variables');
-*/
-
     $realms = variable_realm_list();
-sdp(__METHOD__);
-sdp($realms, '$realms');
     foreach ($realms as $realm_name => $realm_title) {
       $keys = variable_realm_keys($realm_name);
       foreach ($keys as $key_name => $key_title) {
-sdp(__METHOD__);
-sdp(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
         $message = format_string('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name));
         $this->pass($message, $this->group);
         foreach ($this->types as $type) {
-sdp($type, '$type');
           $url = "$this->basePath/google_tag/{$realm_name}/google_tag.$key_name.$type.js";
           $contents = @file_get_contents($url);
-sdp($contents, '$contents');
           $function = "verify{$type}Snippet";
           $this->$function($contents, $this->variables[$key_name]);
         }
@@ -167,32 +126,22 @@ sdp($contents, '$contents');
    * {@inheritdoc}
    */
   protected function checkPageResponse() {
-sdm(__METHOD__);
-sdp(__METHOD__);
     parent::checkPageResponse();
 
     // Remove global realm as no page response will use these values.
     $realms = variable_realm_list();
     unset($realms['global']);
-sdp(__METHOD__);
-sdp($realms, '$realms');
     foreach ($realms as $realm_name => $realm_title) {
       $keys = variable_realm_keys($realm_name);
       foreach ($keys as $key_name => $key_title) {
         // The gtm_test module sets the realm from the query arguments.
         $this->drupalGet('', $options = array('query' => array('name' => $realm_name, 'key' => $key_name)));
-sdp(__METHOD__);
-sdp(t('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name)));
         $message = format_string('realm:key = @realm:@key', array('@realm' => $realm_name, '@key' => $key_name));
         $this->pass($message, $this->group);
         foreach ($this->types as $type) {
-sdp(__METHOD__);
-sdp($type, '$type');
           $uri = "$this->basePath/google_tag/{$realm_name}/google_tag.$key_name.$type.js";
-sdp($uri, '$uri');
           if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
             $realpath = $wrapper->getExternalUrl($uri);
-sdp($realpath, '$realpath');
             $function = "verify{$type}Tag";
             $this->$function($realpath, $this->variables[$key_name]);
           }

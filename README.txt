@@ -86,9 +86,8 @@ TROUBLESHOOTING
 If the JavaScript snippets are not present in the HTML output, try the following
 steps to debug the situation:
 
- * Confirm the snippet files exist at the snippet base URI shown on the module
-   settings page. By default this is public://google_tag/ which on most sites
-   this equates to sites/default/files/google_tag/.
+ * Confirm the snippet files exist at public://google_tag/ (on most sites this
+   equates to sites/default/files/google_tag/).
 
    If missing, then recreate the snippet files by clearing all caches (e.g. from
    the command line using drush or from the performance administration page) OR
