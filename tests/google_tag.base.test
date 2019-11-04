@@ -43,15 +43,13 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Test the module.
    */
   public function testModule() {
-    // Modify default settings.
-    // These should propagate to each container created in test.
-    $settings = \GTMSettings::getInstance();
-    $settings->debug_output = 1;
-    $settings->role_toggle = 'include listed';
-    $settings->role_list = array('content viewer' => 'content viewer');
-    $settings->save();
+    if (get_called_class() == 'GTMBaseTestCase') {
+      $this->assertTrue(TRUE, t('No assertions on base test class'));
+      return;
+    }
 
     try {
+      $this->modifySettings();
       $this->createData();
       $this->checkSnippetFiles();
       $this->checkPageResponse();
@@ -63,6 +61,19 @@ class GTMBaseTestCase extends DrupalWebTestCase {
     finally {
       $this->assertTrue(TRUE, t('Inside FINALLY block'));
     }
+  }
+
+  /**
+   * Modify settings for test purposes.
+   */
+  protected function modifySettings() {
+    // Modify default settings.
+    // These should propagate to each container created in test.
+    $settings = \GTMSettings::getInstance();
+    $settings->debug_output = 1;
+    $settings->role_toggle = 'include listed';
+    $settings->role_list = array('content viewer' => 'content viewer');
+    $settings->save();
   }
 
   /**
