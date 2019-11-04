@@ -43,7 +43,7 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * Test the module.
    */
   public function testModule() {
-    if (get_called_class() == 'GTMBaseTestCase') {
+    if (get_class($this) == 'GTMBaseTestCase') {
       $this->assertTrue(TRUE, t('No assertions on base test class'));
       return;
     }
