@@ -15,7 +15,7 @@ class GTMSettings {
    */
   public function __construct() {
     // On load the values include ctools items: table, type, export_type.
-//     $values = (array) ctools_export_crud_load('gtag_config', 'google_tag.settings');
+    // $values = (array) ctools_export_crud_load('gtag_config', 'google_tag.settings');
     $values = (array) gtag_export_crud_load('gtag_config', 'google_tag.settings');
     foreach ($values as $key => $value) {
       $this->$key = $value;
@@ -44,7 +44,7 @@ class GTMSettings {
    *   The property.
    */
   public function get($property) {
-    return isset($this->$property) ? $this->$property : NULL; // '';
+    return isset($this->$property) ? $this->$property : NULL;
   }
 
   /**
@@ -61,7 +61,7 @@ class GTMSettings {
 
     $settings['name'] = 'google_tag.settings';
     $settings['data'] = $data;
-    $settings['type'] = 'Normal'; // 'Local';
+    $settings['type'] = 'Normal';
     $settings['export_type'] = $export_type;
     $settings = (object) $settings;
     $result = ctools_export_crud_save('gtag_config', $settings);

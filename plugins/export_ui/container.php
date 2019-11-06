@@ -18,18 +18,10 @@ class GTMContainerExport extends ctools_export_ui {
   /**
    * {@inheritdoc}
    */
-  public function hook_menu(&$items) {
-    // @todo menu_router table has 'access_callback' = zero instead of user_access???
-    parent::hook_menu($items);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function get_page_title($op, $item = NULL) {
     // @todo Modify this to return strings like in D8.
     // Are you sure you want to delete the container configuration Primary?
-//     return parent::get_page_title($op, $item);
+    // return parent::get_page_title($op, $item);
 
     // All this code just to use the label not the machine name.
     if (empty($this->plugin['strings']['title'][$op])) {
@@ -39,7 +31,7 @@ class GTMContainerExport extends ctools_export_ui {
     // Replace %title that might be there with the exportable title.
     $title = $this->plugin['strings']['title'][$op];
     if (!empty($item)) {
-      $export_key = $this->plugin['export']['admin_title']; // Not 'key'
+      $export_key = $this->plugin['export']['admin_title'];
       $title = (str_replace('%title', check_plain($item->{$export_key}), $title));
     }
 
@@ -58,7 +50,7 @@ class GTMContainerExport extends ctools_export_ui {
     //   $defaults = _ctools_export_get_defaults($table, $export);
 
     // Load with config table name key but return $item_name key.
-//     $item = parent::load_item("google_tag.container.$item_name");
+    // $item = parent::load_item("google_tag.container.$item_name");
     $item = gtag_export_crud_load('gtag_config', "google_tag.container.$item_name");
     return $item;
   }
@@ -117,7 +109,7 @@ class GTMContainerExport extends ctools_export_ui {
    * {@inheritdoc}
    */
   public function list_build_row($item, &$form_state, $operations) {
-//     parent::list_build_row($item, $form_state, $operations);
+    // parent::list_build_row($item, $form_state, $operations);
 
     // Set up sorting
     $name = $item->{$this->plugin['export']['key']};
@@ -171,11 +163,11 @@ class GTMContainerExport extends ctools_export_ui {
     $header[] = array('data' => t('Machine Name'), 'class' => array('ctools-export-ui-machine-name'));
     $header[] = array('data' => t('Container ID'), 'class' => array('ctools-export-ui-container-id'));
     $header[] = array('data' => t('Weight'), 'class' => array('ctools-export-ui-weight'));
-//     $header[] = array('data' => t('Storage'), 'class' => array('ctools-export-ui-storage'));
+    // $header[] = array('data' => t('Storage'), 'class' => array('ctools-export-ui-storage'));
     $header[] = array('data' => t('Operations'), 'class' => array('ctools-export-ui-operations'));
 
     return $header;
-//     return parent::list_table_header();
+    // return parent::list_table_header();
   }
 
   // ------------------------------------------------------------------------
@@ -199,7 +191,7 @@ class GTMContainerExport extends ctools_export_ui {
     $this->is_cloning = TRUE;
     // @todo On save the name retains the value above (i.e. is not changed).
     return parent::edit_page($js, $input, $original, $step);
-//     return parent::clone_page($js, $input, $original, $step = NULL);
+    // return parent::clone_page($js, $input, $original, $step = NULL);
   }
 
   /**
@@ -352,7 +344,7 @@ class GTMContainerExport extends ctools_export_ui {
     $variables = $this->variables_get() + array('status' => 1);
     $values = array_intersect_key($form_state['values'], $variables);
     // @todo Add properties that are not defined as variables.
-//     $values['status'] = (bool) $variables['status'];
+    // $values['status'] = (bool) $variables['status'];
     return $values;
   }
 

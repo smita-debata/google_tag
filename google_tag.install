@@ -323,7 +323,7 @@ function google_tag_update_7106(&$sandbox) {
 function google_tag_update_7200(&$sandbox) {
   // @todo Retain variables until next hook_update_N to avoid migration issues.
   // Extract the delete variables code from hook_uninstall().
-//   google_tag_uninstall();
+  // google_tag_uninstall();
 
   $chema = drupal_get_schema_unprocessed('google_tag', 'gtag_config');
   db_create_table('gtag_config', $chema);

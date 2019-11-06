@@ -17,7 +17,7 @@
  */
 function google_tag_settings_form($form, &$form_state) {
   module_load_include('inc', 'google_tag', 'includes/variable');
-//   module_load_include('inc', 'ctools', 'includes/export');
+  // module_load_include('inc', 'ctools', 'includes/export');
 
   // Gather data.
   // @todo Set this on validation errors.
@@ -59,7 +59,7 @@ function google_tag_settings_form($form, &$form_state) {
   $suffix = '<div id="edit-default--description" class="description">' . $text . '</div>';
 
   $groups = array(
-//     'general' => array('title' => t('General'), 'collapse' => FALSE),
+    // 'general' => array('title' => t('General'), 'collapse' => FALSE),
     'advanced' => array('title' => t('Advanced')),
     'path' => array('title' => t('Page paths'), 'description' => $description),
     'role' => array('title' => t('User roles'), 'description' => t('On this tab, specify the user role condition.')),
@@ -190,7 +190,7 @@ function google_tag_settings_form_validate($form, &$form_state) {
   $values = &$form_state['values'];
 
   // Trim the text values.
-//   $values['container_id'] = trim($values['container_id']);
+  // $values['container_id'] = trim($values['container_id']);
   $values['uri'] = trim($values['uri']);
   $values['environment_id'] = trim($values['environment_id']);
   $values['data_layer'] = trim($values['data_layer']);
@@ -200,7 +200,7 @@ function google_tag_settings_form_validate($form, &$form_state) {
   google_tag_text_clean($values['blacklist_classes']);
 
   // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
-//   $values['container_id'] = str_replace(array('–', '—', '−'), '-', $values['container_id']);
+  // $values['container_id'] = str_replace(array('–', '—', '−'), '-', $values['container_id']);
   $values['environment_id'] = str_replace(array('–', '—', '−'), '-', $values['environment_id']);
 
   $values['role_list'] = array_filter($values['role_list']);

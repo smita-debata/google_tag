@@ -414,7 +414,7 @@ function _google_tag_variable_info_internal($options) {
     'description' => t('The associative array of data layer classes. <strong>NOTE: If using the dataLayer module to insert these values and variable realms are in effect, then check this item.</strong>', array(), $options),
     'default' => array(),
     'element' => array(
-//       '#prefix' => $visible ? '<span>' . $markup . '</span>' : '',
+      // '#prefix' => $visible ? '<span>' . $markup . '</span>' : '',
       '#attributes' => array('class' => array('element-invisible')),
     ),
   );

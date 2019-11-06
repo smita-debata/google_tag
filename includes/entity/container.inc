@@ -157,7 +157,7 @@ class GTMContainer {
    */
   public function __construct(array $values, $name = NULL) {
     if (empty($values) && $name) {
-//       $values = (array) ctools_export_crud_load('gtag_config', "google_tag.container.$name");
+      // $values = (array) ctools_export_crud_load('gtag_config', "google_tag.container.$name");
       $values = (array) gtag_export_crud_load('gtag_config', "google_tag.container.$name");
     }
     // @todo Always append default container values to mimic variable_get()?
@@ -664,13 +664,13 @@ EOS;
    *   Whether the save was successful.
    */
   public function save($export_type = EXPORT_IN_DATABASE) {
-//     $export_type = isset($this->export_type) ? $this->export_type : NULL;
+    // $export_type = isset($this->export_type) ? $this->export_type : NULL;
     $export_type = isset($this->export_type) ? $this->export_type : $export_type;
     $data = (array) $this;
 
     $config['name'] = "google_tag.container.{$this->name}";
     $config['data'] = $data;
-    $config['type'] = 'Normal'; // 'Local';
+    $config['type'] = 'Normal';
     $config['export_type'] = $export_type;
     $config = (object) $config;
     $result = ctools_export_crud_save('gtag_config', $config);

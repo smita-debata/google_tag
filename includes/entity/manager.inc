@@ -192,7 +192,7 @@ class GTMContainerManager implements ContainerManagerInterface {
       }
     }
     // Create snippet files for enabled containers.
-//     $containers = $this->loadContainers();
+    // $containers = $this->loadContainers();
     $result = TRUE;
     foreach ($containers as $container) {
       $result = !$this->createAssets($container) ? FALSE : $result;
