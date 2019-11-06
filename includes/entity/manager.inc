@@ -7,6 +7,8 @@ class GTMContainerManager implements ContainerManagerInterface {
 
   /**
    * Singleton instance of this class.
+   *
+   * @var GTMContainerManager
    */
   private static $instance;
 
@@ -14,6 +16,7 @@ class GTMContainerManager implements ContainerManagerInterface {
    * Returns singleton instance of this class.
    *
    * @return GTMContainerManager
+   *   The instance.
    */
   public static function getInstance() {
     if (!self::$instance) {

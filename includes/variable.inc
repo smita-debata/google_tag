@@ -343,8 +343,6 @@ function _google_tag_variable_info_advanced($options) {
  * Implements hook_variable_info().
  */
 function _google_tag_variable_info_settings($options) {
-  // Gather data.
-
   // Build variables.
   $variables['uri'] = array(
     'type' => 'string',

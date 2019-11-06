@@ -250,13 +250,6 @@ EOS;
     if ($compact) {
       $script = str_replace(array("\n", '  '), '', $script);
     }
-/*
-    $script = <<<EOS
-<!-- Google Tag Manager -->
-$script
-<!-- End Google Tag Manager -->
-EOS;
-*/
     return $script;
   }
 
@@ -284,13 +277,6 @@ EOS;
     if ($compact) {
       $noscript = str_replace("\n", '', $noscript);
     }
-/*
-    $noscript = <<<EOS
-<!-- Google Tag Manager -->
-$noscript
-<!-- End Google Tag Manager -->
-EOS;
-*/
     return $noscript;
   }
 

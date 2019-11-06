@@ -78,7 +78,7 @@ function google_tag_flush_caches() {
 /**
  * Implements hook_variable_group_info().
  *
- * @deprecated in 7.x-2.0 will be removed in release 7.x-2.1.
+ * @deprecated in 7.x-2.0 and is removed in release 7.x-2.1.
  */
 function google_tag_variable_group_info() {
   require_once DRUPAL_ROOT . '/includes/install.inc';
@@ -94,7 +94,7 @@ function google_tag_variable_group_info() {
 /**
  * Implements hook_variable_info().
  *
- * @deprecated in 7.x-2.0 will be removed in release 7.x-2.1.
+ * @deprecated in 7.x-2.0 and is removed in release 7.x-2.1.
  */
 function google_tag_variable_info($options) {
   require_once DRUPAL_ROOT . '/includes/install.inc';
@@ -196,15 +196,15 @@ function google_tag_ctools_plugin_directory($module, $plugin_type) {
  * corresponding code involving 'conditions' correctly uses the $export['key']
  * entry in the array. The former entry is absent.
  *
- * @param $table
+ * @param string $table
  *   The name of the table to use to retrieve $schema values. This table
  *   must have an 'export' section containing data or this function
  *   will fail.
- * @param $name
+ * @param string $name
  *   The unique ID to load. The field for this ID will be specified by
  *   the export key, which normally defaults to 'name'.
  *
- * @return
+ * @return object
  *   The loaded object.
  */
 function gtag_export_crud_load($table, $name) {

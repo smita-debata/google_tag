@@ -74,7 +74,7 @@ function google_tag_requirements($phase) {
       // Google Tag Manager container ID has not been set.
       $args = array(
         '@url1' => '/admin/config/system/google_tag/settings',
-        '@url2' => '/admin/config/system/google_tag'
+        '@url2' => '/admin/config/system/google_tag',
       );
       $description = $t('Configure default settings on the <a href="@url1">module settings page</a>. Afterwards, add a container on the <a href="@url2">container management page</a>.', $args);
       $requirements['google_tag'] = array(
@@ -368,7 +368,7 @@ function _google_tag_settings_migrate() {
  * @param string $key_name
  *   The realm key name.
  */
-function _google_tag_container_migrate($realm_name ='', $key_name = '') {
+function _google_tag_container_migrate($realm_name = '', $key_name = '') {
   ctools_include('export');
   module_load_include('inc', 'google_tag', 'includes/variable');
 

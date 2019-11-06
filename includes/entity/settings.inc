@@ -7,6 +7,8 @@ class GTMSettings {
 
   /**
    * Singleton instance of this class.
+   *
+   * @var GTMSettings
    */
   private static $instance;
 
@@ -26,6 +28,7 @@ class GTMSettings {
    * Returns singleton instance of this class.
    *
    * @return GTMSettings
+   *   The instance.
    */
   public static function getInstance() {
     if (!self::$instance) {

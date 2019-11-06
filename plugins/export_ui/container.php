@@ -173,6 +173,9 @@ class GTMContainerExport extends ctools_export_ui {
   // ------------------------------------------------------------------------
   // These methods are the API for adding/editing exportable items
 
+  /**
+   * {@inheritdoc}
+   */
   public function add_page($js, $input, $step = NULL) {
     // @todo The crumb trail is Home » Administration » Configuration » System
     // Change this.
