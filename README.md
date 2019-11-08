@@ -1,6 +1,4 @@
-
-CONTENTS OF THIS FILE
----------------------
+## CONTENTS OF THIS FILE
 
  * Introduction
  * Requirements
@@ -9,62 +7,54 @@ CONTENTS OF THIS FILE
  * Troubleshooting
  * Maintainers
 
-
-INTRODUCTION
-------------
+## INTRODUCTION
 
 This project integrates the site with the Google Tag Manager (GTM) application.
 GTM allows you to deploy analytics and measurement tag configurations from a
 web-based user interface (hosted by Google) instead of requiring administrative
 access to your website.
 
- * For a full description, visit the project page:
+ * For a full description, visit the project page:  
    https://www.drupal.org/project/google_tag
 
- * To submit bug reports and feature suggestions, or to track changes:
+ * To submit bug reports and feature suggestions, or to track changes:  
    https://www.drupal.org/project/issues/google_tag
 
+## REQUIREMENTS
 
-REQUIREMENTS
-------------
-
-Sign up for GTM and obtain a 'container ID' for your website. Enter the
+Sign up for GTM and obtain a 'container ID' for your website. Enter the  
 'container ID' on the settings form for this module (see Configuration).
 
  * https://tagmanager.google.com/
 
-
-INSTALLATION
-------------
+## INSTALLATION
 
 Place the project files in an appropriate modules directory and enable the
 module as you would any other contributed module. For further information see:
 
  * https://www.drupal.org/node/895232
 
-
-CONFIGURATION
--------------
+## CONFIGURATION
 
 Users in roles with the 'Administer Google Tag Manager' permission will be able
 to manage the module settings and containers for the site. Configure permissions
 as usual at:
 
- * Administration » People » Permissions
+ * Administration » People » Permissions  
  * admin/people/permissions
 
 From the module settings page, configure the snippet URI and the default
 conditions on which the tags are inserted on a page response. Conditions exist
 for: page paths, user roles, and response statuses. See:
 
- * Administration » Configuration » System » Google Tag Manager
+ * Administration » Configuration » System » Google Tag Manager  
  * admin/config/system/google_tag/settings
 
 From the container management page, manage the containers to be inserted on a
 page response. Add one or more containers with separate container IDs and the
 snippet insertion conditions. See:
 
- * Administration » Configuration » System » Google Tag Manager
+ * Administration » Configuration » System » Google Tag Manager  
  * admin/config/system/google_tag
 
 For development purposes, create a GTM environment for your website and enter
@@ -72,9 +62,7 @@ the 'environment ID' on the 'Advanced' tab of the settings form.
 
  * https://tagmanager.google.com/#/admin
 
-
-TROUBLESHOOTING
----------------
+## TROUBLESHOOTING
 
 If the JavaScript snippets are not present in the HTML output, try the following
 steps to debug the situation:
@@ -107,9 +95,7 @@ code on the script tag. It does not load the snippet file and inspect the code
 therein. Instead of relying on this bot, check whether the GTM snippets are
 loaded as a result of the snippet added by this project.
 
-
-MAINTAINERS
------------
+## MAINTAINERS
 
 Current maintainer:
 
