@@ -131,10 +131,10 @@ class ContainerManager implements ContainerManagerInterface {
   }
 
   /**
-   * Adds page attachments.
+   * Returns container entity IDs.
    *
-   * @param array $attachments
-   *   The attachments array.
+   * @return array
+   *   The entity ID array.
    */
   public function loadContainerIDs() {
     return \Drupal::entityQuery('google_tag_container')
