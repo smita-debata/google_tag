@@ -34,12 +34,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *     "label",
  *     "weight",
  *     "container_id",
- *     "path_toggle",
- *     "path_list",
- *     "role_toggle",
- *     "role_list",
- *     "status_toggle",
- *     "status_list",
  *     "data_layer",
  *     "include_classes",
  *     "whitelist_classes",
@@ -47,6 +41,12 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *     "include_environment",
  *     "environment_id",
  *     "environment_token",
+ *     "path_toggle",
+ *     "path_list",
+ *     "role_toggle",
+ *     "role_list",
+ *     "status_toggle",
+ *     "status_list",
  *   },
  *   links = {
  *     "add-form" = "/admin/config/system/google-tag/add",
@@ -93,48 +93,6 @@ class Container extends ConfigEntityBase implements ConfigEntityInterface {
    * @var string
    */
   public $container_id;
-
-  /**
-   * Whether to include or exclude the listed paths.
-   *
-   * @var string
-   */
-  public $path_toggle;
-
-  /**
-   * The listed paths.
-   *
-   * @var string
-   */
-  public $path_list;
-
-  /**
-   * Whether to include or exclude the listed roles.
-   *
-   * @var string
-   */
-  public $role_toggle;
-
-  /**
-   * The listed roles.
-   *
-   * @var array
-   */
-  public $role_list;
-
-  /**
-   * Whether to include or exclude the listed statuses.
-   *
-   * @var string
-   */
-  public $status_toggle;
-
-  /**
-   * The listed statuses.
-   *
-   * @var string
-   */
-  public $status_list;
 
   /**
    * The name of the data layer.
@@ -184,6 +142,48 @@ class Container extends ConfigEntityBase implements ConfigEntityInterface {
    * @var string
    */
   public $environment_token;
+
+  /**
+   * Whether to include or exclude the listed paths.
+   *
+   * @var string
+   */
+  public $path_toggle;
+
+  /**
+   * The listed paths.
+   *
+   * @var string
+   */
+  public $path_list;
+
+  /**
+   * Whether to include or exclude the listed roles.
+   *
+   * @var string
+   */
+  public $role_toggle;
+
+  /**
+   * The listed roles.
+   *
+   * @var array
+   */
+  public $role_list;
+
+  /**
+   * Whether to include or exclude the listed statuses.
+   *
+   * @var string
+   */
+  public $status_toggle;
+
+  /**
+   * The listed statuses.
+   *
+   * @var string
+   */
+  public $status_list;
 
   /**
    * {@inheritdoc}

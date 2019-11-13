@@ -32,8 +32,7 @@ class SettingsForm extends ConfigFormBase {
     $config = $this->config('google_tag.settings');
 
     // Build form elements.
-
-    $description = $this->t('<br />After configuring the module settings and default container settings, <strong>add a container</strong> on the <a href=":url">container management page</a>.', array(':url' => Url::fromRoute('entity.google_tag_container.collection')->toString()));
+    $description = $this->t('<br />After configuring the module settings and default properties for a new container, <strong>add a container</strong> on the <a href=":url">container management page</a>.', array(':url' => Url::fromRoute('entity.google_tag_container.collection')->toString()));
 
     $form['instruction'] = [
       '#type' => 'markup',
@@ -99,9 +98,6 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Default container settings'),
       '#description' => $this->t('The default container settings that apply to a new container.'),
       '#attributes' => ['class' => ['google-tag']],
-      '#attached' => [
-        'library' => ['google_tag/drupal.settings_form'],
-      ],
     ];
 /*
     // General tab.
@@ -122,97 +118,6 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 */
-    // Page paths tab.
-    $description = $this->t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />On this tab, specify the path condition.');
-
-    // @todo Use singular for element names.
-    $form['path'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Page paths'),
-      '#group' => 'default',
-      '#description' => $description,
-    ];
-
-    $form['path']['path_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Add snippet on specific paths'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All paths except the listed paths'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed paths'),
-      ],
-      '#default_value' => $config->get('_default_container.path_toggle'),
-    ];
-
-    $args = [
-      '%blog' => '/blog',
-      '%blog-wildcard' => '/blog/*',
-      '%front' => '<front>',
-    ];
-
-    $form['path']['path_list'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Listed paths'),
-      '#description' => $this->t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args),
-      '#default_value' => $config->get('_default_container.path_list'),
-      '#rows' => 10,
-    ];
-
-    // User roles tab.
-    $form['role'] = [
-      '#type' => 'details',
-      '#title' => $this->t('User roles'),
-      '#description' => $this->t('On this tab, specify the user role condition.'),
-      '#group' => 'default',
-    ];
-
-    $form['role']['role_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Add snippet for specific roles'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All roles except the selected roles'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the selected roles'),
-      ],
-      '#default_value' => $config->get('_default_container.role_toggle'),
-    ];
-
-    $user_roles = array_map(function ($role) {
-      return $role->label();
-    }, user_roles());
-
-    $form['role']['role_list'] = [
-      '#type' => 'checkboxes',
-      '#title' => $this->t('Selected roles'),
-      '#default_value' => $config->get('_default_container.role_list'),
-      '#options' => $user_roles,
-    ];
-
-    // Response statuses tab.
-    $description = $this->t('Enter one response status per line. For more information, refer to the <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">list of HTTP status codes</a>.');
-
-    $form['status'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Response statuses'),
-      '#group' => 'default',
-      '#description' => $this->t('On this tab, specify the page response status condition.'),
-    ];
-
-    $form['status']['status_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Add snippet for specific statuses'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All statuses except the listed statuses'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed statuses'),
-      ],
-      '#default_value' => $config->get('_default_container.status_toggle'),
-    ];
-
-    $form['status']['status_list'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Listed statuses'),
-      '#description' => $description,
-      '#default_value' => $config->get('_default_container.status_list'),
-      '#rows' => 5,
-    ];
 
     // Advanced tab.
     $form['advanced'] = [
@@ -314,6 +219,106 @@ class SettingsForm extends ConfigFormBase {
       '#size' => 20,
       '#maxlength' => 25,
       '#states' => $this->statesArray('include_environment'),
+    ];
+
+    $form['conditions'] = [
+      '#type' => 'vertical_tabs',
+      '#title' => $this->t('Default insertion conditions'),
+      '#description' => $this->t('The default snippet insertion conditions that apply to a new container.'),
+      '#attributes' => ['class' => ['google-tag']],
+      '#attached' => [
+        'library' => ['google_tag/drupal.settings_form'],
+      ],
+    ];
+
+    // Page paths tab.
+    $description = $this->t('On this and the following tabs, specify the conditions on which the GTM JavaScript snippet will either be inserted on or omitted from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be inserted. The snippet will be omitted if any condition is not met.');
+
+    // @todo Use singular for element names.
+    $form['path'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Page paths'),
+      '#group' => 'conditions',
+      '#description' => $description,
+    ];
+
+    $form['path']['path_toggle'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Insert snippet for specific paths'),
+      '#options' => [
+        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All paths except the listed paths'),
+        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed paths'),
+      ],
+      '#default_value' => $config->get('_default_container.path_toggle'),
+    ];
+
+    $args = [
+      '%node' => '/node',
+      '%user-wildcard' => '/user/*',
+      '%front' => '<front>',
+    ];
+
+    $form['path']['path_list'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Listed paths'),
+      '#description' => $this->t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%node" for the node page, "%user-wildcard" for each individual user, and "%front" for the front page.', $args),
+      '#default_value' => $config->get('_default_container.path_list'),
+      '#rows' => 10,
+    ];
+
+    // User roles tab.
+    $form['role'] = [
+      '#type' => 'details',
+      '#title' => $this->t('User roles'),
+      '#group' => 'conditions',
+    ];
+
+    $form['role']['role_toggle'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Insert snippet for specific roles'),
+      '#options' => [
+        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All roles except the selected roles'),
+        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the selected roles'),
+      ],
+      '#default_value' => $config->get('_default_container.role_toggle'),
+    ];
+
+    $user_roles = array_map(function ($role) {
+      return $role->label();
+    }, user_roles());
+
+    $form['role']['role_list'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Selected roles'),
+      '#default_value' => $config->get('_default_container.role_list'),
+      '#options' => $user_roles,
+    ];
+
+    // Response statuses tab.
+    $description = $this->t('Enter one response status per line. For more information, refer to the <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">list of HTTP status codes</a>.');
+
+    $form['status'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Response statuses'),
+      '#group' => 'conditions',
+    ];
+
+    $form['status']['status_toggle'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Insert snippet for specific statuses'),
+      '#options' => [
+        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All statuses except the listed statuses'),
+        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed statuses'),
+      ],
+      '#default_value' => $config->get('_default_container.status_toggle'),
+    ];
+
+    $form['status']['status_list'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Listed statuses'),
+      '#description' => $description,
+      '#default_value' => $config->get('_default_container.status_list'),
+      '#rows' => 5,
     ];
 
     return parent::buildForm($form, $form_state);

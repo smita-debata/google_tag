@@ -51,7 +51,14 @@ class ContainerForm extends EntityForm {
     $form['settings'] = [
       '#type' => 'vertical_tabs',
       '#title' => $this->t('Container settings'),
-      '#description' => $this->t('The container settings and snippet insertion conditions for this container.'),
+      '#description' => $this->t('The settings affecting the snippet contents for this container.'),
+      '#attributes' => ['class' => ['google-tag']],
+    ];
+
+    $form['conditions'] = [
+      '#type' => 'vertical_tabs',
+      '#title' => $this->t('Insertion conditions'),
+      '#description' => $this->t('The snippet insertion conditions for this container.'),
       '#attributes' => ['class' => ['google-tag']],
       '#attached' => [
         'library' => ['google_tag/drupal.settings_form'],
@@ -59,10 +66,10 @@ class ContainerForm extends EntityForm {
     ];
 
     $form['general'] = $this->generalFieldset($form_state);
+    $form['advanced'] = $this->advancedFieldset($form_state);
     $form['path'] = $this->pathFieldset($form_state);
     $form['role'] = $this->roleFieldset($form_state);
     $form['status'] = $this->statusFieldset($form_state);
-    $form['advanced'] = $this->advancedFieldset($form_state);
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -105,124 +112,6 @@ class ContainerForm extends EntityForm {
       '#type' => 'weight',
       '#title' => 'Weight',
       '#default_value' => $container->get('weight'),
-    ];
-
-    return $fieldset;
-  }
-
-  /**
-   * Fieldset builder for the container settings form.
-   */
-  public function pathFieldset(&$form_state) {
-    $container = $this->entity;
-
-    // Build form elements.
-    $description = $this->t('On this and the next two tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />On this tab, specify the path condition.');
-
-    $fieldset = [
-      '#type' => 'details',
-      '#title' => $this->t('Page paths'),
-      '#group' => 'settings',
-      '#description' => $description,
-    ];
-
-    $fieldset['path_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Add snippet on specific paths'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All paths except the listed paths'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed paths'),
-      ],
-      '#default_value' => $container->get('path_toggle'),
-    ];
-
-    $args = [
-      '%blog' => '/blog',
-      '%blog-wildcard' => '/blog/*',
-      '%front' => '<front>',
-    ];
-
-    $fieldset['path_list'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Listed paths'),
-      '#description' => $this->t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args),
-      '#default_value' => $container->get('path_list'),
-      '#rows' => 10,
-    ];
-
-    return $fieldset;
-  }
-
-  /**
-   * Fieldset builder for the container settings form.
-   */
-  public function roleFieldset(&$form_state) {
-    $container = $this->entity;
-
-    // Build form elements.
-    $fieldset = [
-      '#type' => 'details',
-      '#title' => $this->t('User roles'),
-      '#description' => $this->t('On this tab, specify the user role condition.'),
-      '#group' => 'settings',
-    ];
-
-    $fieldset['role_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Add snippet for specific roles'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All roles except the selected roles'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the selected roles'),
-      ],
-      '#default_value' => $container->get('role_toggle'),
-    ];
-
-    $user_roles = array_map(function ($role) {
-      return $role->label();
-    }, user_roles());
-
-    $fieldset['role_list'] = [
-      '#type' => 'checkboxes',
-      '#title' => $this->t('Selected roles'),
-      '#default_value' => $container->get('role_list'),
-      '#options' => $user_roles,
-    ];
-
-    return $fieldset;
-  }
-
-  /**
-   * Fieldset builder for the container settings form.
-   */
-  public function statusFieldset(&$form_state) {
-    $container = $this->entity;
-
-    // Build form elements.
-    $description = $this->t('Enter one response status per line. For more information, refer to the <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">list of HTTP status codes</a>.');
-
-    $fieldset = [
-      '#type' => 'details',
-      '#title' => $this->t('Response statuses'),
-      '#group' => 'settings',
-      '#description' => $this->t('On this tab, specify the page response status condition.'),
-    ];
-
-    $fieldset['status_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Add snippet for specific statuses'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All statuses except the listed statuses'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed statuses'),
-      ],
-      '#default_value' => $container->get('status_toggle'),
-    ];
-
-    $fieldset['status_list'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Listed statuses'),
-      '#description' => $description,
-      '#default_value' => $container->get('status_list'),
-      '#rows' => 5,
     ];
 
     return $fieldset;
@@ -306,6 +195,122 @@ class ContainerForm extends EntityForm {
       '#size' => 20,
       '#maxlength' => 25,
       '#states' => $this->statesArray('include_environment'),
+    ];
+
+    return $fieldset;
+  }
+
+  /**
+   * Fieldset builder for the container settings form.
+   */
+  public function pathFieldset(&$form_state) {
+    $container = $this->entity;
+
+    // Build form elements.
+    $description = $this->t('On this and the following tabs, specify the conditions on which the GTM JavaScript snippet will either be inserted on or omitted from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be inserted. The snippet will be omitted if any condition is not met.');
+
+    $fieldset = [
+      '#type' => 'details',
+      '#title' => $this->t('Page paths'),
+      '#description' => $description,
+      '#group' => 'conditions',
+    ];
+
+    $fieldset['path_toggle'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Insert snippet for specific paths'),
+      '#options' => [
+        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All paths except the listed paths'),
+        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed paths'),
+      ],
+      '#default_value' => $container->get('path_toggle'),
+    ];
+
+    $args = [
+      '%node' => '/node',
+      '%user-wildcard' => '/user/*',
+      '%front' => '<front>',
+    ];
+
+    $fieldset['path_list'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Listed paths'),
+      '#description' => $this->t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%node" for the node page, "%user-wildcard" for each individual user, and "%front" for the front page.', $args),
+      '#default_value' => $container->get('path_list'),
+      '#rows' => 10,
+    ];
+
+    return $fieldset;
+  }
+
+  /**
+   * Fieldset builder for the container settings form.
+   */
+  public function roleFieldset(&$form_state) {
+    $container = $this->entity;
+
+    // Build form elements.
+    $fieldset = [
+      '#type' => 'details',
+      '#title' => $this->t('User roles'),
+      '#group' => 'conditions',
+    ];
+
+    $fieldset['role_toggle'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Insert snippet for specific roles'),
+      '#options' => [
+        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All roles except the selected roles'),
+        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the selected roles'),
+      ],
+      '#default_value' => $container->get('role_toggle'),
+    ];
+
+    $user_roles = array_map(function ($role) {
+      return $role->label();
+    }, user_roles());
+
+    $fieldset['role_list'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Selected roles'),
+      '#default_value' => $container->get('role_list'),
+      '#options' => $user_roles,
+    ];
+
+    return $fieldset;
+  }
+
+  /**
+   * Fieldset builder for the container settings form.
+   */
+  public function statusFieldset(&$form_state) {
+    $container = $this->entity;
+
+    // Build form elements.
+    $description = $this->t('Enter one response status per line. For more information, refer to the <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">list of HTTP status codes</a>.');
+
+    $fieldset = [
+      '#type' => 'details',
+      '#title' => $this->t('Response statuses'),
+      '#group' => 'conditions',
+    ];
+
+    $fieldset['status_toggle'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Insert snippet for specific statuses'),
+      '#options' => [
+        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All statuses except the listed statuses'),
+        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed statuses'),
+      ],
+      '#default_value' => $container->get('status_toggle'),
+    ];
+
+    $fieldset['status_list'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Listed statuses'),
+      '#description' => $description,
+      '#default_value' => $container->get('status_list'),
+      '#rows' => 5,
     ];
 
     return $fieldset;

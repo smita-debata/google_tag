@@ -6,6 +6,32 @@ _google_tag_container:
       type: string
       label: 'Container ID'
       #translatable: true
+    data_layer:
+      type: string
+      label: 'Data layer'
+      #translatable: true
+    include_classes:
+      type: boolean
+      label: 'Add classes to the data layer'
+    whitelist_classes:
+      type: string
+      label: 'White-listed classes'
+      #translatable: true
+    blacklist_classes:
+      type: string
+      label: 'Black-listed classes'
+      #translatable: true
+    include_environment:
+      type: boolean
+      label: 'Include an environment'
+    environment_id:
+      type: string
+      label: 'Environment ID'
+      #translatable: true
+    environment_token:
+      type: string
+      label: 'Environment token'
+      #translatable: true
     path_toggle:
       type: string
       label: 'Add snippet on specific paths'
@@ -32,30 +58,4 @@ _google_tag_container:
     status_list:
       type: string
       label: 'Listed statuses'
-      #translatable: true
-    data_layer:
-      type: string
-      label: 'Data layer'
-      #translatable: true
-    include_classes:
-      type: boolean
-      label: 'Add classes to the data layer'
-    whitelist_classes:
-      type: string
-      label: 'White-listed classes'
-      #translatable: true
-    blacklist_classes:
-      type: string
-      label: 'Black-listed classes'
-      #translatable: true
-    include_environment:
-      type: boolean
-      label: 'Include an environment'
-    environment_id:
-      type: string
-      label: 'Environment ID'
-      #translatable: true
-    environment_token:
-      type: string
-      label: 'Environment token'
       #translatable: true
