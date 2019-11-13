@@ -215,7 +215,7 @@ class Container extends ConfigEntityBase implements ConfigEntityInterface {
       'data_layer' => $this->dataLayerSnippet(),
     ];
     // Allow other modules to alter the snippets.
-    \Drupal::moduleHandler()->alter('google_tag_snippets', $snippets);
+    \Drupal::moduleHandler()->alter('google_tag_snippets', $snippets, $this);
     return $snippets;
   }
 
@@ -380,7 +380,7 @@ EOS;
       }
 
       // Allow other modules to alter the insertion criteria.
-      \Drupal::moduleHandler()->alter('google_tag_insert', $satisfied[$this->id]);
+      \Drupal::moduleHandler()->alter('google_tag_insert', $satisfied[$this->id], $this);
       $this->displayMessage('after alter @satisfied', ['@satisfied' => $satisfied[$this->id]]);
     }
     return $satisfied[$this->id];
