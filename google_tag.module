@@ -70,6 +70,35 @@ function google_tag_page_top(array &$page) {
 }
 
 /**
+ * Implements hook_plugin_filter_TYPE_alter().
+ *
+ * @see ContainerForm::conditionsForm()
+ */
+function google_tag_plugin_filter_condition_alter(array &$definitions, array $extra, $consumer) {
+  if ($consumer == 'google_tag') {
+    // Remove condition plugins defined by core and domain.
+    $definitions = array_diff_key($definitions, array_flip([
+      'current_theme', 'language', 'node_type', 'request_path', 'user_role',
+      'domain',
+    ]));
+
+    $language_manager = \Drupal::service('language_manager');
+    if (!$language_manager->isMultilingual()) {
+      // Omit the language condition until multiple languages.
+      unset($definitions['gtag_language']);
+    }
+  }
+  else {
+    foreach ($definitions as $id => $definition) {
+      if (substr($id, 0, 5) == 'gtag_') {
+        // Prevent use of custom plugins by other consumers.
+        unset($definitions[$id]);
+      }
+    }
+  }
+}
+
+/**
  * Checks that the directory exists and is writable.
  *
  * @todo Remove this function if core is updated to check the executable bit.
