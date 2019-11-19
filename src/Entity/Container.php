@@ -401,7 +401,7 @@ EOS;
 
       $this->displayMessage('google_tag container ' . $this->id);
       $satisfied[$this->id] = TRUE;
-      if (!$this->statusCheck() || !$this->pathCheck() || !$this->roleCheck()) {
+      if (!$this->statusCheck() || !$this->pathCheck() || !$this->roleCheck() || !$this->access('view')) {
         // Omit snippet if any condition is not met.
         $satisfied[$this->id] = FALSE;
       }
@@ -500,7 +500,7 @@ EOS;
    * @param array $args
    *   (optional) An associative array of replacements.
    */
-  protected function displayMessage($message, array $args = []) {
+  public function displayMessage($message, array $args = []) {
     if (\Drupal::config('google_tag.settings')->get('debug_output')) {
       \Drupal::service('messenger')->addStatus($this->t($message, $args), TRUE);
     }
