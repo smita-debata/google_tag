@@ -95,3 +95,9 @@ google_tag.container.*:
       type: string
       label: 'Listed statuses'
       #translatable: true
+    conditions:
+      type: sequence
+      label: 'Insertion conditions'
+      sequence:
+        type: condition.plugin.[id]
+        label: 'Insertion condition'

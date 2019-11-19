@@ -234,10 +234,9 @@ class SettingsForm extends ConfigFormBase {
     // Page paths tab.
     $description = $this->t('On this and the following tabs, specify the conditions on which the GTM JavaScript snippet will either be inserted on or omitted from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be inserted. The snippet will be omitted if any condition is not met.');
 
-    // @todo Use singular for element names.
     $form['path'] = [
       '#type' => 'details',
-      '#title' => $this->t('Page paths'),
+      '#title' => $this->t('Request path'),
       '#group' => 'conditions',
       '#description' => $description,
     ];
@@ -269,7 +268,7 @@ class SettingsForm extends ConfigFormBase {
     // User roles tab.
     $form['role'] = [
       '#type' => 'details',
-      '#title' => $this->t('User roles'),
+      '#title' => $this->t('User role'),
       '#group' => 'conditions',
     ];
 
@@ -299,7 +298,7 @@ class SettingsForm extends ConfigFormBase {
 
     $form['status'] = [
       '#type' => 'details',
-      '#title' => $this->t('Response statuses'),
+      '#title' => $this->t('Response status'),
       '#group' => 'conditions',
     ];
 

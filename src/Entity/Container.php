@@ -3,9 +3,11 @@
 namespace Drupal\google_tag\Entity;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
@@ -23,6 +25,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *     },
  *     "access" = "Drupal\google_tag\ContainerAccessControlHandler"
  *   },
+ *   admin_permission = "administer google tag manager",
  *   config_prefix = "container",
  *   entity_keys = {
  *     "id" = "id",
@@ -47,6 +50,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *     "role_list",
  *     "status_toggle",
  *     "status_list",
+ *     "conditions",
  *   },
  *   links = {
  *     "add-form" = "/admin/config/system/google-tag/add",
@@ -62,7 +66,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * this may not be an option in above annotation
  *     "clone-form" = "/admin/structure/google_tag/manage/{google_tag_container}/clone",
  */
-class Container extends ConfigEntityBase implements ConfigEntityInterface {
+class Container extends ConfigEntityBase implements ConfigEntityInterface, EntityWithPluginCollectionInterface {
 
   use StringTranslationTrait;
 
@@ -184,6 +188,29 @@ class Container extends ConfigEntityBase implements ConfigEntityInterface {
    * @var string
    */
   public $status_list;
+
+  /**
+   * The insertion conditions.
+   *
+   * Each item is the configuration array not the condition object.
+   *
+   * @var array
+   */
+  protected $conditions = [];
+
+  /**
+   * The insertion condition collection.
+   *
+   * @var \Drupal\Core\Condition\ConditionPluginCollection
+   */
+  protected $conditionCollection;
+
+  /**
+   * The condition plugin manager.
+   *
+   * @var \Drupal\Core\Executable\ExecutableManagerInterface
+   */
+  protected $conditionPluginManager;
 
   /**
    * {@inheritdoc}
@@ -590,6 +617,88 @@ EOS;
       ],
     ] : [];
     return $attachment;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPluginCollections() {
+    return [
+      'conditions' => $this->getInsertionConditions(),
+    ];
+  }
+
+  /**
+   * Returns an array of configuration arrays keyed by insertion condition.
+   *
+   * @return array
+   *   An array of condition configuration keyed by the condition ID.
+   */
+  public function getInsertionConfiguration() {
+    return $this->getInsertionConditions()->getConfiguration();
+  }
+
+  /**
+   * Returns an insertion condition for this container.
+   *
+   * @param string $instance_id
+   *   The condition plugin instance ID.
+   *
+   * @return \Drupal\Core\Condition\ConditionInterface
+   *   A condition plugin.
+   */
+  public function getInsertionCondition($instance_id) {
+    return $this->getInsertionConditions()->get($instance_id);
+  }
+
+  /**
+   * Sets the configuration for an insertion condition.
+   *
+   * @param string $instance_id
+   *   The condition instance ID.
+   * @param array $configuration
+   *   The condition configuration.
+   *
+   * @return $this
+   *
+   * @todo Does this need to set a persistent property?
+   */
+  public function setInsertionCondition($instance_id, array $configuration) {
+    $conditions = $this->getInsertionConditions();
+    if (!$conditions->has($instance_id)) {
+      $configuration['id'] = $instance_id;
+      $conditions->addInstanceId($instance_id, $configuration);
+    }
+    else {
+      $conditions->setInstanceConfiguration($instance_id, $configuration);
+    }
+    return $this;
+  }
+
+  /**
+   * Returns the set of insertion conditions for this container.
+   *
+   * @return \Drupal\Core\Condition\ConditionPluginCollection
+   *   A collection of configured condition plugins.
+   */
+  public function getInsertionConditions() {
+    if (!isset($this->conditionCollection)) {
+      $this->conditionCollection = new ConditionPluginCollection($this->conditionPluginManager(), $this->get('conditions'));
+    }
+    return $this->conditionCollection;
+  }
+
+  /**
+   * Gets the condition plugin manager.
+   *
+   * @return \Drupal\Core\Executable\ExecutableManagerInterface
+   *   The condition plugin manager.
+   */
+  protected function conditionPluginManager() {
+    if (!isset($this->conditionPluginManager)) {
+      $this->conditionPluginManager = \Drupal::service('plugin.manager.condition');
+    }
+    return $this->conditionPluginManager;
   }
 
 }

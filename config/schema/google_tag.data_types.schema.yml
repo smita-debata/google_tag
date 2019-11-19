@@ -59,3 +59,41 @@ _google_tag_container:
       type: string
       label: 'Listed statuses'
       #translatable: true
+
+condition.gtag:
+  type: mapping
+  label: 'Condition'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    #negate:
+      #type: boolean
+      #label: 'Negate'
+    uuid:
+      type: uuid
+    context_mapping:
+      type: sequence
+      label: 'Context assignments'
+      sequence:
+        type: string
+
+condition.plugin.gtag_domain:
+  type: condition.gtag
+  mapping:
+    domain_toggle:
+      type: string
+    domain_list:
+      type: sequence
+      sequence:
+        type: string
+
+condition.plugin.gtag_language:
+  type: condition.gtag
+  mapping:
+    language_toggle:
+      type: string
+    language_list:
+      type: sequence
+      sequence:
+        type: string
