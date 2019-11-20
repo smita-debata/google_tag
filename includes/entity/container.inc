@@ -215,7 +215,7 @@ class GTMContainer {
       'data_layer' => $this->dataLayerSnippet(),
     );
     // Allow other modules to alter the snippets.
-    drupal_alter('google_tag_snippets', $snippets);
+    drupal_alter('google_tag_snippets', $snippets, $this);
     return $snippets;
   }
 
@@ -369,7 +369,7 @@ EOS;
       }
 
       // Allow other modules to alter the insertion criteria.
-      drupal_alter('google_tag_insert', $satisfied[$this->name]);
+      drupal_alter('google_tag_insert', $satisfied[$this->name], $this);
       $this->displayMessage('after alter @satisfied', array('@satisfied' => $satisfied[$this->name]));
     }
     return $satisfied[$this->name];

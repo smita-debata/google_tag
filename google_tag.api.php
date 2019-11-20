@@ -21,8 +21,10 @@
  *
  * @param bool $satisfied
  *   The snippet insertion state.
+ * @param GTMContainer $container
+ *   The associated container object.
  */
-function hook_google_tag_insert_alter(&$satisfied) {
+function hook_google_tag_insert_alter(&$satisfied, $container) {
   // Do something to the state.
   $state = !$state;
 }
@@ -51,8 +53,10 @@ function hook_google_tag_realm_alter(array &$realm) {
  * @param array $snippets
  *   Associative array of snippets keyed by type: script, noscript and
  *   data_layer.
+ * @param GTMContainer $container
+ *   The associated container object.
  */
-function hook_google_tag_snippets_alter(array &$snippets) {
+function hook_google_tag_snippets_alter(array &$snippets, $container) {
   // Do something to the script snippet.
   $snippets['script'] = str_replace('insertBefore', 'insertAfter', $snippets['script']);
 }
