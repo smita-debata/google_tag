@@ -102,7 +102,7 @@ function _google_tag_variable_info_path($options) {
   // Build variables.
   $variables['path_toggle'] = array(
     'type' => 'select',
-    'title' => t('Add snippet on specific paths', array(), $options),
+    'title' => t('Insert snippet for specific paths', array(), $options),
     'options' => array(
       GOOGLE_TAG_EXCLUDE_LISTED => t('All paths except the listed paths', array(), $options),
       GOOGLE_TAG_INCLUDE_LISTED => t('Only the listed paths', array(), $options),
@@ -152,7 +152,7 @@ function _google_tag_variable_info_role($options) {
   // Build variables.
   $variables['role_toggle'] = array(
     'type' => 'select',
-    'title' => t('Add snippet for specific roles', array(), $options),
+    'title' => t('Insert snippet for specific roles', array(), $options),
     'options' => array(
       GOOGLE_TAG_EXCLUDE_LISTED => t('All roles except the selected roles', array(), $options),
       GOOGLE_TAG_INCLUDE_LISTED => t('Only the selected roles', array(), $options),
@@ -181,7 +181,7 @@ function _google_tag_variable_info_status($options) {
   // Build variables.
   $variables['status_toggle'] = array(
     'type' => 'select',
-    'title' => t('Add snippet for specific statuses', array(), $options),
+    'title' => t('Insert snippet for specific statuses', array(), $options),
     'options' => array(
       GOOGLE_TAG_EXCLUDE_LISTED => t('All statuses except the listed statuses', array(), $options),
       GOOGLE_TAG_INCLUDE_LISTED => t('Only the listed statuses', array(), $options),
@@ -222,7 +222,7 @@ function _google_tag_variable_info_realm($options) {
   // Build variables.
   $variables['realm_toggle'] = array(
     'type' => 'select',
-    'title' => t('Add snippet for specific keys', array(), $options),
+    'title' => t('Insert snippet for specific keys', array(), $options),
     'options' => array(
       GOOGLE_TAG_EXCLUDE_LISTED => t('All keys except the selected keys', array(), $options),
       GOOGLE_TAG_INCLUDE_LISTED => t('Only the selected keys', array(), $options),

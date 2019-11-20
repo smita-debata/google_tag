@@ -36,7 +36,7 @@ function google_tag_settings_form($form, &$form_state) {
   $form_state['item'] = $config;
 
   // Build form elements.
-
+  // Module settings.
   $description = t('<br />After configuring the module settings and default container settings, <strong>add a container</strong> on the <a href="!url">container management page</a>.', array('!url' => url('admin/config/system/google_tag')));
 
   $form['instruction'] = array(
@@ -44,7 +44,6 @@ function google_tag_settings_form($form, &$form_state) {
     '#markup' => $description,
   );
 
-  // Module settings.
   $groups = array(
     'settings' => array('title' => t('Module settings'), 'description' => t('The settings that apply to all containers.'), 'collapse' => FALSE),
   );
@@ -54,39 +53,56 @@ function google_tag_settings_form($form, &$form_state) {
   }
 
   // Default container settings.
-  $description = t('On this and the following tabs, specify the conditions on which the GTM JavaScript snippet will either be included in or excluded from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be included. The snippet will be excluded if any condition is not met.<br /><br />On this tab, specify the path condition.');
   $text = t('The default container settings that apply to a new container.');
   $suffix = '<div id="edit-default--description" class="description">' . $text . '</div>';
 
   $groups = array(
     // 'general' => array('title' => t('General'), 'collapse' => FALSE),
     'advanced' => array('title' => t('Advanced')),
-    'path' => array('title' => t('Page paths'), 'description' => $description),
-    'role' => array('title' => t('User roles'), 'description' => t('On this tab, specify the user role condition.')),
-    'status' => array('title' => t('Response statuses'), 'description' => t('On this tab, specify the page response status condition.')),
-    'realm' => array('title' => t('Realm keys'), 'description' => t('On this tab, specify the realm keys condition.')),
+  );
+
+  $form['default'] = array(
+    '#type' => 'vertical_tabs',
+    '#attributes' => array('class' => array('google-tag')),
+    '#prefix' => '<strong>' . t('Default container settings') . '</strong>',
+    '#suffix' => $suffix,
+  );
+  foreach ($groups as $group => $items) {
+    $form['default'][$group] = google_tag_fieldset($group, $items, $form_state['item']);
+  }
+
+  // Default insertion condition.
+  $description = t('On this and the following tabs, specify the conditions on which the GTM JavaScript snippet will either be inserted on or omitted from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be inserted. The snippet will be omitted if any condition is not met.');
+  $text = t('The default snippet insertion conditions that apply to a new container.');
+  $suffix = '<div id="edit-default--description" class="description">' . $text . '</div>';
+
+  $groups = array(
+    'path' => array('title' => t('Request path'), 'description' => $description),
+    'role' => array('title' => t('User role')),
+    'status' => array('title' => t('Response status')),
+    'realm' => array('title' => t('Realm key')),
   );
   if (!module_exists('variable_realm') || !module_exists('variable_store')) {
     unset($groups['realm']);
   }
 
   // Use prefix and suffix as title and description are not rendered.
-  $form['tabs'] = array(
+  $form['conditions'] = array(
     '#type' => 'vertical_tabs',
-    '#title' => t('Default container settings'),
-    '#description' => t('The default container settings that apply to a new container.'),
-    '#default_tab' => $default_tab ? $default_tab : 'edit-general',
+    '#title' => t('Default insertion conditions'),
+    '#description' => t('The default snippet insertion conditions that apply to a new container.'),
+    '#default_tab' => $default_tab ? $default_tab : 'edit-path',
     '#attributes' => array('class' => array('google-tag')),
     '#attached' => array(
       'css' => array(drupal_get_path('module', 'google_tag') . '/css/google_tag.admin.css'),
       'js' => array(drupal_get_path('module', 'google_tag') . '/js/google_tag.admin.js'),
     ),
-    '#prefix' => '<strong>' . t('Default container settings') . '</strong>',
+    '#prefix' => '<strong>' . t('Default insertion conditions') . '</strong>',
     '#suffix' => $suffix,
   );
 
   foreach ($groups as $group => $items) {
-    $form['tabs'][$group] = google_tag_fieldset($group, $items, $form_state['item']);
+    $form['conditions'][$group] = google_tag_fieldset($group, $items, $form_state['item']);
   }
 
   $form['actions'] = array('#type' => 'actions');
