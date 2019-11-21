@@ -14,7 +14,7 @@ interface ContainerManagerInterface {
    * @return bool
    *   Whether the files were saved.
    */
-  public function createAssets(GTMContainer $container);
+  public function createAssets($container);
 
   /**
    * Saves JS snippet files based on current settings.
@@ -25,7 +25,7 @@ interface ContainerManagerInterface {
    * @return bool
    *   Whether the files were saved.
    */
-  public function saveSnippets(GTMContainer $container);
+  public function saveSnippets($container);
 
   /**
    * Adds render array items of page attachments.
