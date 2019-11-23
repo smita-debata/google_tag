@@ -134,14 +134,14 @@ class GTMContainer {
   public $status_list;
 
   /**
-   * Whether to include or exclude the listed realms.
+   * Whether to include or exclude the listed realms. (optional)
    *
    * @var string
    */
   public $realm_toggle;
 
   /**
-   * The listed realms.
+   * The listed realms. (optional)
    *
    * @var string
    */
@@ -363,9 +363,23 @@ EOS;
 
       $this->displayMessage('google_tag container ' . $this->name);
       $satisfied[$this->name] = TRUE;
-      if (!$this->realmCheck() || !$this->statusCheck() || !$this->pathCheck() || !$this->roleCheck()) {
-        // Omit snippet if any condition is not met.
-        $satisfied[$this->name] = FALSE;
+      $types = google_tag_condition_filter();
+      foreach ($types as $type => $value) {
+        if (is_array($value) && isset($value['file'])) {
+          $result = TRUE;
+          $function = "_google_tag_condition_evaluate_$type";
+          if (function_exists($function)) {
+            $result = $function($this);
+          }
+        }
+        else {
+          $result = $this->genericCheck($type);
+        }
+        if (!$result) {
+          // Omit snippet if any condition is not met.
+          $satisfied[$this->name] = FALSE;
+          break;
+        }
       }
 
       // Allow other modules to alter the insertion criteria.
@@ -376,108 +390,82 @@ EOS;
   }
 
   /**
-   * Determines whether to insert the snippet based on status code settings.
+   * Determines whether to insert the snippet based on settings.
+   *
+   * @param string $type
+   *   The condition type.
    *
    * @return bool
-   *   TRUE if the status conditions are met; FALSE otherwise.
+   *   TRUE if the conditions are met; FALSE otherwise.
    */
-  protected function statusCheck() {
-    $toggle = $this->get('status_toggle');
-    $statuses = $this->get('status_list');
+  public function genericCheck($type) {
+    $this->toggle = "{$type}_toggle";
+    $this->list = "{$type}_list";
+    $this->context = "{$type}Context";
+    $this->singular = $type;
 
-    if (empty($statuses)) {
+    $toggle = $this->get($this->toggle);
+    if (empty($toggle)) {
+      // Condition is not configured.
+      return TRUE;
+    }
+    $values = $this->get($this->list);
+    $values = $values && is_array($values) ? array_filter($values) : $values;
+
+    if (empty($values)) {
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
     }
     else {
-      // Get the HTTP response status.
-      $status = drupal_get_http_header('status');
-      // @todo The 8x code omits the $status condition on next line; ok here?
-      $satisfied = $status && strpos($statuses, (string) $status) !== FALSE;
-      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
-    }
-    $this->displayMessage('status check @satisfied', array('@satisfied' => $satisfied));
-    return $satisfied;
-  }
-
-  /**
-   * Determines whether to insert the snippet based on the path settings.
-   *
-   * @return bool
-   *   TRUE if the path conditions are met; FALSE otherwise.
-   */
-  protected function pathCheck() {
-    $toggle = $this->get('path_toggle');
-    $paths = mb_strtolower($this->get('path_list'));
-
-    if (empty($paths)) {
-      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
-    }
-    else {
-      // @todo Are not some paths case sensitive???
-      // Compare the lowercase path alias (if any) and internal path.
-      $paths = drupal_strtolower($paths);
-      $path = drupal_strtolower(drupal_get_path_alias($_GET['q']));
-      $satisfied = drupal_match_path($path, $paths);
-      // @todo Lowercase $_GET['q'] before comparison? What is purpose of this check?
-      if ($path != $_GET['q']) {
-        $satisfied = $satisfied || drupal_match_path($_GET['q'], $paths);
+      $value = $this->{$this->context}($values);
+      if (is_string($values)) {
+        // Examples: status and path.
+        $satisfied = $value;
+      }
+      elseif (is_array($value)) {
+        $satisfied = (bool) array_intersect($value, $values);
+      }
+      else {
+        $satisfied = in_array($value, $values);
       }
       $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
     }
-    $this->displayMessage('path check @satisfied', array('@satisfied' => $satisfied));
+    $this->displayMessage('@singular check @satisfied', array('@singular' => $this->singular, '@satisfied' => $satisfied));
     return $satisfied;
   }
 
-  /**
-   * Determines whether to insert the snippet based on the user role settings.
-   *
-   * @return bool
-   *   TRUE if the role conditions are met; FALSE otherwise.
-   */
-  protected function roleCheck() {
-    $toggle = $this->get('role_toggle');
-    $roles = $this->get('role_list');
-    $roles = array_filter($roles);
+  protected function statusContext($statuses) {
+    // Get the HTTP response status.
+    $status = drupal_get_http_header('status');
+    return $status && strpos($statuses, (string) $status) !== FALSE;
+  }
 
-    if (empty($roles)) {
-      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
+  protected function pathContext($paths) {
+    // Compare the lowercase path alias (if any) and internal path.
+    $paths = drupal_strtolower($paths);
+    $path = drupal_strtolower(drupal_get_path_alias($_GET['q']));
+    $satisfied = drupal_match_path($path, $paths);
+    // @todo Lowercase $_GET['q'] before comparison? What is purpose of this check?
+    if ($path != $_GET['q']) {
+      $satisfied = $satisfied || drupal_match_path($_GET['q'], $paths);
     }
-    else {
-      $satisfied = FALSE;
-      // Check user roles against listed roles.
-      $satisfied = (bool) array_intersect($roles, $GLOBALS['user']->roles);
-      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
-    }
-    $this->displayMessage('role check @satisfied', array('@satisfied' => $satisfied));
     return $satisfied;
   }
 
-  /**
-   * Determines whether to insert the snippet based on the realm key settings.
-   *
-   * @return bool
-   *   TRUE if the realm conditions are met; FALSE otherwise.
-   */
-  protected function realmCheck() {
-    if (!module_exists('variable_realm') || !module_exists('variable_store')) {
-      return TRUE;
-    }
+  protected function roleContext() {
+    return $GLOBALS['user']->roles;
+  }
 
-    $toggle = $this->get('realm_toggle');
-    $realms = $this->get('realm_list');
-    $realms = array_filter($realms);
+  protected function domainContext() {
+    // @todo Array dereference requires PHP 5.4+.
+    return domain_get_domain()['machine_name'];
+  }
 
-    if (empty($realms)) {
-      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED);
-    }
-    else {
-      $satisfied = FALSE;
-      // Check active realms against listed realms.
-      $satisfied = (bool) array_intersect($realms, $this->realmKey());
-      $satisfied = ($toggle == GOOGLE_TAG_EXCLUDE_LISTED) ? !$satisfied : $satisfied;
-    }
-    $this->displayMessage('realm check @satisfied', array('@satisfied' => $satisfied));
-    return $satisfied;
+  protected function languageContext() {
+    return $GLOBALS['language']->language;
+  }
+
+  protected function realmContext() {
+    return $this->realmKey();
   }
 
   /**
@@ -490,7 +478,7 @@ EOS;
     static $value;
     if (!isset($value)) {
       list($realm_name, $realm_key) = google_tag_realm_values();
-      $value = array("$realm_name:$realm_key");
+      $value = "$realm_name:$realm_key";
     }
     return $value;
   }

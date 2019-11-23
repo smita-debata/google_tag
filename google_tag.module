@@ -247,6 +247,60 @@ function google_tag_export_load($reset) {
 }
 
 /**
+ * Returns array of condition plugin types.
+ *
+ * @return array
+ *   An array of condition plugin types.
+ */
+function google_tag_condition_info() {
+  $description = t('On this and the following tabs, specify the conditions on which the GTM JavaScript snippet will either be inserted on or omitted from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be inserted. The snippet will be omitted if any condition is not met.');
+  $groups = array(
+    'path' => array('title' => t('Request path'), 'description' => $description),
+    'role' => array('title' => t('User role')),
+    'status' => array('title' => t('Response status')),
+    'domain' => array('title' => t('Domain')),
+    'language' => array('title' => t('Language')),
+    'realm' => array('title' => t('Realm key')),
+  );
+  return $groups;
+}
+
+/**
+ * Returns filtered list of condition plugin types and loads code file.
+ *
+ * @return array
+ *   An array of condition plugin types.
+ */
+function google_tag_condition_filter() {
+  static $types;
+
+  if (!isset($types)) {
+    $types = google_tag_condition_info();
+    $optional = array(
+      'domain' => array('domain'),
+      'language' => array('locale'),
+      'realm' => array('variable_realm', 'variable_store'),
+    );
+    foreach($optional as $type => $requires) {
+      foreach($requires as $require) {
+        if (!module_exists($require)) {
+          unset($types[$type]);
+          continue 2;
+        }
+      }
+    }
+    drupal_alter('google_tag_conditions', $types);
+
+    foreach ($types as $type => $value) {
+      if (is_array($value) && isset($value['file'])) {
+        require_once DRUPAL_ROOT . '/' . $value['file'];
+      }
+    }
+  }
+  return $types;
+}
+
+/**
  * Checks that the directory exists and is writable.
  *
  * @todo Remove this function if core is updated to check the executable bit.

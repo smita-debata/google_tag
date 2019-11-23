@@ -43,15 +43,7 @@ function google_tag_container_form(&$form, &$form_state) {
     $form['settings'][$group] = google_tag_fieldset($group, $items, $form_state['item']);
   }
 
-  $groups = array(
-    'path' => array('title' => t('Request path'), 'description' => $description),
-    'role' => array('title' => t('User role')),
-    'status' => array('title' => t('Response status')),
-    'realm' => array('title' => t('Realm key')),
-  );
-  if (!module_exists('variable_realm') || !module_exists('variable_store')) {
-    unset($groups['realm']);
-  }
+  $groups = google_tag_condition_filter();
 
   $text = t('The snippet insertion conditions for this container.');
   $suffix = '<div id="edit-default--description" class="description">' . $text . '</div>';
@@ -81,6 +73,11 @@ function google_tag_fieldset($group, array $items, $container) {
   $function = "_google_tag_variable_info_$group";
   $variables = $function(array());
   $items += array('description' => '', 'collapse' => TRUE);
+  // @todo Does google_tag_condition_filter() obviate this gate check?
+  if (empty($variables)) {
+    // This handles optional conditions like domain, language, and realm.
+    return array();
+  }
 
   // Build form elements.
   $fieldset = array(
@@ -124,7 +121,7 @@ function google_tag_form_elements(array $variables, $container) {
       }
     }
     $element['#type'] = google_tag_form_element_type($element['#type']);
-    $element['#default_value'] = $container->$name;
+    $element['#default_value'] = isset($container->$name) ? $container->$name : $element['#default_value'];
     $element += isset($variable['element']) ? $variable['element'] : array();
     $elements[$name] = $element;
   }
@@ -181,8 +178,12 @@ function google_tag_container_form_validate($form, &$form_state) {
   $values['container_id'] = str_replace(array('–', '—', '−'), '-', $values['container_id']);
   $values['environment_id'] = str_replace(array('–', '—', '−'), '-', $values['environment_id']);
 
-  $values['role_list'] = array_filter($values['role_list']);
-  $values['realm_list'] = array_filter($values['realm_list']);
+  foreach (array('role', 'domain', 'language', 'realm') as $type) {
+    $key = "{$type}_list";
+    if (isset($values[$key])) {
+      $values[$key] = array_filter($values[$key]);
+    }
+  }
 
   if (!preg_match('/^GTM-\w{4,}$/', $values['container_id'])) {
     // @todo Is there a more specific regular expression that applies?
@@ -215,6 +216,7 @@ function google_tag_container_form_validate($form, &$form_state) {
 function google_tag_container_form_submit($form, &$form_state) {
   // @todo Filter values to those representing the configuration entity.
   $values = &$form_state['values'];
+  $values['name'] = $values['data']['name'];
   $container = new GTMContainer($values);
 
   // Set global to avoid message display to non-admin users on cache flush.

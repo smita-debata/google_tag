@@ -302,7 +302,8 @@ class GTMContainerExport extends ctools_export_ui {
       $defaults = \GTMSettings::getInstance();
       $items = array();
       // @todo Avoid loops by storing in a '__default_container' key?
-      $groups = array('general', 'advanced', 'path', 'role', 'status', 'realm');
+      $types = google_tag_condition_filter();
+      $groups = array_merge(array('general', 'advanced'), array_keys($types));
       $include_settings ? array_unshift($groups, 'settings') : '';
       foreach ($groups as $group) {
         $function = "_google_tag_variable_info_$group";

@@ -455,9 +455,6 @@ function google_tag_settings_create($use_install_config = TRUE) {
     $name = 'google_tag_' . $name;
     $data[$key] = $use_install_config ? $variable['default'] : variable_get($name, '');
   }
-  // Ensure default values for new settings.
-  $data['realm_toggle'] = $variables['realm_toggle']['default'];
-  $data['realm_list'] = $variables['realm_list']['default'];
   // Prune the list.
   $data['role_list'] = array_filter($data['role_list']);
 

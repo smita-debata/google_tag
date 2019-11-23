@@ -37,7 +37,7 @@ function google_tag_settings_form($form, &$form_state) {
 
   // Build form elements.
   // Module settings.
-  $description = t('<br />After configuring the module settings and default container settings, <strong>add a container</strong> on the <a href="!url">container management page</a>.', array('!url' => url('admin/config/system/google_tag')));
+  $description = t('<br />After configuring the module settings and default properties for a new container, <strong>add a container</strong> on the <a href="!url">container management page</a>.', array('!url' => url('admin/config/system/google_tag')));
 
   $form['instruction'] = array(
     '#type' => 'markup',
@@ -80,11 +80,7 @@ function google_tag_settings_form($form, &$form_state) {
     'path' => array('title' => t('Request path'), 'description' => $description),
     'role' => array('title' => t('User role')),
     'status' => array('title' => t('Response status')),
-    'realm' => array('title' => t('Realm key')),
   );
-  if (!module_exists('variable_realm') || !module_exists('variable_store')) {
-    unset($groups['realm']);
-  }
 
   // Use prefix and suffix as title and description are not rendered.
   $form['conditions'] = array(
@@ -220,7 +216,6 @@ function google_tag_settings_form_validate($form, &$form_state) {
   $values['environment_id'] = str_replace(array('–', '—', '−'), '-', $values['environment_id']);
 
   $values['role_list'] = array_filter($values['role_list']);
-  $values['realm_list'] = array_filter($values['realm_list']);
 /*
   if (!preg_match('/^GTM-\w{4,}$/', $values['container_id'])) {
     // @todo Is there a more specific regular expression that applies?

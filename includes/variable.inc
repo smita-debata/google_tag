@@ -91,37 +91,21 @@ function _google_tag_variable_info_general($options) {
  * Implements hook_variable_info().
  */
 function _google_tag_variable_info_path($options) {
-  // Gather data.
   $args = array(
-    '%blog' => 'blog',
-    '%blog-wildcard' => 'blog/*',
+    '%node' => '/node',
+    '%user-wildcard' => '/user/*',
     '%front' => '<front>',
   );
-  $list_description = t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%blog" for the blog page, "%blog-wildcard" for each individual blog, and "%front" for the front page.', $args, $options);
+  $description = t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%node" for the node page, "%user-wildcard" for each individual user, and "%front" for the front page.', $args, $options);
+  $default = GOOGLE_TAG_PATHS;
+  $rows = 10;
 
-  // Build variables.
-  $variables['path_toggle'] = array(
-    'type' => 'select',
-    'title' => t('Insert snippet for specific paths', array(), $options),
-    'options' => array(
-      GOOGLE_TAG_EXCLUDE_LISTED => t('All paths except the listed paths', array(), $options),
-      GOOGLE_TAG_INCLUDE_LISTED => t('Only the listed paths', array(), $options),
-    ),
-    'default' => GOOGLE_TAG_EXCLUDE_LISTED,
-  );
-
-  $variables['path_list'] = array(
-    'type' => 'text',
-    'title' => t('Listed paths', array(), $options),
-    'description' => $list_description,
-    'default' => GOOGLE_TAG_PATHS,
-    'validate callback' => '_google_tag_validate_text',
-    'element' => array(
-      '#rows' => 10,
-    ),
-  );
-
-  return $variables;
+  $toggle = 'path_toggle';
+  $list = 'path_list';
+  $plural = 'paths';
+  $adjective = 'listed';
+  $config = compact(array('toggle', 'list', 'plural', 'adjective', 'description', 'default', 'rows'));
+  return _google_tag_variable_info_generic($config, $options);
 }
 
 /**
@@ -130,7 +114,6 @@ function _google_tag_variable_info_path($options) {
 function _google_tag_variable_info_role($options) {
   global $language;
 
-  // Gather data.
   // Set language code to default to prevent role names from being translated.
   // Use role name in default language as array key as this matches the values
   // attached to global user object (used when evaluating role condition). Set
@@ -141,103 +124,158 @@ function _google_tag_variable_info_role($options) {
   // roles not just the anonymous and authenticated roles.
   $language_keep = $language->language;
   $language->language = 'en';
-  $roles = user_roles();
+  $options = user_roles();
   $language->language = $language_keep;
-  foreach ($roles as $rid => $role) {
+  foreach ($options as $rid => $role) {
     // Set display value to translated role name.
-    $roles[$role] = t($role);
-    unset($roles[$rid]);
+    $options[$role] = t($role);
+    unset($options[$rid]);
   }
 
-  // Build variables.
-  $variables['role_toggle'] = array(
-    'type' => 'select',
-    'title' => t('Insert snippet for specific roles', array(), $options),
-    'options' => array(
-      GOOGLE_TAG_EXCLUDE_LISTED => t('All roles except the selected roles', array(), $options),
-      GOOGLE_TAG_INCLUDE_LISTED => t('Only the selected roles', array(), $options),
-    ),
-    'default' => GOOGLE_TAG_EXCLUDE_LISTED,
-  );
-
-  $variables['role_list'] = array(
-    'type' => 'options',
-    'title' => t('Selected roles', array(), $options),
-    'default' => array(),
-    'options' => $roles,
-  );
-
-  return $variables;
+  $toggle = 'role_toggle';
+  $list = 'role_list';
+  $plural = 'roles';
+  $config = compact(array('toggle', 'list', 'plural', 'options'));
+  return _google_tag_variable_info_generic($config, $options);
 }
 
 /**
  * Implements hook_variable_info().
  */
 function _google_tag_variable_info_status($options) {
-  // Gather data.
   $args = array('@path' => 'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes');
-  $list_description = t('Enter one response status per line. For more information, refer to the <a href="@path">list of HTTP status codes</a>.', $args, $options);
+  $description = t('Enter one response status per line. For more information, refer to the <a href="@path">list of HTTP status codes</a>.', $args, $options);
+  $default = GOOGLE_TAG_STATUSES;
+  $rows = 5;
 
-  // Build variables.
-  $variables['status_toggle'] = array(
-    'type' => 'select',
-    'title' => t('Insert snippet for specific statuses', array(), $options),
-    'options' => array(
-      GOOGLE_TAG_EXCLUDE_LISTED => t('All statuses except the listed statuses', array(), $options),
-      GOOGLE_TAG_INCLUDE_LISTED => t('Only the listed statuses', array(), $options),
-    ),
-    'default' => GOOGLE_TAG_EXCLUDE_LISTED,
-  );
-
-  $variables['status_list'] = array(
-    'type' => 'text',
-    'title' => t('Listed statuses', array(), $options),
-    'description' => $list_description,
-    'default' => GOOGLE_TAG_STATUSES,
-    'validate callback' => '_google_tag_validate_text',
-    'element' => array(
-      '#rows' => 5,
-    ),
-  );
-
-  return $variables;
+  $toggle = 'status_toggle';
+  $list = 'status_list';
+  $plural = 'statuses';
+  $adjective = 'listed';
+  $config = compact(array('toggle', 'list', 'plural', 'adjective', 'description', 'default', 'rows'));
+  return _google_tag_variable_info_generic($config, $options);
 }
 
 /**
  * Implements hook_variable_info().
  */
 function _google_tag_variable_info_realm($options) {
-  // Gather data.
-  $realm_keys = array();
-  if (module_exists('variable_realm') && module_exists('variable_store')) {
-    $realms = variable_realm_list();
-    foreach ($realms as $realm_name => $realm_title) {
-      $keys = variable_realm_keys($realm_name);
-      foreach ($keys as $key_name => $key_title) {
-        $realm_keys["$realm_name:$key_name"] = "$realm_name:$key_name";
-      }
-    }
+  // @todo Does google_tag_condition_filter() obviate this gate check?
+  if (!module_exists('variable_realm') || !module_exists('variable_store')) {
+    return array();
   }
 
+  $options = array();
+  $realms = variable_realm_list();
+  foreach ($realms as $realm_name => $realm_title) {
+    $keys = variable_realm_keys($realm_name);
+    foreach ($keys as $key_name => $key_title) {
+      $options["$realm_name:$key_name"] = "$realm_name:$key_name";
+    }
+  }
+  $toggle = 'realm_toggle';
+  $list = 'realm_list';
+  $plural = 'keys';
+  $config = compact(array('toggle', 'list', 'plural', 'options'));
+  return _google_tag_variable_info_generic($config, $options);
+}
+
+/**
+ * Implements hook_variable_info().
+ */
+function _google_tag_variable_info_domain($options) {
+  // @todo Does google_tag_condition_filter() obviate this gate check?
+  if (!module_exists('domain')) {
+    return array();
+  }
+
+  $options = array();
+  foreach (domain_domains() as $key => $value) {
+    $options[$value['machine_name']] = $value['sitename'];
+  }
+  $toggle = 'domain_toggle';
+  $list = 'domain_list';
+  $plural = 'domains';
+  $config = compact(array('toggle', 'list', 'plural', 'options'));
+  return _google_tag_variable_info_generic($config, $options);
+}
+
+/**
+ * Implements hook_variable_info().
+ */
+function _google_tag_variable_info_language($options) {
+  // @todo Does google_tag_condition_filter() obviate this gate check?
+  if (!module_exists('locale')) {
+    return array();
+  }
+
+  $toggle = 'language_toggle';
+  $list = 'language_list';
+  $plural = 'languages';
+  $options = locale_language_list();
+  $config = compact(array('toggle', 'list', 'plural', 'options'));
+  return _google_tag_variable_info_generic($config, $options);
+}
+
+/**
+ * Implements hook_variable_info().
+ */
+function _google_tag_variable_info_generic($config, $options) {
+  // Gather data.
+  $config += array('adjective' => 'selected', 'element' => 'options');
+  extract($config);
+  $args = array(
+    '@adjective' => $adjective,
+    '@uc_adjective' => ucfirst($adjective),
+    '@plural' => $plural,
+  );
+
   // Build variables.
-  $variables['realm_toggle'] = array(
+  $variables[$toggle] = array(
     'type' => 'select',
-    'title' => t('Insert snippet for specific keys', array(), $options),
+    'title' => special_t('Insert snippet for specific @plural', $args, $options),
     'options' => array(
-      GOOGLE_TAG_EXCLUDE_LISTED => t('All keys except the selected keys', array(), $options),
-      GOOGLE_TAG_INCLUDE_LISTED => t('Only the selected keys', array(), $options),
+      GOOGLE_TAG_EXCLUDE_LISTED => special_t('All @plural except the @adjective @plural', $args, $options),
+      GOOGLE_TAG_INCLUDE_LISTED => special_t('Only the @adjective @plural', $args, $options),
     ),
     'default' => GOOGLE_TAG_EXCLUDE_LISTED,
   );
 
-  $variables['realm_list'] = array(
-    'type' => 'options',
-    'title' => t('Selected keys', array(), $options),
-    'default' => array(),
-    'options' => $realm_keys,
-  );
+  if ($adjective == 'selected') {
+    $variables[$list] = array(
+      'type' => 'options',
+      'title' => special_t('@uc_adjective @plural', $args, $options),
+      'default' => array(),
+      'options' => $options,
+    );
+  }
+  else {
+    $variables[$list] = array(
+      'type' => 'text',
+      'title' => special_t('@uc_adjective @plural', $args, $options),
+      'description' => $description,
+      'default' => $default,
+      'validate callback' => '_google_tag_validate_text',
+      'element' => array(
+        '#rows' => $rows,
+      ),
+    );
+  }
 
   return $variables;
+}
+
+/**
+ * Returns a translated string after placeholder substitution.
+ *
+ * @param string $string
+ *   The string to manipulate.
+ *
+ * @return string
+ *   The translated string.
+ */
+function special_t($string, $args) {
+  return t(strtr($string, $args));
 }
 
 /**
