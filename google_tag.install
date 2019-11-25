@@ -218,15 +218,19 @@ function google_tag_update_7104(&$sandbox) {
   $count = 0;
   $tables = array('variable');
   if (module_exists('variable_realm') && module_exists('variable_store')) {
+    global $conf;
     $tables[] = 'variable_store';
-    $args = array(
-      ':old' => 's:22:"google_tag_compact_tag"',
-      ':new' => 's:26:"google_tag_compact_snippet"',
-    );
-    $count += db_update('variable')
-      ->expression('value', 'REPLACE(value, :old, :new)', $args)
-      ->condition('name', 'variable_realm_list_language')
-      ->execute();
+    $realms = variable_realm_list();
+    foreach ($realms as $realm_name => $realm_title) {
+      if (!empty($conf["variable_realm_list_{$realm_name}"])) {
+        $items = $conf["variable_realm_list_{$realm_name}"];
+        if ($key = array_search('google_tag_compact_tag', $items, TRUE)) {
+          $items[$key] = 'google_tag_compact_snippet';
+          variable_set("variable_realm_list_{$realm_name}", $items);
+          $count++;
+        }
+      }
+    }
   }
 
   foreach ($tables as $table) {
