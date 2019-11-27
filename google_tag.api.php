@@ -80,9 +80,6 @@ function hook_google_tag_snippets_alter(array &$snippets, $container) {
  * - includes/entity/container.inc (the genericCheck routine)
  *
  * @param array $types
- *   Associative array of condition types keyed by type.
- *
- * @return array
  *   Associative array of condition item arrays keyed by type.
  *   Each condition item array has the following keys:
  *   'file': relative path to file with implementing routines

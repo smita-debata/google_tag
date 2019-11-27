@@ -281,8 +281,8 @@ function google_tag_condition_filter() {
       'language' => array('locale'),
       'realm' => array('variable_realm', 'variable_store'),
     );
-    foreach($optional as $type => $requires) {
-      foreach($requires as $require) {
+    foreach ($optional as $type => $requires) {
+      foreach ($requires as $require) {
         if (!module_exists($require)) {
           unset($types[$type]);
           continue 2;
