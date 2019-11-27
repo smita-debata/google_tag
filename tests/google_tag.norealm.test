@@ -19,15 +19,8 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
-    parent::setUp(array('google_tag'));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function createData() {
-    $this->variables = (object) $variables = array(
+    $this->variables['primary'] = (object) $variables = array(
       'name' => 'primary',
       'label' => 'Primary',
       'status' => TRUE,
@@ -36,19 +29,21 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
       'environment_token' => 'nnnnnnnnnnnnnnnnnnnnn',
       'include_environment' => '1',
     );
-    $this->saveContainer($variables);
   }
 
   /**
    * {@inheritdoc}
    */
   protected function checkSnippetFiles() {
-    $machine_name = $this->variables->name;
-    foreach ($this->types as $type) {
-      $url = "$this->basePath/google_tag/{$machine_name}/google_tag.$type.js";
-      $contents = @file_get_contents($url);
-      $function = "verify{$type}Snippet";
-      $this->$function($contents, $this->variables);
+    foreach ($this->variables as $key => $variables) {
+      $message = "Start on container $key";
+      $this->pass($message, $this->group);
+      foreach ($this->types as $type) {
+        $url = "$this->basePath/google_tag/{$key}/google_tag.$type.js";
+        $contents = @file_get_contents($url);
+        $function = "verify{$type}Snippet";
+        $this->$function($contents, $this->variables[$key]);
+      }
     }
   }
 
@@ -57,17 +52,18 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
    */
   protected function checkPageResponse() {
     parent::checkPageResponse();
-    $this->drupalGet('');
-    $machine_name = $this->variables->name;
-    foreach ($this->types as $type) {
-      $uri = "$this->basePath/google_tag/{$machine_name}/google_tag.$type.js";
-      if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
-        $realpath = $wrapper->getExternalUrl($uri);
-        $function = "verify{$type}Tag";
-        $this->$function($realpath, $this->variables);
-      }
-      else {
-        // @todo
+
+    foreach ($this->variables as $key => $variables) {
+      $this->drupalGet('');
+      $message = "Start on container $key";
+      $this->pass($message, $this->group);
+      foreach ($this->types as $type) {
+        $uri = "$this->basePath/google_tag/{$key}/google_tag.$type.js";
+        if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
+          $realpath = $wrapper->getExternalUrl($uri);
+          $function = "verify{$type}Tag";
+          $this->$function($realpath, $this->variables[$key]);
+        }
       }
     }
   }

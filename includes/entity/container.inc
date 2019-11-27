@@ -651,4 +651,16 @@ EOS;
     return $result;
   }
 
+  /**
+   * Deletes configuration from database.
+   */
+  public function delete() {
+    $data = (array) $this;
+
+    $config['name'] = "google_tag.container.{$this->name}";
+    $config['data'] = $data;
+    $config = (object) $config;
+    ctools_export_crud_delete('gtag_config', $config);
+  }
+
 }

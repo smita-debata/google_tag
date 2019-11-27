@@ -21,6 +21,13 @@ class GTMBaseTestCase extends DrupalWebTestCase {
   protected $types = array('script', 'noscript');
 
   /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  protected $modules = array('google_tag');
+
+  /**
    * {@inheritdoc}
    */
   public static function getInfo() {
@@ -35,8 +42,7 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    * {@inheritdoc}
    */
   protected function setUp() {
-    $modules = func_get_args();
-    parent::setUp($modules ? $modules[0] : array());
+    parent::setUp($this->modules);
   }
 
   /**
@@ -44,22 +50,30 @@ class GTMBaseTestCase extends DrupalWebTestCase {
    */
   public function testModule() {
     if (get_class($this) == 'GTMBaseTestCase') {
-      $this->assertTrue(TRUE, t('No assertions on base test class'));
+      $this->assertTrue(TRUE, t('No assertions on base test class'), $this->group);
       return;
     }
 
     try {
       $this->modifySettings();
+      // Create containers in code.
       $this->createData();
+      $this->saveContainers();
+      $this->checkSnippetFiles();
+      $this->checkPageResponse();
+      // Delete containers.
+      $this->deleteContainers();
+      // Create containers in user interface.
+      $this->submitContainers();
       $this->checkSnippetFiles();
       $this->checkPageResponse();
     }
     catch (Exception $e) {
-      $this->assertTrue(TRUE, t('Inside CATCH block'));
+      $this->assertTrue(TRUE, t('Inside CATCH block'), $this->group);
       watchdog_exception('gtm_test', $e);
     }
     finally {
-      $this->assertTrue(TRUE, t('Inside FINALLY block'));
+      $this->assertTrue(TRUE, t('Inside FINALLY block'), $this->group);
     }
   }
 
@@ -70,6 +84,7 @@ class GTMBaseTestCase extends DrupalWebTestCase {
     // Modify default settings.
     // These should propagate to each container created in test.
     $settings = \GTMSettings::getInstance();
+    $settings->flush_snippets = 1;
     $settings->debug_output = 1;
     $settings->role_toggle = 'include listed';
     $settings->role_list = array('content viewer' => 'content viewer');
@@ -77,29 +92,97 @@ class GTMBaseTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Create test data: configuration variables and snippet files.
+   * Create test data: configuration variables.
    */
   protected function createData() {
   }
 
   /**
-   * Save container in the database and create snippet files.
+   * Save containers in the database and create snippet files.
    */
-  protected function saveContainer(array $variables) {
-    $export = new GTMContainerExport();
-    $default = $export->default_container();
-    unset($default->data, $default->export_type, $default->type);
+  protected function saveContainers() {
+    foreach ($this->variables as $key => $variables) {
+      $export = new GTMContainerExport();
+      $default = $export->default_container();
+      unset($default->data, $default->export_type, $default->type);
 
-    array_walk($variables, function ($value, $key) use ($default) {
-      $default->$key = $value;
-    });
-    // Save container.
-    $container = new GTMContainer((array) $default);
-    $container->save(NULL);
+      array_walk($variables, function ($value, $key) use ($default) {
+        $default->$key = $value;
+      });
+      // Save container.
+      $container = new GTMContainer((array) $default);
+      $container->save(NULL);
 
-    // Create snippet files.
+      // Create snippet files.
+      $manager = \GTMContainerManager::getInstance();
+      $manager->createAssets($container);
+    }
+  }
+
+  /**
+   * Delete containers from the database and delete snippet files.
+   */
+  protected function deleteContainers() {
+    // Delete containers.
+    foreach ($this->variables as $key => $variables) {
+      $container = new GTMContainer(array(), $key);
+      $container->delete();
+    }
+
+    // Confirm no containers.
     $manager = \GTMContainerManager::getInstance();
-    $manager->createAssets($container);
+    $containers = $manager->loadContainers();
+    $message = 'No containers found after delete';
+    $this->assert(empty($containers), $message, $this->group);
+
+    // Delete snippet files.
+    $directory = \GTMSettings::getInstance()->get('uri');
+    if (\GTMSettings::getInstance()->get('flush_snippets')) {
+      if (!empty($directory)) {
+        // Remove any stale files (e.g. module update or machine name change).
+        file_unmanaged_delete_recursive($directory . '/google_tag');
+      }
+    }
+
+    // Confirm no snippet files.
+    $message = 'No snippet files found after delete';
+    $this->assert(!is_dir($directory . '/google_tag'), $message, $this->group);
+  }
+
+  /**
+   * Add containers through user interface.
+   */
+  protected function submitContainers() {
+    // Create and login an admin user.
+    $role_id = $this->drupalCreateRole(array('access content', 'administer google tag manager'), 'admin user');
+    $admin_user = $this->drupalCreateUser();
+    $admin_user->roles[$role_id] = 'admin user';
+    user_save($admin_user);
+    $this->drupalLogin($admin_user);
+
+    foreach ($this->variables as $key => $variables) {
+      $edit = (array) $variables;
+      unset($edit['status']);
+      if (isset($edit['realm_list'])) {
+        $realm = current($edit['realm_list']);
+        $edit["realm_list[$realm]"] = $realm;
+        unset($edit['realm_list']);
+      }
+
+      $this->drupalGet('/admin/config/system/google_tag/add');
+      $this->drupalPost(NULL, $edit, 'Save');
+
+      $text = 'Created @count snippet files for %container container based on configuration.';
+      $args = array('@count' => 3, '%container' => $variables->label);
+      $text = t($text, $args);
+      $message = 'Found snippet confirmation message in page response';
+      $this->assertRaw($text, $message, $this->group);
+
+      $text = 'Created @count snippet files for @container container based on configuration.';
+      $args = array('@count' => 3, '@container' => $variables->label);
+      $text = t($text, $args);
+      $this->assertText($text, $message, $this->group);
+    }
   }
 
   /**
