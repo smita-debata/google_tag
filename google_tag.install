@@ -88,7 +88,17 @@ function google_tag_requirements($phase) {
   if ($phase == 'runtime' || $phase == 'update' || $phase == 'install') {
     $phase == 'install' ? require_once __DIR__ . '/google_tag.module' : '';
     // Adapted from system_requirements().
-    $directory = 'public://google_tag';
+    $directory = \GTMSettings::getInstance()->get('uri');
+    if (empty($directory)) {
+      $requirements['google_tag_snippet_parent_directory'] = array(
+        'title' => t('Google Tag Manager'),
+        'description' => $t('The snippet parent directory is not set. Configure default settings on the <a href="@url1">module settings page</a>.', array('@url1' => '/admin/config/system/google_tag/settings')),
+        'severity' => REQUIREMENT_ERROR,
+        'value' => t('Not configured'),
+      );
+      return $requirements;
+    }
+    $directory .= '/google_tag';
     if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
       _file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     }
