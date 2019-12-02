@@ -10,7 +10,6 @@
  * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
  */
 
-use Drupal\google_tag\Form\GoogleTagSettingsForm;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
