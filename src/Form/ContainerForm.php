@@ -19,6 +19,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 class ContainerForm extends EntityForm {
 
+  use ContainerTrait;
+
   /**
    * The condition plugin manager.
    *
@@ -65,7 +67,8 @@ class ContainerForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
-    $container = $this->entity;
+    $container = $this->container = $this->entity;
+    $this->prefix = '';
 
     // Store the contexts for other objects to use during form building.
     $form_state->setTemporaryValue('gathered_contexts', $this->contextRepository->getAvailableContexts());
@@ -163,225 +166,6 @@ class ContainerForm extends EntityForm {
   }
 
   /**
-   * Fieldset builder for the container settings form.
-   */
-  public function advancedFieldset(FormStateInterface &$form_state) {
-    $container = $this->entity;
-
-    // Build form elements.
-    $fieldset = [
-      '#type' => 'details',
-      '#title' => $this->t('Advanced'),
-      '#group' => 'settings',
-    ];
-
-    $fieldset['data_layer'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Data layer'),
-      '#description' => $this->t('The name of the data layer. Default value is "dataLayer". In most cases, use the default.'),
-      '#default_value' => $container->get('data_layer'),
-      '#attributes' => ['placeholder' => ['dataLayer']],
-      '#required' => TRUE,
-    ];
-
-    $fieldset['include_classes'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Add classes to the data layer'),
-      '#description' => $this->t('If checked, then the listed classes will be added to the data layer.'),
-      '#default_value' => $container->get('include_classes'),
-    ];
-
-    $description = $this->t('The types of tags, triggers, and variables <strong>allowed</strong> on a page. Enter one class per line. For more information, refer to the <a href="https://developers.google.com/tag-manager/devguide#security">developer documentation</a>.');
-
-    $fieldset['whitelist_classes'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('White-listed classes'),
-      '#description' => $description,
-      '#default_value' => $container->get('whitelist_classes'),
-      '#rows' => 5,
-      '#states' => $this->statesArray('include_classes'),
-    ];
-
-    $fieldset['blacklist_classes'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Black-listed classes'),
-      '#description' => $this->t('The types of tags, triggers, and variables <strong>forbidden</strong> on a page. Enter one class per line.'),
-      '#default_value' => $container->get('blacklist_classes'),
-      '#rows' => 5,
-      '#states' => $this->statesArray('include_classes'),
-    ];
-
-    $fieldset['include_environment'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Include an environment'),
-      '#description' => $this->t('If checked, then the applicable snippets will include the environment items below. Enable <strong>only for development</strong> purposes.'),
-      '#default_value' => $container->get('include_environment'),
-    ];
-
-    $description = $this->t('The environment ID to use with this website container. To get an environment ID, <a href="https://tagmanager.google.com/#/admin">select Environments</a>, create an environment, then click the "Get Snippet" action. The environment ID and token will be in the snippet.');
-
-    $fieldset['environment_id'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Environment ID'),
-      '#description' => $description,
-      '#default_value' => $container->get('environment_id'),
-      '#attributes' => ['placeholder' => ['env-x']],
-      '#size' => 10,
-      '#maxlength' => 7,
-      '#states' => $this->statesArray('include_environment'),
-    ];
-
-    $fieldset['environment_token'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Environment token'),
-      '#description' => $this->t('The authentication token for this environment.'),
-      '#default_value' => $container->get('environment_token'),
-      '#attributes' => ['placeholder' => ['xxxxxxxxxxxxxxxxxxxxxx']],
-      '#size' => 20,
-      '#maxlength' => 25,
-      '#states' => $this->statesArray('include_environment'),
-    ];
-
-    return $fieldset;
-  }
-
-  /**
-   * Fieldset builder for the container settings form.
-   */
-  public function pathFieldset(FormStateInterface &$form_state) {
-    $container = $this->entity;
-
-    // Build form elements.
-    $description = $this->t('On this and the following tabs, specify the conditions on which the GTM JavaScript snippet will either be inserted on or omitted from the page response, thereby enabling or disabling tracking and other analytics. All conditions must be satisfied for the snippet to be inserted. The snippet will be omitted if any condition is not met.');
-
-    $fieldset = [
-      '#type' => 'details',
-      '#title' => $this->t('Request path'),
-      '#description' => $description,
-      '#group' => 'conditions',
-    ];
-
-    $fieldset['path_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Insert snippet for specific paths'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All paths except the listed paths'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed paths'),
-      ],
-      '#default_value' => $container->get('path_toggle'),
-    ];
-
-    $args = [
-      '%node' => '/node',
-      '%user-wildcard' => '/user/*',
-      '%front' => '<front>',
-    ];
-
-    $fieldset['path_list'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Listed paths'),
-      '#description' => $this->t('Enter one relative path per line using the "*" character as a wildcard. Example paths are: "%node" for the node page, "%user-wildcard" for each individual user, and "%front" for the front page.', $args),
-      '#default_value' => $container->get('path_list'),
-      '#rows' => 10,
-    ];
-
-    return $fieldset;
-  }
-
-  /**
-   * Fieldset builder for the container settings form.
-   */
-  public function roleFieldset(FormStateInterface &$form_state) {
-    $container = $this->entity;
-
-    // Build form elements.
-    $fieldset = [
-      '#type' => 'details',
-      '#title' => $this->t('User role'),
-      '#group' => 'conditions',
-    ];
-
-    $fieldset['role_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Insert snippet for specific roles'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All roles except the selected roles'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the selected roles'),
-      ],
-      '#default_value' => $container->get('role_toggle'),
-    ];
-
-    $user_roles = array_map(function ($role) {
-      return $role->label();
-    }, user_roles());
-
-    $fieldset['role_list'] = [
-      '#type' => 'checkboxes',
-      '#title' => $this->t('Selected roles'),
-      '#options' => $user_roles,
-      '#default_value' => $container->get('role_list'),
-    ];
-
-    return $fieldset;
-  }
-
-  /**
-   * Fieldset builder for the container settings form.
-   */
-  public function statusFieldset(FormStateInterface &$form_state) {
-    $container = $this->entity;
-
-    // Build form elements.
-    $description = $this->t('Enter one response status per line. For more information, refer to the <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">list of HTTP status codes</a>.');
-
-    $fieldset = [
-      '#type' => 'details',
-      '#title' => $this->t('Response status'),
-      '#group' => 'conditions',
-    ];
-
-    $fieldset['status_toggle'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Insert snippet for specific statuses'),
-      '#options' => [
-        GOOGLE_TAG_EXCLUDE_LISTED => $this->t('All statuses except the listed statuses'),
-        GOOGLE_TAG_INCLUDE_LISTED => $this->t('Only the listed statuses'),
-      ],
-      '#default_value' => $container->get('status_toggle'),
-    ];
-
-    $fieldset['status_list'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Listed statuses'),
-      '#description' => $description,
-      '#default_value' => $container->get('status_list'),
-      '#rows' => 5,
-    ];
-
-    return $fieldset;
-  }
-
-  /**
-   * Returns states array for a form element.
-   *
-   * @param string $variable
-   *   The name of the form element.
-   *
-   * @return array
-   *   The states array.
-   */
-  public function statesArray($variable) {
-    return [
-      'required' => [
-        ':input[name="' . $variable . '"]' => ['checked' => TRUE],
-      ],
-      'invisible' => [
-        ':input[name="' . $variable . '"]' => ['checked' => FALSE],
-      ],
-    ];
-  }
-
-  /**
    * Builds the form elements for the insertion conditions.
    *
    * @param array $form
@@ -449,33 +233,7 @@ class ContainerForm extends EntityForm {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // Trim the text values.
-    $container_id = trim($form_state->getValue('container_id'));
-    $environment_id = trim($form_state->getValue('environment_id'));
-    $form_state->setValue('data_layer', trim($form_state->getValue('data_layer')));
-    $form_state->setValue('path_list', $this->cleanText($form_state->getValue('path_list')));
-    $form_state->setValue('status_list', $this->cleanText($form_state->getValue('status_list')));
-    $form_state->setValue('whitelist_classes', $this->cleanText($form_state->getValue('whitelist_classes')));
-    $form_state->setValue('blacklist_classes', $this->cleanText($form_state->getValue('blacklist_classes')));
-
-    // Replace all types of dashes (n-dash, m-dash, minus) with a normal dash.
-    $container_id = str_replace(['–', '—', '−'], '-', $container_id);
-    $environment_id = str_replace(['–', '—', '−'], '-', $environment_id);
-    $form_state->setValue('container_id', $container_id);
-    $form_state->setValue('environment_id', $environment_id);
-
-    $form_state->setValue('role_list', array_filter($form_state->getValue('role_list')));
-
-    if (!preg_match('/^GTM-\w{4,}$/', $container_id)) {
-      // @todo Is there a more specific regular expression that applies?
-      // @todo Is there a way to validate the container ID?
-      // It may be valid but not the correct one for the website.
-      $form_state->setError($form['general']['container_id'], $this->t('A valid container ID is case sensitive and formatted like GTM-xxxxxx.'));
-    }
-    if ($form_state->getValue('include_environment') && !preg_match('/^env-\d{1,}$/', $environment_id)) {
-      $form_state->setError($form['advanced']['environment_id'], $this->t('A valid environment ID is case sensitive and formatted like env-x.'));
-    }
-
+    $this->validateFormValues($form, $form_state);
     parent::validateForm($form, $form_state);
     $this->validateConditionsForm($form, $form_state);
   }
@@ -553,27 +311,6 @@ class ContainerForm extends EntityForm {
   }
 
   /**
-   * Cleans a string representing a list of items.
-   *
-   * @param string $text
-   *   The string to clean.
-   * @param string $format
-   *   The final format of $text, either 'string' or 'array'.
-   *
-   * @return string
-   *   The clean text.
-   */
-  public function cleanText($text, $format = 'string') {
-    $text = explode("\n", $text);
-    $text = array_map('trim', $text);
-    $text = array_filter($text, 'trim');
-    if ($format == 'string') {
-      $text = implode("\n", $text);
-    }
-    return $text;
-  }
-
-  /**
    * Checks if a container machine name is taken.
    *
    * @param string $value
@@ -586,7 +323,7 @@ class ContainerForm extends EntityForm {
    * @return bool
    *   Whether or not the container machine name is taken.
    */
-  public function containerExists($value, $element, FormStateInterface $form_state) {
+  public function containerExists($value, array $element, FormStateInterface $form_state) {
     /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $container */
     $container = $form_state->getFormObject()->getEntity();
     return (bool) $this->entityTypeManager->getStorage($container->getEntityTypeId())
