@@ -20,7 +20,7 @@ class GTMNoRealmTestCase extends GTMBaseTestCase {
    * {@inheritdoc}
    */
   protected function createData() {
-    $this->variables['primary'] = (object) $variables = array(
+    $this->variables['primary'] = (object) array(
       'name' => 'primary',
       'label' => 'Primary',
       'status' => TRUE,

@@ -30,7 +30,7 @@ class GTMRealmTestCase extends GTMBaseTestCase {
    * {@inheritdoc}
    */
   protected function createData() {
-    $this->variables['default'] = (object) $variables = array(
+    $this->variables['default'] = (object) array(
       'name' => 'default',
       'label' => 'Default',
       'status' => TRUE,
@@ -44,7 +44,7 @@ class GTMRealmTestCase extends GTMBaseTestCase {
     );
 
     // Set variables for gtm_test:primary.
-    $this->variables['primary'] = (object) $variables = array(
+    $this->variables['primary'] = (object) array(
       'name' => 'primary',
       'label' => 'Primary',
       'status' => TRUE,
@@ -58,7 +58,7 @@ class GTMRealmTestCase extends GTMBaseTestCase {
     );
 
     // Set variables for gtm_test:secondary.
-    $this->variables['secondary'] = (object) $variables = array(
+    $this->variables['secondary'] = (object) array(
       'name' => 'secondary',
       'label' => 'Secondary',
       'status' => TRUE,
