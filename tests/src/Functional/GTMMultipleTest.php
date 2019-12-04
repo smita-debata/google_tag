@@ -13,7 +13,9 @@ class GTMMultipleTest extends GTMTestBase {
    * {@inheritdoc}
    */
   protected function createData() {
-    $this->variables['default'] = (object) $variables = [
+    parent::createData();
+
+    $this->variables['default'] = (object) [
       'id' => 'default',
       'label' => 'Default',
       'weight' => 3,
@@ -21,12 +23,9 @@ class GTMMultipleTest extends GTMTestBase {
       'include_environment' => '1',
       'environment_id' => 'env-7',
       'environment_token' => 'ddddddddddddddddddddd',
-      'realm_toggle' => 'include listed',
-      'realm_list' => ['gtm_test:default' => 'gtm_test:default'],
     ];
-    $this->saveContainer($variables);
 
-    $this->variables['primary'] = (object) $variables = [
+    $this->variables['primary'] = (object) [
       'id' => 'primary',
       'label' => 'Primary',
       'weight' => 2,
@@ -34,12 +33,9 @@ class GTMMultipleTest extends GTMTestBase {
       'include_environment' => '1',
       'environment_id' => 'env-1',
       'environment_token' => 'ppppppppppppppppppppp',
-      'realm_toggle' => 'include listed',
-      'realm_list' => ['gtm_test:primary' => 'gtm_test:primary'],
     ];
-    $this->saveContainer($variables);
 
-    $this->variables['secondary'] = (object) $variables = [
+    $this->variables['secondary'] = (object) [
       'id' => 'secondary',
       'label' => 'Secondary',
       'weight' => 1,
@@ -47,10 +43,7 @@ class GTMMultipleTest extends GTMTestBase {
       'include_environment' => '1',
       'environment_id' => 'env-2',
       'environment_token' => 'sssssssssssssssssssss',
-      'realm_toggle' => 'include listed',
-      'realm_list' => ['gtm_test:secondary' => 'gtm_test:secondary'],
     ];
-    $this->saveContainer($variables);
   }
 
   /**

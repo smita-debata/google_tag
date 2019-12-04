@@ -22,7 +22,7 @@ abstract class GTMTestBase extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['google_tag'];
+  protected static $modules = ['google_tag'];
 
   /**
    * The snippet file types.
@@ -45,7 +45,15 @@ abstract class GTMTestBase extends BrowserTestBase {
   public function testModule() {
     try {
       $this->modifySettings();
+      // Create containers in code.
       $this->createData();
+      $this->saveContainers();
+      $this->checkSnippetFiles();
+      $this->checkPageResponse();
+      // Delete containers.
+      $this->deleteContainers();
+      // Create containers in user interface.
+      $this->submitContainers();
       $this->checkSnippetFiles();
       $this->checkPageResponse();
     }
@@ -67,6 +75,7 @@ abstract class GTMTestBase extends BrowserTestBase {
     $config = \Drupal::service('config.factory')->getEditable('google_tag.settings');
     $settings = $config->get();
     unset($settings['_core']);
+    $settings['flush_snippets'] = 1;
     $settings['debug_output'] = 1;
     $settings['_default_container']['role_toggle'] = 'include listed';
     $settings['_default_container']['role_list'] = ['content viewer' => 'content viewer'];
@@ -74,28 +83,101 @@ abstract class GTMTestBase extends BrowserTestBase {
   }
 
   /**
-   * Create test data: containers and snippet files.
+   * Create test data: configuration variables and users.
    */
   protected function createData() {
+    // Create an admin user.
+    $this->drupalCreateRole(['access content', 'administer google tag manager'], 'admin user');
+    $this->adminUser = $this->drupalCreateUser();
+    $this->adminUser->roles[] = 'admin user';
+    $this->adminUser->save();
+
+    // Create a test user.
+    $this->drupalCreateRole(['access content'], 'content viewer');
+    $this->nonAdminUser = $this->drupalCreateUser();
+    $this->nonAdminUser->roles[] = 'content viewer';
+    $this->nonAdminUser->save();
   }
 
   /**
-   * Save container in the database and create snippet files.
+   * Save containers in the database and create snippet files.
    */
-  protected function saveContainer(array $variables) {
-    // Create container with default container settings, then modify and save.
-    $container = new Container([], 'google_tag_container');
-    $container->enforceIsNew();
-    $container->set('id', $variables['id']);
-    unset($variables['id']);
-    array_walk($variables, function ($value, $key) use ($container) {
-      $container->$key = $value;
-    });
-    $container->save();
+  protected function saveContainers() {
+    foreach ($this->variables as $key => $variables) {
+      // Create container with default container settings, then modify.
+      $container = new Container([], 'google_tag_container');
+      $container->enforceIsNew();
+      $container->set('id', $variables->id);
+      // @todo This has unintended collateral effect; the id property is gone forever.
+      // Code in submitContainers() needs this value.
+      $values = (array) $variables;
+      unset($values['id']);
+      array_walk($values, function ($value, $key) use ($container) {
+        $container->$key = $value;
+      });
+      // Save container.
+      $container->save();
 
-    // Create snippet files.
+      // Create snippet files.
+      $manager = \Drupal::service('google_tag.container_manager');
+      $manager->createAssets($container);
+    }
+  }
+
+  /**
+   * Delete containers from the database and delete snippet files.
+   */
+  protected function deleteContainers() {
+    // Delete containers.
+    foreach ($this->variables as $key => $variables) {
+      // also \Drupal::entityTypeManager()
+      $container = \Drupal::service('entity_type.manager')->getStorage('google_tag_container')->load($key);
+      $container->delete();
+    }
+
+    // Confirm no containers.
     $manager = \Drupal::service('google_tag.container_manager');
-    $manager->createAssets($container);
+    $ids = $manager->loadContainerIDs();
+    $message = 'No containers found after delete';
+    parent::assertTrue(empty($ids), $message);
+
+    // @todo Next statement will not delete files as containers are gone.
+    // $manager->createAllAssets();
+    // Delete snippet files.
+    $directory = \Drupal::config('google_tag.settings')->get('uri');
+    if (\Drupal::config('google_tag.settings')->get('flush_snippets')) {
+      if (!empty($directory)) {
+        // Remove any stale files (e.g. module update or machine name change).
+        \Drupal::service('file_system')->deleteRecursive($directory . '/google_tag');
+      }
+    }
+
+    // Confirm no snippet files.
+    $message = 'No snippet files found after delete';
+    parent::assertTrue(!is_dir($directory . '/google_tag'), $message);
+  }
+
+  /**
+   * Add containers through user interface.
+   */
+  protected function submitContainers() {
+    $this->drupalLogin($this->adminUser);
+
+    foreach ($this->variables as $key => $variables) {
+      $edit = (array) $variables;
+      $this->drupalPostForm('/admin/config/system/google-tag/add', $edit, 'Save');
+
+      $text = 'Created @count snippet files for %container container based on configuration.';
+      $args = array('@count' => 3, '%container' => $variables->label);
+      $text = t($text, $args);
+      $message = 'Found snippet confirmation message in page response';
+      $this->assertRaw($text, $message);
+
+      $text = 'Created @count snippet files for @container container based on configuration.';
+      $args = array('@count' => 3, '@container' => $variables->label);
+      $text = t($text, $args);
+      $this->assertText($text, $message);
+    }
   }
 
   /**
@@ -148,12 +230,7 @@ abstract class GTMTestBase extends BrowserTestBase {
    * Inspect the page response.
    */
   protected function checkPageResponse() {
-    // Create and login a test user.
-    $role_id = $this->drupalCreateRole(['access content'], 'content viewer');
-    $non_admin_user = $this->drupalCreateUser();
-    $non_admin_user->roles[] = 'content viewer';
-    $non_admin_user->save();
-    $this->drupalLogin($non_admin_user);
+    $this->drupalLogin($this->nonAdminUser);
   }
 
   /**
