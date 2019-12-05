@@ -8,8 +8,6 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
-use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -26,7 +24,21 @@ class ContainerForm extends EntityForm {
    *
    * @var \Drupal\Core\Condition\ConditionManager
    */
-  protected $condition_manager;
+  protected $conditionManager;
+
+  /**
+   * The context repository service.
+   *
+   * @var \Drupal\Core\Plugin\Context\ContextRepositoryInterface
+   */
+  protected $contextRepository;
+
+  /**
+   * The container entity.
+   *
+   * @var \Drupal\google_tag\Entity\Container
+   */
+  protected $container;
 
   /**
    * {@inheritdoc}
@@ -42,23 +54,22 @@ class ContainerForm extends EntityForm {
    *   The ConditionManager for building the insertion conditions.
    * @param \Drupal\Core\Plugin\Context\ContextRepositoryInterface $context_repository
    *   The lazy context repository service.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language
-   *   The language manager.
    */
-  public function __construct(ExecutableManagerInterface $condition_manager, ContextRepositoryInterface $context_repository, LanguageManagerInterface $language) {
+  public function __construct(ExecutableManagerInterface $condition_manager, ContextRepositoryInterface $context_repository) {
     $this->conditionManager = $condition_manager;
     $this->contextRepository = $context_repository;
-    $this->language = $language;
   }
 
   /**
    * {@inheritdoc}
+   *
+   * This routine is the trick to DependencyInjection in Drupal. Without it the
+   * __construct method complains of no arguments instead of three.
    */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.condition'),
-      $container->get('context.repository'),
-      $container->get('language_manager')
+      $container->get('context.repository')
     );
   }
 
