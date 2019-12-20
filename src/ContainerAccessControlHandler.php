@@ -112,12 +112,17 @@ class ContainerAccessControlHandler extends EntityAccessControlHandler implement
       // Because cacheable metadata might be missing, forbid cache write.
       $access = AccessResult::forbidden()->setCacheMaxAge(0);
     }
+/*
     elseif ($missing_value) {
-      // The contexts exist but have no value. Allow access without
-      // disabling caching. For example the node type condition will have a
-      // missing context on any non-node route like the frontpage.
+      // The context exists but has no value. For example, the node type
+      // condition will have a missing context value on any non-node route like
+      // the frontpage.
+      // @todo Checking this state here prevents the evaluation of other
+      // conditions. If this condition does not apply, then that should NOT
+      // preclude further evaluation NOR result in automatic access.
       $access = AccessResult::allowed();
     }
+*/
     elseif ($this->resolveConditions($conditions, 'and') !== FALSE) {
       $access = AccessResult::allowed();
     }
