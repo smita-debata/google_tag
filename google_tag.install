@@ -88,7 +88,7 @@ function google_tag_requirements($phase) {
   if ($phase == 'runtime' || $phase == 'update' || $phase == 'install') {
     $phase == 'install' ? require_once __DIR__ . '/google_tag.module' : '';
     // Adapted from system_requirements().
-    $directory = \GTMSettings::getInstance()->get('uri');
+    $directory = $phase == 'install' ? 'public:/' : \GTMSettings::getInstance()->get('uri');
     if (empty($directory)) {
       $requirements['google_tag_snippet_parent_directory'] = array(
         'title' => t('Google Tag Manager'),
