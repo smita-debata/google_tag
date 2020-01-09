@@ -61,7 +61,7 @@ class GTMContainerManager implements ContainerManagerInterface {
     $args = array('@count' => count($snippets), '%container' => $container->get('label'));
     if (!$result) {
       $message = 'An error occurred saving @count snippet files for %container container. Contact the site administrator if this persists.';
-      $this->displayMessage($message, $args, MessengerInterface::TYPE_ERROR);
+      $this->displayMessage($message, $args, 'error');
       watchdog('google_tag', $message, $args, WATCHDOG_ERROR);
     }
     else {
