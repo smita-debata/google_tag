@@ -257,7 +257,7 @@ trait ContainerTrait {
       if (substr($directory, -3) == '://') {
         $args = ['%directory' => $directory];
         $message = 'The snippet parent uri %directory is invalid. Enter a single trailing slash to specify a plain stream wrapper.';
-        $form_state->setError($form['settings']['uri'], $this->t($message, $args));
+        $form_state->setError($form['module']['uri'], $this->t($message, $args));
       }
 
       // Allow for a plain stream wrapper with one trailing slash.
@@ -265,7 +265,7 @@ trait ContainerTrait {
       if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
         $args = ['%directory' => $directory];
         $message = 'The snippet parent uri %directory is invalid, possibly due to file system permissions. The directory either does not exist, or is not writable or searchable.';
-        $form_state->setError($form['settings']['uri'], $this->t($message, $args));
+        $form_state->setError($form['module']['uri'], $this->t($message, $args));
       }
     }
 
