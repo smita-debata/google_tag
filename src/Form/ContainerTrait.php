@@ -263,7 +263,7 @@ trait ContainerTrait {
 
     // Specific to the settings form.
     $uri = $form_state->getValue('uri');
-    if (!is_null($uri)) {
+    if (!is_null($uri) && $form['#form_id'] == 'google_tag_settings') {
       $uri = trim($uri);
       $form_state->setValue('uri', $uri);
 
