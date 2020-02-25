@@ -160,7 +160,7 @@ abstract class GTMTestBase extends BrowserTestBase {
   protected function deleteContainers() {
     // Delete containers.
     foreach ($this->variables as $key => $variables) {
-      // also \Drupal::entityTypeManager()
+      // Also exposed as \Drupal::entityTypeManager().
       $container = \Drupal::service('entity_type.manager')->getStorage('google_tag_container')->load($key);
       $container->delete();
     }
@@ -198,12 +198,12 @@ abstract class GTMTestBase extends BrowserTestBase {
       $this->drupalPostForm('/admin/config/system/google-tag/add', $edit, 'Save');
 
       $text = 'Created @count snippet files for %container container based on configuration.';
-      $args = array('@count' => 3, '%container' => $variables->label);
+      $args = ['@count' => 3, '%container' => $variables->label];
       $text = t($text, $args);
       $this->assertSession()->responseContains($text);
 
       $text = 'Created @count snippet files for @container container based on configuration.';
-      $args = array('@count' => 3, '@container' => $variables->label);
+      $args = ['@count' => 3, '@container' => $variables->label];
       $text = t($text, $args);
       $this->assertSession()->pageTextContains($text);
     }

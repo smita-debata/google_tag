@@ -6,7 +6,6 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
@@ -280,13 +279,6 @@ EOS;
     if ($compact) {
       $script = str_replace(["\n", '  '], '', $script);
     }
-/*
-    $script = <<<EOS
-<!-- Google Tag Manager -->
-$script
-<!-- End Google Tag Manager -->
-EOS;
-*/
     return $script;
   }
 
@@ -310,13 +302,6 @@ EOS;
     if ($compact) {
       $noscript = str_replace("\n", '', $noscript);
     }
-/*
-    $noscript = <<<EOS
-<!-- Google Tag Manager -->
-$noscript
-<!-- End Google Tag Manager -->
-EOS;
-*/
     return $noscript;
   }
 

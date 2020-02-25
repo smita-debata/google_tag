@@ -35,7 +35,7 @@ class SettingsForm extends ConfigFormBase {
     $this->prefix = '_default_container.';
 
     // Build form elements.
-    $description = $this->t('<br />After configuring the module settings and default properties for a new container, <strong>add a container</strong> on the <a href=":url">container management page</a>.', array(':url' => Url::fromRoute('entity.google_tag_container.collection')->toString()));
+    $description = $this->t('<br />After configuring the module settings and default properties for a new container, <strong>add a container</strong> on the <a href=":url">container management page</a>.', [':url' => Url::fromRoute('entity.google_tag_container.collection')->toString()]);
 
     $form['instruction'] = [
       '#type' => 'markup',

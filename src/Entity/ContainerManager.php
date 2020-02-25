@@ -2,8 +2,7 @@
 
 namespace Drupal\google_tag\Entity;
 
-use Drupal\google_tag\Entity\ContainerManagerInterface;
-
+// use Drupal\google_tag\Entity\ContainerManagerInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -35,7 +34,7 @@ class ContainerManager implements ContainerManagerInterface {
 
   /**
    * The file system.
-  *
+   *
    * @var \Drupal\Core\File\FileSystemInterface
    */
   protected $fileSystem;
@@ -49,7 +48,7 @@ class ContainerManager implements ContainerManagerInterface {
 
   /**
    * The logger.
-  *
+   *
    * @var \Psr\Log\LoggerInterface
    */
   protected $logger;

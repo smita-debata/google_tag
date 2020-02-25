@@ -2,7 +2,6 @@
 
 namespace Drupal\google_tag;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Condition\ConditionInterface;
 use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Executable\ExecutablePluginBase;

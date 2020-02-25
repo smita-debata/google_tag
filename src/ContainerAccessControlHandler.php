@@ -8,7 +8,6 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 // use Drupal\Core\Condition\ConditionAccessResolverTrait;
-use Drupal\Core\Condition\ConditionInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -89,8 +88,8 @@ class ContainerAccessControlHandler extends EntityAccessControlHandler implement
       return AccessResult::forbidden()->addCacheableDependency($entity);
     }
 
-   // @todo Why is this not default code for an entity that uses the condition
-   // plugin interface? Most of it applies generally.
+    // @todo Why is this not default code for an entity that uses the condition
+    // plugin interface? Most of it applies generally.
 
     // Store entity to have access in resolveConditions().
     /** @var \Drupal\google_tag\Entity\Container $entity */
@@ -165,7 +164,9 @@ class ContainerAccessControlHandler extends EntityAccessControlHandler implement
   }
 
   /**
-   * Override the resolveConditions() routine to avoid these calls:
+   * Override the resolveConditions() routine.
+   *
+   * Avoid these calls:
    *   $condition->execute()
    *   $this->executableManager->execute($this);
    * on plugins defined by this module.
