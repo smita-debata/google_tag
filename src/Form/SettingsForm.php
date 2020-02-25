@@ -159,6 +159,10 @@ class SettingsForm extends ConfigFormBase {
     $config->save();
 
     parent::submitForm($form, $form_state);
+    // @todo Only display if a container exists?
+    $message = 'Changes to default container settings and insertion conditions <strong>only apply to new containers</strong>. To modify settings for existing containers, click the container management link below.';
+    $args = ['%directory' => $old_uri . '/google_tag'];
+    $this->messenger()->addWarning($this->t($message, $args));
 
     $new_uri = $config->get('uri');
     if ($old_uri != $new_uri) {
