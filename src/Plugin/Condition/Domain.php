@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @Condition(
  *   id = "gtag_domain",
  *   label = @Translation("Domain"),
- *   context = {
+ *   context_definitions = {
  *     "entity:domain" = @ContextDefinition("entity:domain", label = @Translation("Domain"), required = TRUE)
  *   }
  * )

@@ -35,6 +35,8 @@ abstract class GTMTestBase extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected function setUp() {
+    // @todo Property first defined in drupal 8.8.0, but tests run on 8.9.x.
+    $this->defaultTheme = 'stark';
     parent::setUp();
     $this->basePath = \Drupal::config('google_tag.settings')->get('uri');
   }
