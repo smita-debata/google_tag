@@ -15,7 +15,10 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *
  * @ConfigEntityType(
  *   id = "google_tag_container",
- *   label = @Translation("Container configuration"),
+ *   label = @Translation("Container"),
+ *   label_singular = @Translation("container"),
+ *   label_plural = @Translation("containers"),
+ *   label_collection = @Translation("Containers"),
  *   handlers = {
  *     "storage" = "Drupal\Core\Config\Entity\ConfigEntityStorage",
  *     "list_builder" = "Drupal\google_tag\ContainerListBuilder",

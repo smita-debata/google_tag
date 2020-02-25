@@ -66,6 +66,13 @@ abstract class ConditionBase extends ExecutablePluginBase implements ConditionIn
   protected $options = [];
 
   /**
+   * The selected options (for the summary message).
+   *
+   * @var array
+   */
+  protected $values = [];
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {

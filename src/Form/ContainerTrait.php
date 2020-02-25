@@ -7,6 +7,20 @@ use Drupal\Core\Form\FormStateInterface;
 trait ContainerTrait {
 
   /**
+   * The container entity.
+   *
+   * @var \Drupal\google_tag\Entity\Container
+   */
+  protected $container;
+
+  /**
+   * The property prefix that allows reuse by container and settings forms.
+   *
+   * @var string
+   */
+  protected $prefix;
+
+  /**
    * Fieldset builder for the container settings form.
    */
   public function advancedFieldset(FormStateInterface &$form_state) {

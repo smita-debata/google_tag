@@ -32,6 +32,34 @@ abstract class GTMTestBase extends BrowserTestBase {
   protected $types = ['script', 'noscript'];
 
   /**
+   * The snippet base URI.
+   *
+   * @var string
+   */
+  protected $basePath;
+
+  /**
+   * The admin user.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $adminUser;
+
+  /**
+   * The non-admin user.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $nonAdminUser;
+
+  /**
+   * The test variables.
+   *
+   * @var array
+   */
+  protected $variables = [];
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -59,7 +87,7 @@ abstract class GTMTestBase extends BrowserTestBase {
       $this->checkSnippetFiles();
       $this->checkPageResponse();
     }
-    catch (Exception $e) {
+    catch (\Exception $e) {
       parent::assertTrue(TRUE, t('Inside CATCH block'));
       watchdog_exception('gtm_test', $e);
     }
@@ -172,13 +200,12 @@ abstract class GTMTestBase extends BrowserTestBase {
       $text = 'Created @count snippet files for %container container based on configuration.';
       $args = array('@count' => 3, '%container' => $variables->label);
       $text = t($text, $args);
-      $message = 'Found snippet confirmation message in page response';
-      $this->assertRaw($text, $message);
+      $this->assertSession()->responseContains($text);
 
       $text = 'Created @count snippet files for @container container based on configuration.';
       $args = array('@count' => 3, '@container' => $variables->label);
       $text = t($text, $args);
-      $this->assertText($text, $message);
+      $this->assertSession()->pageTextContains($text);
     }
   }
 

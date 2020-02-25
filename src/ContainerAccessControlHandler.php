@@ -44,6 +44,13 @@ class ContainerAccessControlHandler extends EntityAccessControlHandler implement
   protected $contextRepository;
 
   /**
+   * The container entity for which to check access.
+   *
+   * @var \Drupal\google_tag\Entity\Container
+   */
+  protected $entity;
+
+  /**
    * Constructs a container access control handler.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type

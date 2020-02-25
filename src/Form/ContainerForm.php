@@ -34,13 +34,6 @@ class ContainerForm extends EntityForm {
   protected $contextRepository;
 
   /**
-   * The container entity.
-   *
-   * @var \Drupal\google_tag\Entity\Container
-   */
-  protected $container;
-
-  /**
    * {@inheritdoc}
    */
   public function getFormId() {
