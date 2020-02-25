@@ -110,14 +110,14 @@ class SettingsForm extends ConfigFormBase {
     $fieldset['rebuild_snippets'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Recreate snippets on cache rebuild'),
-      '#description' => $this->t('If checked, then the JavaScript snippet files will be created during a cache rebuild. This is <strong>recommended on production sites</strong>.'),
+      '#description' => $this->t('If checked, then the JavaScript snippet files will be created during a cache rebuild. This is <strong>recommended on production sites</strong>. If not checked, any missing snippet files will be created during a page response.'),
       '#default_value' => $config->get('rebuild_snippets'),
     ];
 
     $fieldset['flush_snippets'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Flush snippet directory on cache rebuild'),
-      '#description' => $this->t('If checked, then the snippet directory will be deleted and recreated during a cache rebuild. If not checked, then manual intervention may be required to tidy up the snippet directory (e.g. remove snippet files for a deleted container).'),
+      '#description' => $this->t('If checked, then the snippet directory will be deleted during a cache rebuild. If not checked, then manual intervention may be required to tidy up the snippet directory (e.g. remove snippet files for a deleted container).'),
       '#default_value' => $config->get('flush_snippets'),
     ];
 
