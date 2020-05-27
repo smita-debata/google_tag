@@ -136,7 +136,9 @@ class ContainerManager implements ContainerManagerInterface {
    *   The entity ID array.
    */
   public function loadContainerIDs() {
-    return \Drupal::entityQuery('google_tag_container')
+    return $this->entityTypeManager
+      ->getStorage('google_tag_container')
+      ->getQuery()
       ->condition('status', 1)
       ->sort('weight')
       ->execute();

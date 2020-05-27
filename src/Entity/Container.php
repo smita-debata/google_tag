@@ -444,7 +444,7 @@ EOS;
     else {
       $request = \Drupal::request();
       $current_path = \Drupal::service('path.current');
-      $alias_manager = \Drupal::service('path.alias_manager');
+      $alias_manager = \Drupal::service('path_alias.manager');
       $path_matcher = \Drupal::service('path.matcher');
       // @todo Are not some paths case sensitive???
       // Compare the lowercase path alias (if any) and internal path.

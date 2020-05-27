@@ -63,10 +63,9 @@ abstract class GTMTestBase extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected function setUp() {
-    // @todo Property first defined in drupal 8.8.0, but tests run on 8.9.x.
     $this->defaultTheme = 'stark';
     parent::setUp();
-    $this->basePath = \Drupal::config('google_tag.settings')->get('uri');
+    $this->basePath = $this->config('google_tag.settings')->get('uri');
   }
 
   /**
@@ -102,7 +101,7 @@ abstract class GTMTestBase extends BrowserTestBase {
   protected function modifySettings() {
     // Modify default settings.
     // These should propagate to each container created in test.
-    $config = \Drupal::service('config.factory')->getEditable('google_tag.settings');
+    $config = $this->config('google_tag.settings');
     $settings = $config->get();
     unset($settings['_core']);
     $settings['flush_snippets'] = 1;
@@ -149,7 +148,7 @@ abstract class GTMTestBase extends BrowserTestBase {
       $container->save();
 
       // Create snippet files.
-      $manager = \Drupal::service('google_tag.container_manager');
+      $manager = $this->container->get('google_tag.container_manager');
       $manager->createAssets($container);
     }
   }
@@ -161,12 +160,12 @@ abstract class GTMTestBase extends BrowserTestBase {
     // Delete containers.
     foreach ($this->variables as $key => $variables) {
       // Also exposed as \Drupal::entityTypeManager().
-      $container = \Drupal::service('entity_type.manager')->getStorage('google_tag_container')->load($key);
+      $container = $this->container->get('entity_type.manager')->getStorage('google_tag_container')->load($key);
       $container->delete();
     }
 
     // Confirm no containers.
-    $manager = \Drupal::service('google_tag.container_manager');
+    $manager = $this->container->get('google_tag.container_manager');
     $ids = $manager->loadContainerIDs();
     $message = 'No containers found after delete';
     parent::assertTrue(empty($ids), $message);
@@ -174,11 +173,11 @@ abstract class GTMTestBase extends BrowserTestBase {
     // @todo Next statement will not delete files as containers are gone.
     // $manager->createAllAssets();
     // Delete snippet files.
-    $directory = \Drupal::config('google_tag.settings')->get('uri');
-    if (\Drupal::config('google_tag.settings')->get('flush_snippets')) {
+    $directory = $this->config('google_tag.settings')->get('uri');
+    if ($this->config('google_tag.settings')->get('flush_snippets')) {
       if (!empty($directory)) {
         // Remove any stale files (e.g. module update or machine name change).
-        \Drupal::service('file_system')->deleteRecursive($directory . '/google_tag');
+        $this->container->get('file_system')->deleteRecursive($directory . '/google_tag');
       }
     }
 
@@ -266,7 +265,7 @@ abstract class GTMTestBase extends BrowserTestBase {
    * Verify the tag in page response.
    */
   protected function verifyScriptTag($realpath) {
-    $query_string = \Drupal::state()->get('system.css_js_query_string') ?: '0';
+    $query_string = $this->container->get('state')->get('system.css_js_query_string') ?: '0';
     $text = "src=\"$realpath?$query_string\"";
     $this->assertSession()->responseContains($text);
 
