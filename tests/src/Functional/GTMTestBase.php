@@ -183,7 +183,7 @@ abstract class GTMTestBase extends BrowserTestBase {
 
     // Confirm no snippet files.
     $message = 'No snippet files found after delete';
-    parent::assertTrue(!is_dir($directory . '/google_tag'), $message);
+    parent::assertDirectoryNotExists($directory . '/google_tag', $message);
   }
 
   /**
