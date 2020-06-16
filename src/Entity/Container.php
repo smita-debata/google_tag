@@ -256,7 +256,6 @@ class Container extends ConfigEntityBase implements ConfigEntityInterface, Entit
    */
   protected function scriptSnippet() {
     // Gather data.
-    $compact = \Drupal::config('google_tag.settings')->get('compact_snippet');
     $container_id = $this->variableClean('container_id');
     $data_layer = $this->variableClean('data_layer');
     $query = $this->environmentQuery();
@@ -264,7 +263,6 @@ class Container extends ConfigEntityBase implements ConfigEntityInterface, Entit
     // Build script snippet.
     $script = <<<EOS
 (function(w,d,s,l,i){
-
   w[l]=w[l]||[];
   w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
   var f=d.getElementsByTagName(s)[0];
@@ -273,13 +271,9 @@ class Container extends ConfigEntityBase implements ConfigEntityInterface, Entit
   j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl+'$query';
   j.async=true;
   f.parentNode.insertBefore(j,f);
-
 })(window,document,'script','$data_layer','$container_id');
 EOS;
-    if ($compact) {
-      $script = str_replace(["\n", '  '], '', $script);
-    }
-    return $script;
+    return $this->compactSnippet($script);
   }
 
   /**
@@ -290,7 +284,6 @@ EOS;
    */
   protected function noscriptSnippet() {
     // Gather data.
-    $compact = \Drupal::config('google_tag.settings')->get('compact_snippet');
     $container_id = $this->variableClean('container_id');
     $query = $this->environmentQuery();
 
@@ -299,10 +292,7 @@ EOS;
 <noscript aria-hidden="true"><iframe src="https://www.googletagmanager.com/ns.html?id=$container_id$query"
  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 EOS;
-    if ($compact) {
-      $noscript = str_replace("\n", '', $noscript);
-    }
-    return $noscript;
+    return $this->compactSnippet($noscript, ["\n"]);
   }
 
   /**
@@ -313,7 +303,6 @@ EOS;
    */
   protected function dataLayerSnippet() {
     // Gather data.
-    $compact = \Drupal::config('google_tag.settings')->get('compact_snippet');
     $data_layer = $this->variableClean('data_layer');
     $whitelist = $this->get('whitelist_classes');
     $blacklist = $this->get('blacklist_classes');
@@ -337,16 +326,11 @@ EOS;
       $classes = json_encode($classes);
       $script = <<<EOS
 (function(w,l){
-
   w[l]=w[l]||[];
   w[l].push($classes);
-
 })(window,'$data_layer');
 EOS;
-      if ($compact) {
-        $script = str_replace(["\n", '  '], '', $script);
-      }
-      return $script;
+      return $this->compactSnippet($script);
     }
   }
 
@@ -380,6 +364,22 @@ EOS;
    */
   public function variableClean($variable) {
     return trim(json_encode($this->get($variable)), '"');
+  }
+
+  /**
+   * Returns the compacted snippet.
+   *
+   * @param string $snippet
+   *   The JavaScript snippet.
+   * @param array $search
+   *   The array of strings to replace with blank.
+   *
+   * @return string
+   *   The compacted snippet.
+   */
+  protected function compactSnippet($snippet, array $search = ["\n", '  ']) {
+    $compact = \Drupal::config('google_tag.settings')->get('compact_snippet');
+    return $compact ? str_replace($search, '', $snippet) : $snippet;
   }
 
   /**
