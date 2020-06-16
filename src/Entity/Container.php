@@ -313,6 +313,7 @@ EOS;
    */
   protected function dataLayerSnippet() {
     // Gather data.
+    $compact = \Drupal::config('google_tag.settings')->get('compact_snippet');
     $data_layer = $this->variableClean('data_layer');
     $whitelist = $this->get('whitelist_classes');
     $blacklist = $this->get('blacklist_classes');
@@ -333,7 +334,18 @@ EOS;
 
     if ($classes) {
       // Build data layer snippet.
-      $script = "var $data_layer = [" . json_encode($classes) . '];';
+      $classes = json_encode($classes);
+      $script = <<<EOS
+(function(w,l){
+
+  w[l]=w[l]||[];
+  w[l].push($classes);
+
+})(window,'$data_layer');
+EOS;
+      if ($compact) {
+        $script = str_replace(["\n", '  '], '', $script);
+      }
       return $script;
     }
   }
