@@ -194,20 +194,9 @@ class ContainerManager implements ContainerManagerInterface {
       $types = $include_classes ? ['data_layer', 'script'] : ['script'];
 
       // Add data_layer and script snippets to head (no longer by default).
-      if ($include_script_as_file) {
-        foreach ($types as $type) {
-          // @todo Will it matter if file is empty?
-          // @todo Check config for the whitelist and blacklist classes before adding.
-          $attachments['#attached']['html_head'][] = $container->fileTag($type, $weight++);
-        }
-      }
-      else {
-        foreach ($types as $type) {
-          // @see drupal_get_js() in 7.x core.
-          // For inline JavaScript to validate as XHTML, all JavaScript containing
-          // XHTML needs to be wrapped in CDATA.
-          $attachments['#attached']['html_head'][] = $container->inlineTag($type, $weight++);
-        }
+      $function = $include_script_as_file ? 'fileTag' : 'inlineTag';
+      foreach ($types as $type) {
+        $attachments['#attached']['html_head'][] = $container->$function($type, $weight++);
       }
     }
   }
