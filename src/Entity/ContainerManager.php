@@ -3,6 +3,8 @@
 namespace Drupal\google_tag\Entity;
 
 // use Drupal\google_tag\Entity\ContainerManagerInterface;
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -26,11 +28,11 @@ class ContainerManager implements ContainerManagerInterface {
   protected $entityTypeManager;
 
   /**
-   * The module handler.
+   * The module configuration.
    *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $moduleHandler;
+  protected $config;
 
   /**
    * The file system.
@@ -38,6 +40,13 @@ class ContainerManager implements ContainerManagerInterface {
    * @var \Drupal\Core\File\FileSystemInterface
    */
   protected $fileSystem;
+
+  /**
+   * The cache backend.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cache;
 
   /**
    * The messenger.
@@ -56,10 +65,11 @@ class ContainerManager implements ContainerManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, FileSystemInterface $file_system, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger_factory) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, FileSystemInterface $file_system, CacheBackendInterface $cache, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger_factory) {
     $this->entityTypeManager = $entity_type_manager;
-    $this->moduleHandler = $module_handler;
+    $this->config = $config_factory->get('google_tag.settings');
     $this->fileSystem = $file_system;
+    $this->cache = $cache;
     $this->messenger = $messenger;
     $this->logger = $logger_factory->get('google_tag');
   }
@@ -68,7 +78,7 @@ class ContainerManager implements ContainerManagerInterface {
    * {@inheritdoc}
    */
   public function createAssets(ConfigEntityInterface $container) {
-    $include_script_as_file = \Drupal::config('google_tag.settings')->get('include_file');
+    $include_script_as_file = $this->config->get('include_file');
     if (!$include_script_as_file) {
       return $this->saveSnippets($container);
     }
@@ -94,7 +104,7 @@ class ContainerManager implements ContainerManagerInterface {
    * {@inheritdoc}
    */
   public function saveSnippets(ConfigEntityInterface $container) {
-    $include_script_as_file = \Drupal::config('google_tag.settings')->get('include_file');
+    $include_script_as_file = $this->config->get('include_file');
     // Save the altered snippets after hook_google_tag_snippets_alter().
     $result = TRUE;
     $snippets = $container->snippets();
@@ -108,7 +118,7 @@ class ContainerManager implements ContainerManagerInterface {
       else {
         // Write to cache (noscript is always inline).
         $cid = $container->snippetCid($type);
-        \Drupal::service('cache.data')->set($cid, $snippet, CACHE::PERMANENT, $container->getCacheTags());
+        $this->cache->set($cid, $snippet, CACHE::PERMANENT, $container->getCacheTags());
       }
     }
     $args = ['@count' => count($snippets), '%container' => $container->get('label')];
@@ -175,7 +185,7 @@ class ContainerManager implements ContainerManagerInterface {
       }
 
       static $weight = 9;
-      $include_script_as_file = \Drupal::config('google_tag.settings')->get('include_file');
+      $include_script_as_file = $this->config->get('include_file');
       $include_classes = $container->get('include_classes');
       // @todo Only want one data_layer snippet even with multiple containers.
       // If user sorts containers such that the first does not define the data
@@ -238,8 +248,8 @@ class ContainerManager implements ContainerManagerInterface {
    * {@inheritdoc}
    */
   public function deleteAllAssets() {
-    if (\Drupal::config('google_tag.settings')->get('flush_snippets')) {
-      $directory = \Drupal::config('google_tag.settings')->get('uri');
+    if ($this->config->get('flush_snippets')) {
+      $directory = $this->config->get('uri');
       if (!empty($directory)) {
         // Remove any stale files (e.g. module update or machine name change).
         return $this->fileSystem->deleteRecursive($directory . '/google_tag');
@@ -292,7 +302,7 @@ class ContainerManager implements ContainerManagerInterface {
    * {@inheritdoc}
    */
   public function findAssets(ConfigEntityInterface $container) {
-    $include_script_as_file = \Drupal::config('google_tag.settings')->get('include_file');
+    $include_script_as_file = $this->config->get('include_file');
     $include_classes = $container->get('include_classes');
     $types = $include_classes ? ['data_layer', 'script', 'noscript'] : ['script', 'noscript'];
 
@@ -304,8 +314,7 @@ class ContainerManager implements ContainerManagerInterface {
         }
       }
       else {
-        $cid = $container->snippetCid($type);
-        if (!$cache = \Drupal::service('cache.data')->get($cid)) {
+        if (!$cache = $this->cache->get($container->snippetCid($type))) {
           return FALSE;
         }
       }
