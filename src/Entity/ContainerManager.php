@@ -68,6 +68,11 @@ class ContainerManager implements ContainerManagerInterface {
    * {@inheritdoc}
    */
   public function createAssets(ConfigEntityInterface $container) {
+    $include_script_as_file = \Drupal::config('google_tag.settings')->get('include_file');
+    if (!$include_script_as_file) {
+      return $this->saveSnippets($container);
+    }
+
     $result = TRUE;
     $directory = $container->snippetDirectory();
     if (!is_dir($directory) || !_google_tag_is_writable($directory) || !_google_tag_is_executable($directory)) {
@@ -89,13 +94,22 @@ class ContainerManager implements ContainerManagerInterface {
    * {@inheritdoc}
    */
   public function saveSnippets(ConfigEntityInterface $container) {
+    $include_script_as_file = \Drupal::config('google_tag.settings')->get('include_file');
     // Save the altered snippets after hook_google_tag_snippets_alter().
     $result = TRUE;
     $snippets = $container->snippets();
     foreach ($snippets as $type => $snippet) {
-      $uri = $container->snippetURI($type);
-      $path = $this->fileSystem->saveData($snippet, $uri, FileSystemInterface::EXISTS_REPLACE);
-      $result = !$path ? FALSE : $result;
+      if ($include_script_as_file && $type != 'noscript') {
+        // Write to file.
+        $uri = $container->snippetURI($type);
+        $path = $this->fileSystem->saveData($snippet, $uri, FileSystemInterface::EXISTS_REPLACE);
+        $result = !$path ? FALSE : $result;
+      }
+      else {
+        // Write to cache (noscript is always inline).
+        $cid = $container->snippetCid($type);
+        \Drupal::service('cache.data')->set($cid, $snippet, CACHE::PERMANENT, $container->getCacheTags());
+      }
     }
     $args = ['@count' => count($snippets), '%container' => $container->get('label')];
     if (!$result) {
@@ -252,7 +266,10 @@ class ContainerManager implements ContainerManagerInterface {
     $include_classes = $container->get('include_classes');
     $types = $include_classes ? ['data_layer', 'script', 'noscript'] : ['script', 'noscript'];
     $directory = $container->snippetDirectory();
-    $result = $this->fileSystem->deleteRecursive($directory);
+    $result = TRUE;
+    if (!empty($directory) && is_dir($directory)) {
+      $result = $this->fileSystem->deleteRecursive($directory);
+    }
 
     $args = ['@count' => count($types), '%container' => $container->get('label')];
     if (!$result) {
@@ -275,14 +292,25 @@ class ContainerManager implements ContainerManagerInterface {
    * {@inheritdoc}
    */
   public function findAssets(ConfigEntityInterface $container) {
+    $include_script_as_file = \Drupal::config('google_tag.settings')->get('include_file');
     $include_classes = $container->get('include_classes');
     $types = $include_classes ? ['data_layer', 'script', 'noscript'] : ['script', 'noscript'];
-    $result = TRUE;
+
     foreach ($types as $type) {
-      $uri = $container->snippetURI($type);
-      $result = !is_file($uri) ? FALSE : $result;
+      if ($include_script_as_file && $type != 'noscript') {
+        $uri = $container->snippetURI($type);
+        if (!is_file($uri)) {
+          return FALSE;
+        }
+      }
+      else {
+        $cid = $container->snippetCid($type);
+        if (!$cache = \Drupal::service('cache.data')->get($cid)) {
+          return FALSE;
+        }
+      }
     }
-    return $result;
+    return TRUE;
   }
 
 }

@@ -530,6 +530,19 @@ EOS;
   }
 
   /**
+   * Returns the snippet cache ID for a snippet type.
+   *
+   * @param string $type
+   *   The snippet type.
+   *
+   * @return string
+   *   The snippet cache ID.
+   */
+  public function snippetCid($type) {
+    return "google_tag:$type:{$this->id()}";
+  }
+
+  /**
    * Returns tag array for the snippet type.
    *
    * @param string $type
@@ -568,9 +581,7 @@ EOS;
    *   The tag array.
    */
   public function inlineTag($type, $weight) {
-    $uri = $this->snippetURI($type);
-    $url = \Drupal::service('file_system')->realpath($uri);
-    $contents = @file_get_contents($url);
+    $contents = $this->getSnippetContents($type);
     $attachment = [
       $contents ? [
         '#type' => 'html_tag',
@@ -606,9 +617,7 @@ EOS;
     // As markup, core removes the 'style' attribute from the noscript snippet.
     // With the inline template type, core does not alter the noscript snippet.
 
-    $uri = $this->snippetURI($type);
-    $url = \Drupal::service('file_system')->realpath($uri);
-    $contents = @file_get_contents($url);
+    $contents = $this->getSnippetContents($type);
     $attachment = $contents ? [
       "google_tag_{$type}_tag__{$this->id()}" => [
         '#type' => 'inline_template',
@@ -617,6 +626,20 @@ EOS;
       ],
     ] : [];
     return $attachment;
+  }
+
+  /**
+   * Returns the snippet contents for the snippet type.
+   *
+   * @param string $type
+   *   The snippet type.
+   *
+   * @return string
+   *   The snippet contents.
+   */
+  public function getSnippetContents($type) {
+    $cache = \Drupal::service('cache.data')->get($this->snippetCid($type));
+    return $cache ? $cache->data : '';
   }
 
   /**
