@@ -118,7 +118,7 @@ class ContainerManager implements ContainerManagerInterface {
       else {
         // Write to cache (noscript is always inline).
         $cid = $container->snippetCid($type);
-        $this->cache->set($cid, $snippet, CACHE::PERMANENT, $container->getCacheTags());
+        $this->cache->set($cid, $snippet, CacheBackendInterface::CACHE_PERMANENT, $container->getCacheTags());
       }
     }
     $args = ['@count' => count($snippets), '%container' => $container->get('label')];
