@@ -201,7 +201,8 @@ abstract class GTMTestBase extends BrowserTestBase {
 
     foreach ($this->variables as $key => $variables) {
       $edit = (array) $variables;
-      $this->drupalPostForm('/admin/config/system/google-tag/add', $edit, 'Save');
+      $this->drupalGet('/admin/config/system/google-tag/add');
+      $this->submitForm($edit, 'Save');
 
       $text = 'Created @count snippet files for %container container based on configuration.';
       $args = ['@count' => 3, '%container' => $variables->label];
