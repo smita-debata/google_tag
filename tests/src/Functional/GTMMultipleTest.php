@@ -82,7 +82,14 @@ class GTMMultipleTest extends GTMTestBase {
       parent::assertTrue(TRUE, $message);
       foreach ($this->types as $type) {
         $uri = "$this->basePath/google_tag/{$key}/google_tag.$type.js";
-        $url = file_url_transform_relative(file_create_url($uri));
+        // Remove the if-else when core_version_requirement >= 9.3 for this module.
+        if (\Drupal::hasService('file_url_generator')) {
+          $generator = \Drupal::service('file_url_generator');
+          $url = $generator->transformRelative($generator->generateAbsoluteString($uri));
+        }
+        else {
+          $url = file_url_transform_relative(file_create_url($uri));
+        }
         $function = "verify{$type}Tag";
         $this->$function($url, $this->variables[$key]);
       }

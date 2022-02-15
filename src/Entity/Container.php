@@ -555,7 +555,14 @@ EOS;
    */
   public function fileTag($type, $weight) {
     $uri = $this->snippetURI($type);
-    $url = file_url_transform_relative(file_create_url($uri));
+    // Remove the if-else when core_version_requirement >= 9.3 for this module.
+    if (\Drupal::hasService('file_url_generator')) {
+      $generator = \Drupal::service('file_url_generator');
+      $url = $generator->transformRelative($generator->generateAbsoluteString($uri));
+    }
+    else {
+      $url = file_url_transform_relative(file_create_url($uri));
+    }
     $query_string = \Drupal::state()->get('system.css_js_query_string') ?: '0';
     $attachment = [
       [
