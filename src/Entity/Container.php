@@ -289,7 +289,7 @@ EOS;
 
     // Build noscript snippet.
     $noscript = <<<EOS
-<noscript aria-hidden="true"><iframe src="https://www.googletagmanager.com/ns.html?id=$container_id$query"
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=$container_id$query"
  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 EOS;
     return $this->compactSnippet($noscript, ["\n"]);
