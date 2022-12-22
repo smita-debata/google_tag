@@ -110,7 +110,7 @@ class GTMContainerManager implements ContainerManagerInterface {
         $containers[] = new GTMContainer((array) $object);
       }
       usort($containers, function ($a, $b) {
-        return (int) $b->weight < (int) $a->weight;
+        return (int) $a->weight - (int) $b->weight;
       });
     }
     return $containers;

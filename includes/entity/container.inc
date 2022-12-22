@@ -574,7 +574,7 @@ EOS;
   public function inlineTag($type, $weight) {
     $uri = $this->snippetURI($type);
     $url = drupal_realpath($uri);
-    $contents = @file_get_contents($url);
+    $contents = $url ? @file_get_contents($url) : FALSE;
     drupal_add_js($contents, array('type' => 'inline', 'group' => JS_LIBRARY * 2, 'requires_jquery' => FALSE));
 
     // This approach uses weight only but does not group the script tags so
@@ -616,7 +616,7 @@ EOS;
     // TRUE outputs as aria-hidden="1"
     $uri = $this->snippetURI($type);
     $url = drupal_realpath($uri);
-    $contents = @file_get_contents($url);
+    $contents = $url ? @file_get_contents($url) : FALSE;
     $attachment = $contents ? array(
       "google_tag_{$type}_tag__{$this->id()}" => array(
         '#type' => 'html_tag',
