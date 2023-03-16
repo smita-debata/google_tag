@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Provides google_tag install, update, and uninstall functions.
+ */
+
+/**
+ * Update permissions from old google tag module.
+ *
+ * @param mixed $sandbox
+ *   Sandbox.
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function google_tag_update_8200(&$sandbox) {
+  $roles = \Drupal::entityTypeManager()->getStorage('user_role')->loadMultiple();
+  /** @var \Drupal\user\RoleInterface $role */
+  foreach ($roles as $role) {
+    if ($role->hasPermission('administer google tag manager')) {
+      $role->revokePermission('administer google tag manager');
+      $role->grantPermission('administer google_tag_container');
+      $role->save();
+    }
+  }
+}

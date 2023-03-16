@@ -1,0 +1,5 @@
+name: Google Tag
+description: Sets up Google Tag
+type: module
+core_version_requirement: ^9.5 || ^10
+configure: google_tag.settings_form
