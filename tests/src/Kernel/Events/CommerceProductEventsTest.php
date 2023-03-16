@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Commerce product events test.
+ *
+ * @group google_tag
  */
 final class CommerceProductEventsTest extends CommerceKernelTestBase {
 

@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Generate lead event test.
+ *
+ * @group google_tag
  */
 final class GenerateLeadEventTest extends GoogleTagTestCase {
 

@@ -14,6 +14,7 @@ use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
  * Tests commerce refund event.
  *
  * @requires module commerce_order
+ * @group google_tag
  */
 final class CommerceRefundEventTest extends OrderKernelTestBase {
 

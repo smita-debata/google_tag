@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Login event test.
+ *
+ * @group google_tag
  */
 final class LoginEventTest extends GoogleTagTestCase {
 

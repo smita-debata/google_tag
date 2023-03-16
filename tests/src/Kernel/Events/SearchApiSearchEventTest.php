@@ -10,6 +10,8 @@ use Drupal\Tests\google_tag\Kernel\GoogleTagTestCase;
 
 /**
  * Search Api search event test.
+ *
+ * @group google_tag
  */
 final class SearchApiSearchEventTest extends GoogleTagTestCase {
 

@@ -13,6 +13,7 @@ use Drupal\Tests\commerce_cart\Kernel\CartKernelTestBase;
  * Commerce carts add/removal events test.
  *
  * @requires module commerce_cart
+ * @group google_tag
  */
 final class CommerceCartEventsTest extends CartKernelTestBase {
 

@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @coversDefaultClass \Drupal\google_tag\TagContainerResolver
+ * @group google_tag
  */
 final class TagContainerResolverTest extends GoogleTagTestCase {
 

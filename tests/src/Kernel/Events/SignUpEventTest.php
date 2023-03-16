@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Signup event test.
+ *
+ * @group google_tag
  */
 final class SignUpEventTest extends GoogleTagTestCase {
 

@@ -9,6 +9,8 @@ use Drupal\google_tag\Entity\TagContainer;
 
 /**
  * Tests page attachment hooks.
+ *
+ * @group google_tag
  */
 final class PageAttachmentsHookTest extends GoogleTagTestCase {
 

@@ -9,6 +9,7 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 
 /**
  * @coversDefaultClass \Drupal\google_tag\GoogleTagController
+ * @group google_tag
  */
 final class GoogleTagControllerTest extends GoogleTagTestCase {
 

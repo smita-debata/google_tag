@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Commerce checkout event test.
  *
  * @requires module commerce_checkout
+ * @group google_tag
  */
 final class CommerceCheckoutEventsTest extends OrderKernelTestBase {
 

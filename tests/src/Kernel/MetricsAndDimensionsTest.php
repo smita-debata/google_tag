@@ -9,6 +9,8 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * Tests metrics and dimensions.
+ *
+ * @group google_tag
  */
 final class MetricsAndDimensionsTest extends GoogleTagTestCase {
 

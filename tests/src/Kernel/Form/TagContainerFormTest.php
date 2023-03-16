@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @coversDefaultClass \Drupal\google_tag\Form\TagContainerForm
+ * @group google_tag
  */
 final class TagContainerFormTest extends GoogleTagTestCase {
 
