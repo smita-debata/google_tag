@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @WebformHandler(
  *   id = "google_tag_webform_purchase",
- *   label = @Translation("Google Tag: Purchase event")
+ *   label = @Translation("Google Tag: Purchase event"),
  *   category = @Translation("Google Tag"),
  *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_SINGLE,
  *   results = \Drupal\webform\Plugin\WebformHandlerInterface::RESULTS_IGNORED,
