@@ -53,4 +53,12 @@ abstract class GoogleTagTestCase extends KernelTestBase {
     return $response;
   }
 
+  protected function loadFixture(string $fixture_file, string $module_name = 'google_tag') {
+    $module_path = $this->container->get('module_handler')
+      ->getModule($module_name)
+      ->getPath();
+    $path = sprintf('%s/tests/fixtures/%s', $module_path, $fixture_file);
+    require $path;
+  }
+
 }

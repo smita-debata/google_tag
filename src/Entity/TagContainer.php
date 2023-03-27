@@ -13,8 +13,8 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * @ConfigEntityType(
  *   id = "google_tag_container",
  *   label = @Translation("Google Tag Container"),
- *   label_singular = @Translation("tag container"),
- *   label_plural = @Translation("tag containers"),
+ *   label_singular = @Translation("container"),
+ *   label_plural = @Translation("containers"),
  *   label_collection = @Translation("Google Tag containers"),
  *   handlers = {
  *     "list_builder" = "Drupal\google_tag\TagContainerListBuilder",
@@ -24,7 +24,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *     },
  *   },
  *   admin_permission = "administer google_tag_container",
- *   config_prefix = "tag_container",
+ *   config_prefix = "container",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
@@ -46,7 +46,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *     "delete-form" = "/admin/config/services/google-tag/manage/{google_tag_container}/delete",
  *     "enable" = "/admin/config/services/google-tag/manage/{google_tag_container}/enable",
  *     "disable" = "/admin/config/services/google-tag/manage/{google_tag_container}/disable",
- *     "collection" = "/admin/config/services/google-tag",
+ *     "collection" = "/admin/config/services/google-tag/containers",
  *   }
  * )
  */

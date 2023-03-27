@@ -9,6 +9,6 @@ google_tag.settings_form_tab:
   base_route: entity.google_tag_container.single_form
 
 google_tag.container_list_tab:
-  route_name: entity.google_tag_container.containers
+  route_name: entity.google_tag_container.collection
   title: Additional Tags
   base_route: entity.google_tag_container.single_form

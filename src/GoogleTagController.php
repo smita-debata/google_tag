@@ -10,6 +10,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\google_tag\Entity\TagContainer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -51,6 +52,34 @@ class GoogleTagController extends HtmlEntityFormController implements ContainerI
       $this->googleTagEntity = $tag_entities[$tag_entity];
     }
     return $this->getContentResult($request, $route_match);
+  }
+
+  /**
+   * Enables a Container object.
+   *
+   * @param \Drupal\google_tag\Entity\TagContainer $google_tag_container
+   *   The Container object to enable.
+   *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *   A redirect response to the google_tag_container listing page.
+   */
+  public function enable(TagContainer $google_tag_container) {
+    $google_tag_container->enable()->save();
+    return new RedirectResponse($google_tag_container->toUrl('collection', ['absolute' => TRUE])->toString());
+  }
+
+  /**
+   * Disables a Container object.
+   *
+   * @param \Drupal\google_tag\Entity\TagContainer $google_tag_container
+   *   The Container object to disable.
+   *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *   A redirect response to the google_tag_container listing page.
+   */
+  public function disable(TagContainer $google_tag_container) {
+    $google_tag_container->disable()->save();
+    return new RedirectResponse($google_tag_container->toUrl('collection', ['absolute' => TRUE])->toString());
   }
 
   /**

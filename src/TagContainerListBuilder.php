@@ -19,7 +19,7 @@ class TagContainerListBuilder extends ConfigEntityListBuilder {
   public function buildHeader() {
     $header['label'] = t('Label');
     $header['id'] = t('Machine name');
-    $header['container_id'] = t('Container ID');
+    $header['container_ids'] = t('Container ID(s)');
     $header['weight'] = t('Weight');
     return $header + parent::buildHeader();
   }
@@ -32,7 +32,7 @@ class TagContainerListBuilder extends ConfigEntityListBuilder {
     // @todo Add JS for drag handle on weight.
     $row['label'] = $entity->label();
     $row['id'] = $entity->id();
-    $row['container_id'] = $entity->get('container_id');
+    $row['container_ids'] = implode(', ', $entity->get('tag_container_ids'));
     $row['weight'] = $entity->get('weight');
     return $row + parent::buildRow($entity);
   }

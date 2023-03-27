@@ -9,7 +9,7 @@ google_tag.settings:
       type: string
       label: 'Default Google Tag Entity'
 
-google_tag.tag_container.*:
+google_tag.container.*:
   type: config_entity
   label: 'Google Tag settings container'
   mapping:
@@ -139,3 +139,9 @@ google_tag.advanced_settings.gtm:
     environment_token:
       type: string
       label: 'Environment token'
+
+condition.plugin.response_code:
+  type: condition.plugin
+  mapping:
+    response_codes:
+      type: string

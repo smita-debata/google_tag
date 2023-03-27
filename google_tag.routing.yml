@@ -18,7 +18,7 @@ google_tag.settings_form:
     _permission: 'administer google_tag_container'
 
 # container management
-entity.google_tag_container.containers:
+entity.google_tag_container.collection:
   path: '/admin/config/services/google-tag/containers'
   defaults:
     _entity_list: 'google_tag_container'
@@ -34,6 +34,22 @@ entity.google_tag_container.add_form:
     entity_type_id: 'google_tag_container' # 'entity.google_tag argument'
   requirements:
     _custom_access: '\Drupal\google_tag\GoogleTagController::addContainerAccess'
+
+entity.google_tag_container.enable:
+  path: '/admin/config/services/google-tag/manage/{google_tag_container}/enable'
+  defaults:
+    _controller: '\Drupal\google_tag\GoogleTagController::enable'
+    entity_type: 'google_tag_container'
+  requirements:
+    _permission: 'administer google_tag_container'
+
+entity.google_tag_container.disable:
+  path: '/admin/config/services/google-tag/manage/{google_tag_container}/disable'
+  defaults:
+    _controller: '\Drupal\google_tag\GoogleTagController::disable'
+    entity_type: 'google_tag_container'
+  requirements:
+    _permission: 'administer google_tag_container'
 
 entity.google_tag_container.edit_form:
   path: '/admin/config/services/google-tag/manage/{google_tag_container}'
