@@ -5,7 +5,8 @@
  * Provides google_tag install, update, and uninstall functions.
  */
 
-use Drupal\google_tag\Entity\TagContainer;
+use Drupal\google_tag\Migration\GoogleAnalyticsMigrator;
+use Drupal\google_tag\Migration\GoogleTagUpgradeManager;
 
 /**
  * Update permissions from old google tag module.
@@ -41,158 +42,61 @@ function google_tag_update_8200(&$sandbox) {
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
 function google_tag_update_8201(&$sandbox) {
-  $storage = \Drupal::entityTypeManager()->getStorage('google_tag_container');
-  $entity_ids = $storage->getQuery()
-    ->condition('status', 1)
-    ->sort('weight')
-    ->execute();
-  if (!$entity_ids) {
+  // Upgrade existing google tag 1.x entities if available.
+  $gt_upgrade_manager = new GoogleTagUpgradeManager(
+    \Drupal::service('plugin.manager.google_tag_event'),
+    \Drupal::service('plugin.manager.condition'),
+    \Drupal::service('config.factory'),
+    \Drupal::service('entity_type.manager')
+  );
+  $gt_upgrade_manager->upgradeGoogleTagEntities();
+}
+
+/**
+ * Implements hook_install().
+ */
+function google_tag_install() {
+  // Migrate available google analytics configuration.
+  if (!\Drupal::moduleHandler()->moduleExists('google_analytics')) {
     return;
   }
-  /** @var \Drupal\google_tag\Entity\TagContainer[] $entities */
-  $entities = $storage->loadMultiple($entity_ids);
-  $default_entity = '';
-  $gtag_settings = \Drupal::configFactory()->getEditable('google_tag.settings');
-  $existing_default_entity = $gtag_settings->get('default_google_tag_entity');
-  $use_collection = count($entities) > 1;
-  foreach ($entities as $entity) {
-    // First iteration.
-    if ($default_entity === '') {
-      $default_entity = $entity->id();
-    }
-    // Skip if it's a new entity.
-    if ($entity->get('tag_container_ids') !== []) {
-      continue;
-    }
-    // Convert container_id string into tag_container_ids array.
-    $entity->set('tag_container_ids', [$entity->get('container_id')]);
+  $ga_migrator = new GoogleAnalyticsMigrator(
+    \Drupal::service('plugin.manager.google_tag_event'),
+    \Drupal::service('plugin.manager.condition'),
+    \Drupal::service('config.factory'),
+    \Drupal::service('entity_type.manager')
+  );
+  $ga_migrator->migrateGaToGoogleTag();
+}
 
-    // Convert advanced settings from old to new format.
-    _google_tag_convert_gtm_settings($entity);
+/**
+ * Implements hook_requirements().
+ */
+function google_tag_requirements($phase) {
+  $requirements = [];
+  $incompatible = FALSE;
 
-    // Convert conditions.
-    _google_tag_convert_conditions($entity);
-
-    // Configure events.
-    $events = $entity->get('events');
-    if ($events === []) {
-      $event_data = [];
-      /** @var \Drupal\google_tag\GoogleTagEventManager $event_manager */
-      $event_manager = \Drupal::service('plugin.manager.google_tag_event');
-      $event_definitions = $event_manager->getDefinitions();
-      foreach (array_keys($event_definitions) as $event_id) {
-        /** @var \Drupal\google_tag\Plugin\GoogleTag\Event\GoogleTagEventInterface $event_plugin */
-        $event_plugin = $event_manager->createInstance($event_id, []);
-        $event_data[$event_id] = $event_plugin->getConfiguration();
+  if ($phase === 'update') {
+    $entities = \Drupal::entityTypeManager()->getStorage('google_tag_container')->loadMultiple();
+    if (\Drupal::moduleHandler()->moduleExists('google_analytics')) {
+      $ga_settings = \Drupal::config('google_analytics.settings');
+      $accounts = $ga_settings->get('account');
+      $metrics_dimensions = $ga_settings->get('custom.parameters');
+      if ($entities && $accounts !== '' && $metrics_dimensions !== []) {
+        $incompatible = TRUE;
       }
-      $entity->set('events', $event_data);
     }
-    $entity->save();
-  }
-  $new_gtag_settings['default_google_tag_entity'] = isset($existing_default_entity) && $existing_default_entity !== '' ? $existing_default_entity : $default_entity;
-  $new_gtag_settings['use_collection'] = $use_collection;
-  $gtag_settings->setData($new_gtag_settings)->save();
-}
-
-/**
- * Converts conditions for google tag entity.
- *
- * @param \Drupal\google_tag\Entity\TagContainer $entity
- *   Google tag entity.
- */
-function _google_tag_convert_conditions(TagContainer $entity) {
-  // Convert conditions.
-  // Get saved conditions.
-  $old_conditions = $entity->get('conditions');
-  $new_conditions = [];
-  $condition_definitions = \Drupal::service('plugin.manager.condition')->getDefinitions();
-  $negate_toggle = 'exclude_listed';
-  foreach ($old_conditions as $condition_id => $condition_config) {
-    // Only add to the config if condition plugin is available.
-    if (isset($condition_definitions[$condition_id])) {
-      $new_conditions[$condition_id] = $condition_config;
-      continue;
-    }
-    // Convert custom gtag_language into language condition.
-    if ($condition_id === 'gtag_language' && \Drupal::languageManager()->isMultilingual()) {
-      $gtag_language_config = $old_conditions['gtag_language'] ?? [];
-      $language_plugin = 'language';
-      $language_negate = $gtag_language_config['language_toggle'] !== $negate_toggle;
-      $langcodes = $gtag_language_config['language_list'] ?? [];
-      $langcodes = array_combine($langcodes, $langcodes);
-      $language_config = [
-        'id' => $language_plugin,
-        'langcodes' => $langcodes,
-        'negate' => $language_negate,
+    if ($incompatible) {
+      // @todo provide a drush command usage example here.
+      // Where users can choose between google_tag 1.x
+      // and google_analytics for migration.
+      $requirements['google_tag'] = [
+        'title' => t('Google Tag'),
+        'description' => t('In order to use Google Tag 2.x, you must decide the upgrade path between Google Tag 1.x and Google Analytics.'),
+        'severity' => REQUIREMENT_ERROR,
+        'value' => 'Google Tag 2.x is incompatible with Google Analytics while upgrading from 1.x.',
       ];
-      $language_config['context_mapping'] = $gtag_language_config['context_mapping'];
-      $new_conditions[$language_plugin] = $language_config;
     }
   }
-  // Convert roles, request paths, status code
-  // custom conditions from 1.x to actual condition plugins.
-  // Request path custom condition.
-  $request_negate = $entity->get('path_toggle') !== $negate_toggle;
-  $request_paths = $entity->get('path_list');
-  $request_path_plugin = 'request_path';
-  if ($request_paths !== '' && isset($condition_definitions[$request_path_plugin])) {
-    $request_path_config = [
-      'id' => $request_path_plugin,
-      'pages' => $request_paths,
-      'negate' => $request_negate,
-    ];
-    $new_conditions[$request_path_plugin] = $request_path_config;
-  }
-  // Response code custom condition.
-  $response_code_negate = $entity->get('status_toggle') !== $negate_toggle;
-  $response_codes = $entity->get('status_list');
-  $response_code_plugin = 'response_code';
-  if ($response_codes !== '' && isset($condition_definitions[$response_code_plugin])) {
-    $response_code_config = [
-      'id' => $response_code_plugin,
-      'response_codes' => $response_codes,
-      'negate' => $response_code_negate,
-    ];
-    $new_conditions[$response_code_plugin] = $response_code_config;
-  }
-  // Roles custom condition.
-  $roles_negate = $entity->get('role_toggle') !== $negate_toggle;
-  $roles = $entity->get('role_list');
-  $roles_plugin = 'user_role';
-  if ($roles !== [] && isset($condition_definitions[$roles_plugin])) {
-    $user_role_definition = $condition_definitions[$roles_plugin];
-    $context_definition = $user_role_definition['context_definitions']['user'];
-    $user_contexts = \Drupal::service('context.handler')->getMatchingContexts(
-      \Drupal::service('context.repository')->getAvailableContexts(),
-      $context_definition
-    );
-    $roles_config = [
-      'id' => $roles_plugin,
-      'roles' => $roles,
-      'negate' => $roles_negate,
-      'context_mapping' => [
-        'user' => array_key_first($user_contexts),
-      ],
-    ];
-    $new_conditions[$roles_plugin] = $roles_config;
-  }
-  $entity->set('conditions', $new_conditions);
-}
-
-/**
- * Converts advanced gtm settings.
- *
- * @param \Drupal\google_tag\Entity\TagContainer $entity
- *   Google tag entity.
- */
-function _google_tag_convert_gtm_settings(TagContainer $entity) {
-  $gtm_settings = [];
-  $gtm_settings['data_layer'] = $entity->get('data_layer') ?? 'dataLayer';
-  $gtm_settings['include_classes'] = $entity->get('include_classes') ?? FALSE;
-  $gtm_settings['allowlist_classes'] = $entity->get('whitelist_classes') ?? '';
-  $gtm_settings['blocklist_classes'] = $entity->get('blacklist_classes') ?? '';
-  $gtm_settings['include_environment'] = $entity->get('include_environment') ?? FALSE;
-  $gtm_settings['environment_id'] = $entity->get('environment_id') ?? '';
-  $gtm_settings['environment_token'] = $entity->get('environment_token') ?? '';
-  $entity->set('advanced_settings', ['gtm' => $gtm_settings]);
+  return $requirements;
 }

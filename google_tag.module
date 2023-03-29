@@ -46,6 +46,10 @@ function google_tag_module_implements_alter(&$implementations, $hook) {
     $group = $implementations['google_tag'];
     unset($implementations['google_tag']);
     $implementations['google_tag'] = $group;
+    // Unset google_analytics' hook implementation for page_attachments, if available.
+    if (isset($implementations['google_analytics'])) {
+      unset($implementations['google_analytics']);
+    }
   }
 }
 

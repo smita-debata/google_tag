@@ -1,6 +1,8 @@
 <?php
 
-namespace Drupal\Tests\google_tag\Kernel;
+namespace Drupal\Tests\google_tag\Kernel\Migrate;
+
+use Drupal\Tests\google_tag\Kernel\GoogleTagTestCase;
 
 /**
  * Tests hook update for migrating 1.x container entities to 2.x.
