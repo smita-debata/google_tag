@@ -48,7 +48,7 @@ class GoogleTagController extends HtmlEntityFormController implements ContainerI
     $tag_entities = $this->entityTypeManager->getStorage($entity_type_id)->loadMultiple();
     // Only one Google Tag exists, load it.
     // @todo There might be a better logic path here.
-    if ($tag_entity && $tag_entities[$tag_entity] instanceof TagContainer) {
+    if ($tag_entity && isset($tag_entities[$tag_entity])) {
       $this->googleTagEntity = $tag_entities[$tag_entity];
     }
     return $this->getContentResult($request, $route_match);

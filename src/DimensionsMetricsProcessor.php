@@ -53,10 +53,7 @@ final class DimensionsMetricsProcessor {
       if ($custom['value'] === '') {
         continue;
       }
-      if ($custom['type'] === 'metric') {
-        if (!is_numeric($custom['value'])) {
-          continue;
-        }
+      if (($custom['type'] === 'metric') && is_numeric($custom['value'])) {
         $custom['value'] = (float) $custom['value'];
       }
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\google_tag\Plugin\GoogleTag\Event;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
 
 /**
  * Login event plugin.
@@ -18,7 +17,7 @@ use Drupal\Core\Plugin\PluginFormInterface;
  *   dependency = "user"
  * )
  */
-final class LoginEvent extends EventBase implements PluginFormInterface {
+final class LoginEvent extends ConfigurableEventBase {
 
   /**
    * {@inheritDoc}
@@ -33,6 +32,7 @@ final class LoginEvent extends EventBase implements PluginFormInterface {
    * {@inheritDoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildConfigurationForm($form, $form_state);
     $form['method'] = [
       '#type' => 'textfield',
       '#title' => 'Login Method',
@@ -45,7 +45,8 @@ final class LoginEvent extends EventBase implements PluginFormInterface {
   /**
    * {@inheritDoc}
    */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
+  protected function getTokenElements(): array {
+    return ['method'];
   }
 
   /**

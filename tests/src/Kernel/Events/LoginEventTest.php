@@ -23,6 +23,7 @@ final class LoginEventTest extends GoogleTagTestCase {
    * @testWith [""]
    *           ["Drupal"]
    *           ["CMS"]
+   *           ["[site:url]"]
    *           [null]
    */
   public function testEvent(?string $method): void {
@@ -64,6 +65,9 @@ final class LoginEventTest extends GoogleTagTestCase {
       $event_data = [];
     }
     else {
+      if ($method && str_starts_with($method, '[')) {
+        $method = $this->container->get('token')->replace($method, [], ['clear' => TRUE]);
+      }
       $event_data = [
         'method' => $method ?? 'CMS',
       ];

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\google_tag\Plugin\GoogleTag\Event;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\user\UserInterface;
 
 /**
@@ -18,10 +17,8 @@ use Drupal\user\UserInterface;
  *   description = @Translation("This event indicates that a user has signed up for an account."),
  *   dependency = "user"
  * )
- *
- * @todo plugin configuration form or something must state this only works if register != REGISTER_ADMINISTRATORS_ONLY
  */
-final class SignUpEvent extends EventBase implements PluginFormInterface {
+final class SignUpEvent extends ConfigurableEventBase {
 
   /**
    * {@inheritDoc}
@@ -37,6 +34,7 @@ final class SignUpEvent extends EventBase implements PluginFormInterface {
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     if ($this->configuration['method'] !== UserInterface::REGISTER_ADMINISTRATORS_ONLY) {
+      $form = parent::buildConfigurationForm($form, $form_state);
       $form['method'] = [
         '#type' => 'textfield',
         '#title' => 'Signup Method',
@@ -44,20 +42,21 @@ final class SignUpEvent extends EventBase implements PluginFormInterface {
         '#description' => $this->t('Sign up method should not be :admin for GA to work.', [':admin' => UserInterface::REGISTER_ADMINISTRATORS_ONLY]),
         '#maxlength' => '254',
       ];
+      return $form;
     }
-    else {
-      $form['markup'] = [
-        '#type' => 'markup',
-        '#markup' => 'Sign up is admin_only, nothing to be configured here.',
-      ];
-    }
+
+    $form['markup'] = [
+      '#type' => 'markup',
+      '#markup' => $this->t('Sign up is :admin, nothing to be configured here.', [':admin' => UserInterface::REGISTER_ADMINISTRATORS_ONLY]),
+    ];
     return $form;
   }
 
   /**
    * {@inheritDoc}
    */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
+  protected function getTokenElements(): array {
+    return ['method'];
   }
 
   /**

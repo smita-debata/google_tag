@@ -18,12 +18,16 @@ final class SignUpEventTest extends GoogleTagTestCase {
 
   /**
    * Tests signup event.
+   *
+   * @testWith ["[site:url]"]
+   *           [null]
    */
-  public function testEvent(): void {
+  public function testEvent(?string $method): void {
+    $config = $method !== NULL ? ['method' => $method] : [];
     TagContainer::create([
       'id' => 'foo',
       'weight' => 10,
-      'events' => ['sign_up' => []],
+      'events' => ['sign_up' => $config],
     ])->save();
 
     $uri = Url::fromRoute('user.register')->toString();
@@ -54,7 +58,9 @@ final class SignUpEventTest extends GoogleTagTestCase {
       [
         'name' => 'sign_up',
         'data' => [
-          'method' => 'CMS',
+          'method' => $method && str_starts_with($method, '[')
+            ? $this->container->get('token')->replace($method, [], ['clear' => TRUE])
+            : 'CMS',
         ],
       ],
     ]);
