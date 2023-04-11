@@ -20,7 +20,7 @@ class GoogleAnalyticsMigrator extends GoogleTagMigrateBase {
   public function migrateGaToGoogleTag(): void {
     $ga_settings = $this->configFactory->get('google_analytics.settings');
     $accounts = $ga_settings->get('account');
-    $metrics_dimensions = $ga_settings->get('custom.parameters');
+    $metrics_dimensions = $ga_settings->get('custom.parameters') ?: [];
     if ($accounts === '' && $metrics_dimensions === []) {
       return;
     }
