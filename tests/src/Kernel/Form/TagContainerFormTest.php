@@ -51,6 +51,9 @@ final class TagContainerFormTest extends GoogleTagTestCase {
 
     $config = $this->config('google_tag.settings');
     self::assertNotEmpty($config->get('default_google_tag_entity'));
+    $google_tag_id = $config->get('default_google_tag_entity');
+    $google_tag = $this->container->get('entity_type.manager')->getStorage('google_tag_container')->load($google_tag_id);
+    self::assertEmpty($google_tag->get('conditions'));
   }
 
 }

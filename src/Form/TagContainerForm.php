@@ -537,6 +537,12 @@ class TagContainerForm extends EntityForm {
 
     $this->submitConditionsForm($form, $form_state);
 
+    // Save config entity a first time so that the conditions form can be
+    // properly filtered.
+    // @see https://www.drupal.org/project/google_tag/issues/3345719#comment-15009415
+    // @see BlockForm::submitForm()
+    $this->entity->save();
+
     $this->submitEventsForm($form, $form_state);
 
     $this->messenger()->addStatus($this->t('The configuration options have been saved.'));
