@@ -518,14 +518,17 @@ class TagContainerForm extends EntityForm {
     parent::submitForm($form, $form_state);
 
     $default_id = '';
-    $tag_container_ids = $this->entity->get('tag_container_ids') ?? [];
+    // No need to fetch again from entity,
+    // ids should already be available in form state values now.
+    $tag_container_ids = [];
     foreach ($form_state->getValue('accounts') as $account) {
       if (!$default_id) {
         $default_id = $account['value'];
       }
       $tag_container_ids[$account['weight']] = $account['value'];
     }
-    $this->entity->set('tag_container_ids', $tag_container_ids);
+    // Need to save tags without weights otherwise it doesn't show up on UI.
+    $this->entity->set('tag_container_ids', array_values($tag_container_ids));
 
     if ($this->entity->id() === NULL) {
       // Set the ID and Label based on the first Google Tag.
