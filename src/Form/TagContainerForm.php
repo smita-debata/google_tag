@@ -313,6 +313,13 @@ class TagContainerForm extends EntityForm {
       $form['advanced_settings']['gtm'] = $this->gtmAdvancedFieldset($form_state);
     }
 
+    $form['status'] = [
+      '#type' => 'checkbox',
+      '#title' => 'Enabled',
+      '#default_value' => $this->entity->status(),
+      '#description' => 'Check this checkbox to enable Tag Container.',
+    ];
+
     return $form;
   }
 
