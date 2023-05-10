@@ -594,6 +594,8 @@ class TagContainerForm extends EntityForm {
       $condition = $form_state->get(['conditions', $condition_id]);
       $condition->submitConfigurationForm($form['conditions'][$condition_id], SubformState::createForSubform($form['conditions'][$condition_id], $form, $form_state));
       $configuration = $condition->getConfiguration();
+      // Due to strict type checking, cast negation to a boolean.
+      $configuration['negate'] = (bool) $configuration['negate'];
       // Update the insertion conditions on the container.
       $this->entity->getInsertionConditions()->addInstanceId($condition_id, $configuration);
     }
