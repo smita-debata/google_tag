@@ -99,7 +99,9 @@ final class EventCollector implements EventCollectorInterface {
     $events = $this->events;
     $this->events = [];
     $delayed_events = $this->session->get('google_tag_events', []);
-    $this->session->set('google_tag_events', []);
+    if ($delayed_events !== []) {
+        $this->session->set('google_tag_events', []);
+    }
     return $delayed_events + $events;
   }
 
