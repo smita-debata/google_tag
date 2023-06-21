@@ -5,6 +5,7 @@ namespace Drupal\google_tag\Entity;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
+use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
@@ -54,6 +55,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 class TagContainer extends ConfigEntityBase implements EntityWithPluginCollectionInterface {
 
   use StringTranslationTrait;
+  use MessengerTrait;
 
   /**
    * Define the Acceptable Google Tag and GTM ID Patterns.
@@ -181,9 +183,16 @@ class TagContainer extends ConfigEntityBase implements EntityWithPluginCollectio
    * @return array
    *   Gtm settings.
    */
-  public function getGtmSettings(): array {
+  public function getGtmSettings(string $gtmid = NULL): array {
+    // Choose first gtmID if none was supplied.
+    $gtmid = $gtmid ?? $this->getGtmId();
+
     $advanced_settings = $this->get('advanced_settings');
-    return $advanced_settings['gtm'] ?? [];
+    // Legacy advanced settings detected.
+    return $advanced_settings['gtm'][$gtmid] ?? [
+      'data_layer' => 'dataLayer',
+      'include_environment' => FALSE
+    ];
   }
 
   /**

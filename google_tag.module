@@ -46,7 +46,7 @@ function google_tag_module_implements_alter(&$implementations, $hook) {
     $group = $implementations['google_tag'];
     unset($implementations['google_tag']);
     $implementations['google_tag'] = $group;
-    // Unset google_analytics' hook implementation for page_attachments, if available.
+    // Unset google_analytics' hook implementation for page_attachments.
     if (isset($implementations['google_analytics'])) {
       unset($implementations['google_analytics']);
     }
@@ -68,15 +68,16 @@ function google_tag_page_top(array &$page) {
   $cacheable_metadata = new CacheableMetadata();
   $cacheable_metadata->addCacheTags($config->getEntityType()->getListCacheTags());
 
-  foreach($gtm_ids as $gtm_id) {
+  foreach ($gtm_ids as $gtm_id) {
+    $adv_settings = $config->getGtmSettings($gtm_id);
     if ($gtm_id !== '') {
       $query_params = [
         'id' => $gtm_id,
       ];
-      if ($config->get('include_environment')) {
+      if ($adv_settings['include_environment']) {
         // Gather data.
-        $query_params['gtm_auth'] = $config->get('environment_id');
-        $query_params['gtm_preview'] = $config->get('environment_token');
+        $query_params['gtm_auth'] = $adv_settings['environment_id'];
+        $query_params['gtm_preview'] = $adv_settings['environment_token'];
         $query_params['gtm_cookies_win'] = 'x';
       }
 

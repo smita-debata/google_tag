@@ -143,9 +143,16 @@ final class PageAttachmentsHookTest extends GoogleTagTestCase {
       ],
       'advanced_settings' => [
         'gtm' => [
-          'include_classes' => TRUE,
-          'allowlist_classes' => $allowlist_classes,
-          'blocklist_classes' => $blocklist_classes,
+          'GTM-XXXXXX' => [
+            'include_classes' => TRUE,
+            'allowlist_classes' => $allowlist_classes,
+            'blocklist_classes' => $blocklist_classes,
+          ],
+          'GTM-YYYYYY' => [
+            'include_classes' => TRUE,
+            'allowlist_classes' => $allowlist_classes,
+            'blocklist_classes' => $blocklist_classes,
+          ],
         ],
       ],
     ])->save();

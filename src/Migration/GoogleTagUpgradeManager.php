@@ -71,6 +71,7 @@ class GoogleTagUpgradeManager extends GoogleTagMigrateBase {
    */
   protected function convertGtmSettings(TagContainer $entity): void {
     $gtm_settings = [];
+    $gtm_id = $entity->getGtmId();
     $gtm_settings['data_layer'] = $entity->get('data_layer') ?? 'dataLayer';
     $gtm_settings['include_classes'] = $entity->get('include_classes') ?? FALSE;
     $gtm_settings['allowlist_classes'] = $entity->get('whitelist_classes') ?? '';
@@ -78,7 +79,7 @@ class GoogleTagUpgradeManager extends GoogleTagMigrateBase {
     $gtm_settings['include_environment'] = $entity->get('include_environment') ?? FALSE;
     $gtm_settings['environment_id'] = $entity->get('environment_id') ?? '';
     $gtm_settings['environment_token'] = $entity->get('environment_token') ?? '';
-    $entity->set('advanced_settings', ['gtm' => $gtm_settings]);
+    $entity->set('advanced_settings', ['gtm' => [$gtm_id => $gtm_settings]]);
   }
 
   /**
