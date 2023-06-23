@@ -224,9 +224,9 @@ function google_tag_preprocess_item_list__search_results(&$variables) {
  * Implements hook_ENTITY_TYPE_view().
  */
 function google_tag_commerce_product_view(array &$build, ProductInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  if (!\Drupal::request()->isMethodSafe()) {
-    // Workaround to prevent sending an event if the add to cart form is
-    // causing a render.
+  // Workaround to prevent sending an event if the add to cart form is
+  // causing a render, or if a product has no published variations.
+  if (!\Drupal::request()->isMethodSafe() || !$entity->hasVariations()) {
     return;
   }
 
