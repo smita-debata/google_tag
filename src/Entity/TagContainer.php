@@ -2,6 +2,8 @@
 
 namespace Drupal\google_tag\Entity;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Condition\ConditionInterface;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
@@ -298,4 +300,27 @@ class TagContainer extends ConfigEntityBase implements EntityWithPluginCollectio
     return $this->dimensions_metrics;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContexts() {
+    $cache_contexts = array_map(fn(ConditionInterface $condition) => $condition->getCacheContexts(), iterator_to_array($this->getInsertionConditions()) ?? []);
+    return Cache::mergeContexts(parent::getCacheContexts(), ...array_values($cache_contexts));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags() {
+    $cache_tags = array_map(fn(ConditionInterface $condition) => $condition->getCacheTags(), iterator_to_array($this->getInsertionConditions()) ?? []);
+    return Cache::mergeTags(parent::getCacheTags(), ...array_values($cache_tags));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheMaxAge() {
+    $cache_maxage = array_map(fn(ConditionInterface $condition) => $condition->getCacheMaxAge(), iterator_to_array($this->getInsertionConditions()) ?? []);
+    return Cache::mergeMaxAges(parent::getCacheMaxAge(), ...array_values($cache_maxage));
+  }
 }
