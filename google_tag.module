@@ -99,7 +99,7 @@ function google_tag_page_top(array &$page) {
  */
 function google_tag_page_attachments(array &$attachments) {
   $definition = \Drupal::entityTypeManager()->getDefinition('google_tag_container');
-  $cacheable_metadata = new CacheableMetadata();
+  $cacheable_metadata = CacheableMetadata::createFromRenderArray($attachments);
   $cacheable_metadata->addCacheTags($definition->getListCacheTags());
 
   /** @var \Drupal\google_tag\Entity\TagContainer|null $config */
